@@ -7,7 +7,7 @@ Location::Location() {
     _cgi_path = "";
     _cgi_ext = "";
     _autoindex ="";
-    
+    _return = "";
 }
 
 Location::~Location() {}
@@ -42,6 +42,12 @@ void Location::setCgiExt(std::string cgi_ext)
     this->_cgi_ext = cgi_ext; 
 }
 
+
+void Location::setReturn(std::string returnn)
+{ 
+    this->_return = returnn; 
+}
+
 std::string Location::getPath() 
 { 
     return this->_path; 
@@ -70,4 +76,9 @@ std::string Location::getCgiExt()
 std::string Location::getAutoIndex() 
 { 
     return this->_autoindex; 
+}
+
+std::string Location::getReturn() 
+{ 
+    return this->_return; 
 }

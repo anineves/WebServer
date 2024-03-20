@@ -29,6 +29,7 @@ public:
     std::string getProtocol();
     int         getCode();
     void printMessage();
+    void setPath( std::string path);
 
 private:
     std::string _fullRequest;

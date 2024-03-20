@@ -13,14 +13,17 @@ class Server {
         std::string s_index;
         std::string s_error_page;
         std::string _upload_to;
-        std::vector<std::string> _methods;
+       
         std::string _cgi_path;
         std::string _cgi_ext;
         bool        _auto_index;
         bool        _executable;
+        std::string _return;
         std::vector <Location> _locations;
 
     public:
+        bool        _redirect;
+     std::vector<std::string> _methods;
         Server();
         Server(std::string ipAddr, int port, std::string root, std::string index);
         ~Server();
@@ -38,7 +41,8 @@ class Server {
         void    setCgiExt(std::string cgi_ext);
         void    setAutoIndex(std::string autoindex);
         void    setExecutable(std::string executable);
-
+        void    setRedirect(std::string redirect);
+        void    setReturn(std::string returnn);
 
         // ---- GETTERS ----
         std::string getIpAddr_s();

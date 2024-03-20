@@ -12,6 +12,7 @@ private:
     std::string _cgi_ext;
     std::string _autoindex;
     std::vector<std::string> _allow_methods;
+    std::string _return;
 
 public:
     Location();
@@ -23,6 +24,7 @@ public:
     void setCgiPath(std::string cgi_path);
     void setCgiExt(std::string cgi_ext);
     void setAutoIndex(std::string autoindex);
+    void setReturn(std::string returnn);
 
     std::string getPath();
     std::vector<std::string> getAllowMethods();
@@ -30,6 +32,7 @@ public:
     std::string getCgiPath();
     std::string getCgiExt();
     std::string getAutoIndex();
+    std::string getReturn();
 };
 
 #endif 

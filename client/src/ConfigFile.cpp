@@ -267,6 +267,7 @@ bool ConfigFile::parserLocation(std::string path, std::vector<Location>& _locati
         std::string fword;
         ss >> fword;
         if (fword == "allow_methods") {
+            std::cout << "Entrei allow  " << std::endl;
             std::vector<std::string> methods_vec;
             std::string str_methods = obtainValue(line, "allow_methods");
             int flag = 0;
@@ -292,6 +293,10 @@ bool ConfigFile::parserLocation(std::string path, std::vector<Location>& _locati
             location.setCgiExt(obtainValue(line, "cgi_ext"));
          if (fword == "autoindex")
             location.setAutoIndex(obtainValue(line, "autoindex"));
+        if (fword == "return")
+        {
+            location.setReturn(obtainValue(line, "return"));
+        }
     }
         location.setPath(path);
 

@@ -106,6 +106,11 @@ void    Request::printMessage() {
     
     std::cout << " ==== fullRquest ==== \n" << _fullRequest << std::endl << "=== END fullrequest ====" << std::endl; 
 }
+
+void Request::setPath( std::string path)
+{
+	this->_path = path;
+}
 /*
 GET /css/styles.css HTTP/1.1
 Host: localhost:8008

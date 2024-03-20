@@ -28,6 +28,12 @@ std::string Response::buildResponse(Request request) {
     request.printMessage();
     if (request.getMethod() == "GET" || request.getMethod() == "POST" || request.getMethod() == "DELETE") 
     {
+        std::cout << "valor redirect " << m_server._redirect << std::endl;
+        if(m_server._redirect)
+        {
+                request.setPath(m_server.getLocations()[2].getReturn());
+                std::cout << "****************Entrei Redi" << request.getPath() << std::endl;
+        }
         std::string filePath = obtainFilePath(request.getPath());
         std::ifstream file(filePath.c_str());
         if (file) {

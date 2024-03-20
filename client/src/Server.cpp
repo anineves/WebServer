@@ -8,7 +8,7 @@ Server::Server()
 //Acho que nao e necessario 
 Server::Server(std::string ipAddr, int port, std::string root, std::string index) {
 
-   s_ip_address = ipAddr;
+    s_ip_address = ipAddr;
     s_root = root;
     s_port = port;
     s_index = index;
@@ -20,6 +20,7 @@ Server::Server(std::string ipAddr, int port, std::string root, std::string index
     _cgi_path = "";
     _cgi_ext = "";
     _executable = "";
+    _redirect = false;
     _auto_index = false;
     verificErrorServer();
 }
@@ -69,6 +70,15 @@ void Server::setExecutable(std::string executable)
     }
 }
 
+void Server::setRedirect(std::string redirect) 
+{ 
+    if (redirect == "true") {
+        this->_redirect = true;
+    } else {
+        this->_redirect = false;
+    }
+}
+
 
 // ---- GETTERS ----
 std::string Server::getIpAddr_s() {return this->s_ip_address;}
@@ -91,7 +101,7 @@ void Server::verificErrorServer()
     if(s_ip_address.empty() || s_root.empty() || s_root.empty() || s_index.empty())
     {
         log("ERROR: Invalid Server");
-                exit(1);
+            exit(1);
     }
 }
 
