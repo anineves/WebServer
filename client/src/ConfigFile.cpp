@@ -204,7 +204,7 @@ void ConfigFile::parser(std::string conFile) {
 
     std::cout << "First Locations Info:\n";
     std::cout << "Path:" << _locations[1].getPath() << std::endl;
-    std::cout << "Allow methods:" << _locations[1].getAllowMethods() << std::endl;
+    //std::cout << "Allow methods:" << _locations[1].getAllowMethods() << std::endl;
     std::cout << "Upload:" << _locations[1].getUploadTo() << std::endl;
     std::cout << "Cgi:" << _locations[1].getCgiPath() << std::endl;
     std::cout << "Cgi ext:" << _locations[1].getCgiExt() << std::endl;
@@ -266,8 +266,24 @@ bool ConfigFile::parserLocation(std::string path, std::vector<Location>& _locati
         std::stringstream ss(line);
         std::string fword;
         ss >> fword;
-        if (fword == "allow_methods")
-            location.setAllowMethods(obtainValue(line, "allow_methods"));
+        if (fword == "allow_methods") {
+            std::vector<std::string> methods_vec;
+            std::string str_methods = obtainValue(line, "allow_methods");
+            int flag = 0;
+            int start = 0;
+            for (size_t i = 0; i < str_methods.length() + 1; i++) {          
+                if (str_methods[i] && !flag) {
+               
+                    start = i;
+                    flag++;
+                }
+                if ((str_methods[i] == ' ' || str_methods[i] == '\0') && flag) {
+                    flag--;
+                    methods_vec.push_back(str_methods.substr(start, i - start));
+                }
+            }
+            location.setAllowMethods(methods_vec);
+        }
         if (fword == "upload_to")
             location.setUploadTo(obtainValue(line, "upload_to"));
         if (fword == "cgi_path")

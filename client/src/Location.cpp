@@ -2,7 +2,7 @@
 
 Location::Location() {
     _path = "";
-    _allow_methods = "";
+    //_allow_methods = "";
     _upload_to = "";
     _cgi_path = "";
     _cgi_ext = "";
@@ -17,8 +17,9 @@ void Location::setPath(std::string path)
     this->_path = path; 
 }
 
-void Location::setAllowMethods(std::string allow_methods) 
+void Location::setAllowMethods(std::vector<std::string> allow_methods) 
 { 
+    this->_allow_methods.clear();
     this->_allow_methods = allow_methods; 
 }
 
@@ -46,7 +47,7 @@ std::string Location::getPath()
     return this->_path; 
 }
 
-std::string Location::getAllowMethods() 
+std::vector<std::string> Location::getAllowMethods() 
 { 
     return this->_allow_methods; 
 }

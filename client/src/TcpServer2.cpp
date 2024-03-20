@@ -134,13 +134,8 @@ void    TcpServer2::verifyLocations( Server server, Request request)
         std::cout << methodstmp[i] << " ";
     }
     std::cout << std::endl;
-    std::cout << server.getLocations()[1].getAllowMethods() << std::endl;
+    //std::cout << server.getLocations()[1].getAllowMethods() << std::endl;
     if (server.getLocations().size() != 0) {
-
-        
-        //std::vector<Location>::iterator it = server.getLocations();
-        //std::vector<Location>::iterator it2;
-    
         for (int i = 0; i < (int)server.getLocations().size(); i++) 
         {
             std::cout << "##### Path Location" << server.getLocations()[i].getPath() << std::endl;
@@ -159,6 +154,13 @@ void    TcpServer2::verifyLocations( Server server, Request request)
                 }
                 if(server.getLocations()[i].getAutoIndex() != "" )
                     server.setAutoIndex(server.getLocations()[i].getAutoIndex());
+                if(server.getLocations()[i].getAllowMethods().size() != 0)
+                    server.setMethods(server.getLocations()[i].getAllowMethods());
+                
+
+                std::cout << "!@@@!@!## Print Vector Server" << server.getMethods_s()[0] << std::endl ;
+                std::cout << "!@@@!@!## Print Vector Server" << server.getMethods_s()[1] << std::endl ;
+                std::cout << "!@@@!@!## Print Vector Server" << server.getMethods_s()[2] << std::endl ;
         }
     }
 }
