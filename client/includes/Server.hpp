@@ -16,6 +16,7 @@ class Server {
         std::vector<std::string> _methods;
         std::string _cgi_path;
         std::string _cgi_ext;
+        bool        _auto_index;
         bool        _executable;
         std::vector <Location> _locations;
 
@@ -32,6 +33,12 @@ class Server {
         void    setErrorPage_s(std::string error_page);
         void    setLocation(std::vector<Location> locations);
         void    setUploadTo(std::string upload_to);
+        void    setMethods(std::vector <std::string> methods);
+        void    setCgiPath(std::string cgi_path);
+        void    setCgiExt(std::string cgi_ext);
+        void    setAutoIndex(std::string autoindex);
+        void    setExecutable(std::string executable);
+
 
         // ---- GETTERS ----
         std::string getIpAddr_s();

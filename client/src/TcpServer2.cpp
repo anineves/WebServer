@@ -143,8 +143,17 @@ void    TcpServer2::verifyLocations( Server server, Request request)
             std::cout << "###############- Path Location " << server.getLocations()[i].getPath() << " Path request " << pathRequest  << std::endl;
                 if(server.getLocations()[i].getUploadTo() != "" )
                     server.setUploadTo(server.getLocations()[i].getUploadTo());
-            }
+               if(server.getLocations()[i].getCgiPath() != "" )
+                    server.setCgiPath(server.getLocations()[i].getCgiPath());
+                if(server.getLocations()[i].getCgiExt() != "" )
+                {
+                    server.setExecutable("true");
+                    server.setCgiPath(server.getLocations()[i].getCgiPath());
+                }
+                if(server.getLocations()[i].getAutoIndex() != "" )
+                    server.setAutoIndex(server.getLocations()[i].getAutoIndex());
 
         }
     }
+}
 }

@@ -28,7 +28,7 @@ public:
     std::string getUploadTo();
     std::string getCgiPath();
     std::string getCgiExt();
-    //std::string getAutoIndex();
+    std::string getAutoIndex();
 };
 
 #endif 

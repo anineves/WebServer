@@ -65,3 +65,8 @@ std::string Location::getCgiExt()
 { 
     return this->_cgi_ext; 
 }
+
+std::string Location::getAutoIndex() 
+{ 
+    return this->_autoindex; 
+}

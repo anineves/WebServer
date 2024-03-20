@@ -20,6 +20,7 @@ Server::Server(std::string ipAddr, int port, std::string root, std::string index
     _cgi_path = "";
     _cgi_ext = "";
     _executable = "";
+    _auto_index = false;
     verificErrorServer();
 }
 
@@ -36,8 +37,38 @@ void    Server::setRoot_s(std::string root) {this->s_root = root;}
 void    Server::setIndex_s(std::string index) {this->s_index = index;}
 
 void    Server::setErrorPage_s(std::string error_page) {this->s_error_page = error_page;}
-void    Server::setUploadTo(std::string upload_to) {this->_upload_to = upload_to;}
+
 void    Server::setLocation( std::vector<Location> locations) { this->_locations = locations; }
+
+void    Server::setUploadTo(std::string upload_to) {this->_upload_to = upload_to;}
+
+void Server::setMethods(std::vector<std::string> methods) {
+    this->_methods.clear();
+    this->_methods = methods;
+}
+
+void Server::setCgiPath(std::string cgi_path) { this->_cgi_path = cgi_path;}
+
+void Server::setCgiExt(std::string cgi_ext) { this->_cgi_ext = cgi_ext;}
+
+void Server::setAutoIndex(std::string autoindex) 
+{ 
+    if (autoindex == "true") {
+        this->_auto_index = true;
+    } else {
+        this->_auto_index = false;
+    }
+}
+
+void Server::setExecutable(std::string executable) 
+{ 
+    if (executable == "true") {
+        this->_executable = true;
+    } else {
+        this->_executable = false;
+    }
+}
+
 
 // ---- GETTERS ----
 std::string Server::getIpAddr_s() {return this->s_ip_address;}
