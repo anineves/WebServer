@@ -127,7 +127,14 @@ void    TcpServer2::verifyLocations( Server server, Request request)
     std::string pathRequest = request.getPath();
     std::cout << "######PathReq-" << pathRequest << "$" << std::endl;
 
-   
+    std::cout << "" << request.getMethod() << std::endl;
+    std::vector<std::string> methodstmp = server.getMethods_s();
+    for (size_t i= 0; i < methodstmp.size(); i++) {
+        std::cout << "..........aqui methods inciais ........";
+        std::cout << methodstmp[i] << " ";
+    }
+    std::cout << std::endl;
+    std::cout << server.getLocations()[1].getAllowMethods() << std::endl;
     if (server.getLocations().size() != 0) {
 
         
@@ -143,7 +150,7 @@ void    TcpServer2::verifyLocations( Server server, Request request)
             std::cout << "###############- Path Location " << server.getLocations()[i].getPath() << " Path request " << pathRequest  << std::endl;
                 if(server.getLocations()[i].getUploadTo() != "" )
                     server.setUploadTo(server.getLocations()[i].getUploadTo());
-               if(server.getLocations()[i].getCgiPath() != "" )
+                if(server.getLocations()[i].getCgiPath() != "" )
                     server.setCgiPath(server.getLocations()[i].getCgiPath());
                 if(server.getLocations()[i].getCgiExt() != "" )
                 {
@@ -152,7 +159,6 @@ void    TcpServer2::verifyLocations( Server server, Request request)
                 }
                 if(server.getLocations()[i].getAutoIndex() != "" )
                     server.setAutoIndex(server.getLocations()[i].getAutoIndex());
-
         }
     }
 }

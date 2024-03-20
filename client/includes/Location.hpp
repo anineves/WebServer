@@ -6,7 +6,7 @@
 class Location {
 private:
     std::string _path;
-    std::string _allow_methods;
+    std::vector<std::string> _allow_methods;
     std::string _upload_to;
     std::string _cgi_path;
     std::string _cgi_ext;
@@ -24,7 +24,7 @@ public:
     void setAutoIndex(std::string autoindex);
 
     std::string getPath();
-    std::string getAllowMethods();
+    std::vector<std::string> getAllowMethods();
     std::string getUploadTo();
     std::string getCgiPath();
     std::string getCgiExt();

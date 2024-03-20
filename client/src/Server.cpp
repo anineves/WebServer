@@ -78,9 +78,12 @@ int     Server::getPort_s() {return this->s_port;}
 std::string Server::getRoot_s() {return this->s_root;}
 
 std::string Server::getIndex_s() {return this->s_index;}
+
 std::string Server::getErrorPage_s() {return this->s_error_page;}
+
 std::vector<Location> Server::getLocations() {return this->_locations;}
 
+std::vector<std::string> Server::getMethods_s() {return this->_methods;}
 
 
 void Server::verificErrorServer()

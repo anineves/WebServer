@@ -33,7 +33,7 @@ class Server {
         void    setErrorPage_s(std::string error_page);
         void    setLocation(std::vector<Location> locations);
         void    setUploadTo(std::string upload_to);
-        void    setMethods(std::vector <std::string> methods);
+        void    setMethods(std::vector<std::string> methods);
         void    setCgiPath(std::string cgi_path);
         void    setCgiExt(std::string cgi_ext);
         void    setAutoIndex(std::string autoindex);
@@ -47,6 +47,7 @@ class Server {
         std::string getIndex_s();
         std::string getErrorPage_s();
         std::vector<Location> getLocations();
+        std::vector<std::string> getMethods_s();
 
         void verificErrorServer();
 };
