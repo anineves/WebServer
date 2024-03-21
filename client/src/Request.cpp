@@ -111,6 +111,69 @@ void Request::setPath( std::string path)
 {
 	this->_path = path;
 }
+
+
+
+
+void    Request::verifyLocations( Server server) 
+{
+    std::string pathRequest = this->_path;
+    std::cout << "######PathReq-" << pathRequest << "$" << std::endl;
+
+    std::cout << "" << this->_method << std::endl;
+    std::vector<std::string> methodstmp = server.getMethods_s();
+    for (size_t i= 0; i < methodstmp.size(); i++) {
+        std::cout << "..........aqui methods inciais ........";
+        std::cout << methodstmp[i] << " ";
+    }
+    std::cout << std::endl;
+    //std::cout << server.getLocations()[1].getAllowMethods() << std::endl;
+    if (server.getLocations().size() != 0) {
+        for (int i = 0; i < (int)server.getLocations().size(); i++) 
+        {
+            std::cout << "##### Path Location" << server.getLocations()[i].getPath() << std::endl;
+            if(!pathRequest.find(server.getLocations()[i].getPath()))
+            {
+                if(pathRequest == "/red.html")
+                {
+                    this->setPath("/index.html");
+                    _code = 301;
+                }
+
+            //pathLocation = server.getLocations[i].pathLocation;
+            std::cout << "###############- Path Location " << server.getLocations()[i].getPath() << " Path request " << pathRequest  << std::endl;
+                if(server.getLocations()[i].getUploadTo() != "" )
+                    server.setUploadTo(server.getLocations()[i].getUploadTo());
+                if(server.getLocations()[i].getCgiPath() != "" )
+                    server.setCgiPath(server.getLocations()[i].getCgiPath());
+                if(server.getLocations()[i].getCgiExt() != "" )
+                {
+                    server.setExecutable("true");
+                    server.setCgiPath(server.getLocations()[i].getCgiPath());
+                }
+                if(server.getLocations()[i].getAutoIndex() != "" )
+                    server.setAutoIndex(server.getLocations()[i].getAutoIndex());
+                if(server.getLocations()[i].getAllowMethods().size() != 0)
+                {
+                    server._methods.clear();
+                    server.setMethods(server.getLocations()[i].getAllowMethods());
+                }
+                if(server.getLocations()[i].getReturn() != "" )
+                {
+                    server.setRedirect("true");
+                    //std::cout << "Valore Redirect get retur" << server._redirect << std::endl;
+                    server.setIndex_s(server.getLocations()[i].getReturn());
+                }
+
+                std::cout << "!@@@!@!## Print Vector Server" << server.getMethods_s()[0] << std::endl ;
+                std::cout << "!@@@!@!## Print Vector Server" << server.getMethods_s()[1] << std::endl ;
+                std::cout << "!@@@!@!## Print Vector Server" << server.getMethods_s()[2] << std::endl ;
+        }
+
+    }
+}
+}
+
 /*
 GET /css/styles.css HTTP/1.1
 Host: localhost:8008

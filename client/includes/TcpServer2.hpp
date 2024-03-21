@@ -42,7 +42,7 @@ private:
     void sendResponse(int client_socket, const std::string& response);
     void closeServer();
     uint32_t strToNet(const std::string &ip_address);
-    void verifyLocations(Server server, Request request);
+    
    
 
 };

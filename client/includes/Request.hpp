@@ -30,6 +30,7 @@ public:
     int         getCode();
     void printMessage();
     void setPath( std::string path);
+    void verifyLocations(Server server);
 
 private:
     std::string _fullRequest;
