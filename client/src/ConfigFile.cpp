@@ -180,6 +180,8 @@ void ConfigFile::parser(std::string conFile) {
                 insideServerBlock = false;
                 //Aqui Vai o vector das Locations para poder ser adicionado no Server
                 parserServer(_locations, _servers, &serverContent);
+                serverContent.str("");
+                serverContent.clear(); 
             }
         } else {
             if (insideServerBlock) {
