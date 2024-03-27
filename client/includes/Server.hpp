@@ -7,23 +7,29 @@
 
 class Server {
     private:
-        std::string s_ip_address;
-        int         s_port;
-        std::string s_root;
-        std::string s_index;
-        std::string s_error_page;
-        std::string _upload_to;
+        std::string             s_ip_address;
+        int                     s_port;
+        std::string             s_root;
+        std::string             s_index;
+        std::string             s_error_page;
+        std::string             _upload_to;
        
-        std::string _cgi_path;
-        std::string _cgi_ext;
-        bool        _auto_index;
-        bool        _executable;
-        std::string _return;
-        std::vector <Location> _locations;
+        std::string             _cgi_path;
+        std::string             _cgi_ext;
+        bool                    _auto_index;
+        bool                    _executable;
+        std::string             _return;
+        std::vector <Location>  _locations;
+        int                     s_socket;
+        struct sockaddr_in      s_socketAddress;
+        socklen_t               s_socketAddress_len;
+        std::string             s_ServerMessage;
+        struct epoll_event      event;
+        int                     e_poll_fd;
 
     public:
         bool        _redirect;
-     std::vector<std::string> _methods;
+        std::vector<std::string> _methods;
         Server();
         Server(std::string ipAddr, int port, std::string root, std::string index);
         ~Server();
@@ -43,7 +49,7 @@ class Server {
         void    setExecutable(std::string executable);
         void    setRedirect(std::string redirect);
         void    setReturn(std::string returnn);
-
+        int     setSocket();
         // ---- GETTERS ----
         std::string getIpAddr_s();
         int         getPort_s();
@@ -53,7 +59,8 @@ class Server {
         std::vector<Location> getLocations();
         std::vector<std::string> getMethods_s();
 
-        void verificErrorServer();
+        void    verificErrorServer();
+        void    startListen();
 };
 
 #endif

@@ -19,7 +19,7 @@ TcpServer2::~TcpServer2() {
 }
 
 int TcpServer2::startServer() {
-    m_socket = socket(AF_INET, SOCK_STREAM, 0);
+/*     m_socket = socket(AF_INET, SOCK_STREAM, 0);
     if (m_socket < 0) {
         exitWithError("Cannot create socket");
         return 1;
@@ -27,11 +27,12 @@ int TcpServer2::startServer() {
     if (bind(m_socket, (sockaddr *)&m_socketAddress, m_socketAddress_len) < 0) {
         exitWithError("Cannot bind socket to address");
         return 1;
-    }
+    } */
     return 0;
 }
 
 void TcpServer2::startListen() {
+    //correr os servers e o Epoll eu todos ate ficarem ready (POLLIN || POLLOUT)
     if (listen(m_socket, 20) < 0) {
         exitWithError("Socket listen Failed");
     }

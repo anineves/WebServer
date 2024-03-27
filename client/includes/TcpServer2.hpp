@@ -10,7 +10,7 @@
 # include <sys/socket.h>
 # include <netinet/in.h>
 # include <arpa/inet.h>
-# include <poll.h>
+# include <sys/epoll.h>
 # include "./ConfigFile.hpp"
 # include "./webServer.hpp"
 # include "./Utils.hpp"
@@ -29,12 +29,9 @@ public:
     void startListen();
 
 private:
-    int m_socket;
-    struct sockaddr_in m_socketAddress;
-    socklen_t m_socketAddress_len;
-    std::string m_serverMessage;
-    Server m_server;
-    struct pollfd m_pollFds[1];
+    std::vector<Server>         m_server;
+    struct epoll_event          m_event;
+    std::vector <epoll_event>   v_epollReady;
 
     int startServer();
     void acceptConnection();

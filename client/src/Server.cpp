@@ -22,6 +22,14 @@ Server::Server(std::string ipAddr, int port, std::string root, std::string index
     _executable = "";
     _redirect = false;
     _auto_index = false;
+    s_socketAddress.sin_family = AF_INET;
+    s_socketAddress.sin_port = htons(this->s_port);
+    s_socketAddress.sin_addr.s_addr = htonl(INADDR_ANY);
+    if (setSocket()) {
+        std::ostringstream ss;
+        ss << "Failed to start server with Port: " << ntohs(s_socketAddress.sin_port);
+        log(ss.str());
+    }
     verificErrorServer();
 }
 
@@ -79,6 +87,20 @@ void Server::setRedirect(std::string redirect)
     }
 }
 
+int Server::setSocket() {
+
+    this->s_socket = socket(AF_INET, SOCK_STREAM, 0);
+    if (this->s_socket < 0) {
+        exitWithError("Cannot create socket.");
+        return 1;
+    }
+    if (bind(this->s_socket, (sockaddr *)&s_socketAddress, s_socketAddress_len) < 0) {
+        exitWithError("Cannot bind socket to address");
+        return 1;        
+    }
+    return 0;
+}
+
 
 // ---- GETTERS ----
 std::string Server::getIpAddr_s() {return this->s_ip_address;}
@@ -105,5 +127,25 @@ void Server::verificErrorServer()
     }
 }
 
+void    Server::startListen() {
+    if (listen(this->s_socket, 20) < 0) {
+        exitWithError("Socket listen Failed.");
+        exit(1);
+    }
 
+    std::ostringstream ss;
+    ss << "\n*** Listening on ADDRESS: " << inet_ntoa(s_socketAddress.sin_addr) << " Port: " << ntohs(s_socketAddress.sin_port) << " ***\n\n";
+    log(ss.str());
+    this->e_poll_fd = epoll_create(MAXEPOLLSIZE);
+    if (e_poll_fd < 0) {
+        exitWithError("Epoll creat failed");
+        exit(1);
+    }
+    else if (e_poll_fd) {
+        log("Epoll Accepted!"); 
+    }
+
+
+
+}
 
