@@ -26,7 +26,7 @@ void TcpServer2::startServer() {
 
         m_server[i].setSocket(socket(AF_INET, SOCK_STREAM, 0));
         if (socket(AF_INET, SOCK_STREAM, 0) == -1) {
-            perror("Socket creation failed");
+            exitWithError("Socket creation failed");
             exit(EXIT_FAILURE);
         }
 
@@ -37,21 +37,25 @@ void TcpServer2::startServer() {
 
 
         if (bind(m_server[i].getSocket(), (struct sockaddr *)&m_server[i].s_socketAddress, sizeof(m_server[i].s_socketAddress)) < 0) {
-            perror("Bind failed");
+            exitWithError("Bind failed");
             exit(EXIT_FAILURE);
         }
         //startListen(m_server[i]);
         if (listen(m_server[i].getSocket(), 20) < 0) {
             exitWithError("Socket listen Failed");
+            exit(EXIT_FAILURE);
         }
-        event.events = EPOLLIN;
-        event.data.fd = m_server[i].getSocket();
-        if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, m_server[i], &event) == -1) {
+        m_event.events = EPOLLIN;
+        m_event.data.fd = m_server[i].getSocket();
+        if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, m_server[i].getSocket(), &m_event) == -1) {
             exitWithError("epoll_ctl: listen_sock");
             exit(EXIT_FAILURE);
         }
     }
-    return 0;
+    
+    std::cout << "\n\n * * * Listening Server at folloiwing ports: ";
+    printPorts();
+    std::cout << std::endl;
 }
 
 /*void TcpServer2::startListen(Server &server) {
@@ -143,3 +147,9 @@ uint32_t TcpServer2::strToNet(const std::string &ip_address) {
     return htonl(addr.s_addr);
 }
 
+void TcpServer2::printPorts() {
+    for (size_t i = 0; i < this->m_server.size(); i++) {
+        std::cout << this->m_server[i].getPort_s() << " ";
+    }
+    std::cout << " * * * \n\n"<< std::endl;
+}

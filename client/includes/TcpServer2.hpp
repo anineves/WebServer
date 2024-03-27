@@ -27,6 +27,7 @@ public:
     ~TcpServer2();
 
     void startListen(Server &server);
+    void printPorts();
 
 private:
     std::vector<Server>         m_server;
@@ -40,9 +41,6 @@ private:
     void sendResponse(int client_socket, const std::string& response);
     void closeServer();
     uint32_t strToNet(const std::string &ip_address);
-    
-   
-
 };
 
 #endif
