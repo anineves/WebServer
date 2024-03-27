@@ -39,12 +39,8 @@ int main(int ac, char **av) {
 
     std::vector<Server>& servers = configFile.getServers();
     std::cout << "Number of servers: " << servers.size() << std::endl; 
-    for (std::vector<Server>::iterator it = servers.begin(); it != servers.end(); ++it) {
-    Server& server = *it;
     TcpServer2 tcpServer(servers);
     tcpServer.startListen();
-    
-}
     return 0;
 }
 }

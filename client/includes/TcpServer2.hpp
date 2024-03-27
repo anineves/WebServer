@@ -23,17 +23,18 @@ class Request;
 
 class TcpServer2 {
 public:
-    TcpServer2(Server& server);
+    TcpServer2(std::vector<Server> server);
     ~TcpServer2();
 
-    void startListen();
+    void startListen(Server &server);
 
 private:
     std::vector<Server>         m_server;
+    int                         epoll_fd;
     struct epoll_event          m_event;
-    std::vector <epoll_event>   v_epollReady;
+    struct epoll_event          m_events[MAX_EVENTS];
 
-    int startServer();
+    void startServer();
     void acceptConnection();
     std::string showClientHeader(int client_socket);
     void sendResponse(int client_socket, const std::string& response);

@@ -21,13 +21,13 @@ class Server {
         std::string             _return;
         std::vector <Location>  _locations;
         int                     s_socket;
-        struct sockaddr_in      s_socketAddress;
         socklen_t               s_socketAddress_len;
         std::string             s_ServerMessage;
         struct epoll_event      event;
         int                     e_poll_fd;
 
     public:
+        struct sockaddr_in      s_socketAddress;
         bool        _redirect;
         std::vector<std::string> _methods;
         Server();
@@ -49,7 +49,7 @@ class Server {
         void    setExecutable(std::string executable);
         void    setRedirect(std::string redirect);
         void    setReturn(std::string returnn);
-        int     setSocket();
+        void    setSocket(int set_socket);
         // ---- GETTERS ----
         std::string getIpAddr_s();
         int         getPort_s();
@@ -58,9 +58,10 @@ class Server {
         std::string getErrorPage_s();
         std::vector<Location> getLocations();
         std::vector<std::string> getMethods_s();
+        int getSocket();
 
         void    verificErrorServer();
-        void    startListen();
+        
 };
 
 #endif

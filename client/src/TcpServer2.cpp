@@ -1,15 +1,17 @@
 #include "../includes/TcpServer2.hpp"
 
-TcpServer2::TcpServer2(Server& server)
-    : m_socket(-1), m_socketAddress(), m_socketAddress_len(sizeof(m_socketAddress)), m_server(server) {
-    m_socketAddress.sin_family = AF_INET;
-    m_socketAddress.sin_port = htons(server.getPort_s());
-    m_socketAddress.sin_addr.s_addr = htonl(INADDR_ANY);
-
-    if (this->startServer() != 0) {
+TcpServer2::TcpServer2(std::vector<Server> servers) : m_server(servers){
+    
+/*     if (this->startServer() != 0) {
         std::ostringstream ss;
-        ss << "Failed to start server with Port: " << ntohs(m_socketAddress.sin_port);
+        ss << "Failed to start server with Port: " ;
         log(ss.str());
+    } */
+    epoll_fd = epoll_create(100);
+    if(epoll_fd == -1)
+    {
+        exitWithError("Create epoll");
+        exit(EXIT_FAILURE);
     }
 }
 
@@ -18,44 +20,63 @@ TcpServer2::~TcpServer2() {
     std::cout << "TcpServer Destructor called.\n";
 }
 
-int TcpServer2::startServer() {
-/*     m_socket = socket(AF_INET, SOCK_STREAM, 0);
-    if (m_socket < 0) {
-        exitWithError("Cannot create socket");
-        return 1;
+void TcpServer2::startServer() {
+
+    for (int i = 0; i < MAX_CLIENTS; ++i) {
+
+        m_server[i].setSocket(socket(AF_INET, SOCK_STREAM, 0));
+        if (socket(AF_INET, SOCK_STREAM, 0) == -1) {
+            perror("Socket creation failed");
+            exit(EXIT_FAILURE);
+        }
+
+        memset(&m_server[i].s_socketAddress, 0, sizeof(m_server[i].s_socketAddress));
+        m_server[i].s_socketAddress.sin_family = AF_INET;
+        m_server[i].s_socketAddress.sin_addr.s_addr = INADDR_ANY;
+        m_server[i].s_socketAddress.sin_port = htons(m_server[i].getPort_s());
+
+
+        if (bind(m_server[i].getSocket(), (struct sockaddr *)&m_server[i].s_socketAddress, sizeof(m_server[i].s_socketAddress)) < 0) {
+            perror("Bind failed");
+            exit(EXIT_FAILURE);
+        }
+        //startListen(m_server[i]);
+        if (listen(m_server[i].getSocket(), 20) < 0) {
+            exitWithError("Socket listen Failed");
+        }
+        event.events = EPOLLIN;
+        event.data.fd = m_server[i].getSocket();
+        if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, m_server[i], &event) == -1) {
+            exitWithError("epoll_ctl: listen_sock");
+            exit(EXIT_FAILURE);
+        }
     }
-    if (bind(m_socket, (sockaddr *)&m_socketAddress, m_socketAddress_len) < 0) {
-        exitWithError("Cannot bind socket to address");
-        return 1;
-    } */
     return 0;
 }
 
-void TcpServer2::startListen() {
+/*void TcpServer2::startListen(Server &server) {
     //correr os servers e o Epoll eu todos ate ficarem ready (POLLIN || POLLOUT)
-    if (listen(m_socket, 20) < 0) {
-        exitWithError("Socket listen Failed");
-    }
+
 
     std::ostringstream ss;
     ss << "\n*** Listening on ADDRESS: " << inet_ntoa(m_socketAddress.sin_addr) << " Port: " << ntohs(m_socketAddress.sin_port) << " ***\n\n";
     log(ss.str());
 
-    m_pollFds[0].fd = m_socket;
-    m_pollFds[0].events = POLLIN;
-
+    //m_pollFds[0].fd = m_socket;
+    //m_pollFds[0].events = POLLIN;
+    
     while (true) {
         log("========== Waiting for a new connection =========\n\n\n");
         int pollResult = poll(m_pollFds, 1, -1);
         if (pollResult < 0) {
             exitWithError("Poll error");
         }
-
         if (m_pollFds[0].revents & POLLIN) {
             acceptConnection();
         }
     }
 }
+*/
 
 void TcpServer2::acceptConnection() {
     int new_socket = accept(m_socket, (sockaddr *)&m_socketAddress, &m_socketAddress_len);
@@ -109,7 +130,6 @@ void TcpServer2::sendResponse(int client_socket, const std::string& response){
 }
 
 void TcpServer2::closeServer() {
-    close(m_socket);
     std::cout << "closeServer Function called.\n";
     exit(0);
 }

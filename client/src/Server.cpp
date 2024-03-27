@@ -34,6 +34,7 @@ Server::Server(std::string ipAddr, int port, std::string root, std::string index
 }
 
 Server::~Server() {
+    close(this->s_socket);
     std::cout << "Server port: " << this->s_port << " destructor called.\n";
 }
 
@@ -87,36 +88,43 @@ void Server::setRedirect(std::string redirect)
     }
 }
 
-int Server::setSocket() {
-
-    this->s_socket = socket(AF_INET, SOCK_STREAM, 0);
-    if (this->s_socket < 0) {
-        exitWithError("Cannot create socket.");
-        return 1;
-    }
-    if (bind(this->s_socket, (sockaddr *)&s_socketAddress, s_socketAddress_len) < 0) {
-        exitWithError("Cannot bind socket to address");
-        return 1;        
-    }
-    return 0;
+void Server::setSocket(int set_socket) {
+    this->s_socket = set_socket;
 }
 
 
 // ---- GETTERS ----
-std::string Server::getIpAddr_s() {return this->s_ip_address;}
+std::string Server::getIpAddr_s() {
+    return this->s_ip_address;
+}
 
-int     Server::getPort_s() {return this->s_port;}
+int     Server::getPort_s() {
+    return this->s_port;
+}
 
-std::string Server::getRoot_s() {return this->s_root;}
+std::string Server::getRoot_s() {
+    return this->s_root;
+}
 
-std::string Server::getIndex_s() {return this->s_index;}
+std::string Server::getIndex_s() {
+    return this->s_index;
+}
 
-std::string Server::getErrorPage_s() {return this->s_error_page;}
+std::string Server::getErrorPage_s() {
+    return this->s_error_page;
+}
 
-std::vector<Location> Server::getLocations() {return this->_locations;}
+std::vector<Location> Server::getLocations() {
+    return this->_locations;
+}
 
-std::vector<std::string> Server::getMethods_s() {return this->_methods;}
+std::vector<std::string> Server::getMethods_s() {
+    return this->_methods;
+}
 
+int Server::getSocket() {
+    return this->s_socket;
+}
 
 void Server::verificErrorServer()
 {
@@ -141,11 +149,6 @@ void    Server::startListen() {
         exitWithError("Epoll creat failed");
         exit(1);
     }
-    else if (e_poll_fd) {
+    else if (e_poll_fd) {    //close(m_socket);
         log("Epoll Accepted!"); 
-    }
-
-
-
-}
-
+    }{return this->s_socket;}
