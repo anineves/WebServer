@@ -40,7 +40,7 @@ int main(int ac, char **av) {
     std::vector<Server>& servers = configFile.getServers();
     std::cout << "Number of servers: " << servers.size() << std::endl; 
     TcpServer2 tcpServer(servers);
-    tcpServer.startListen();
+    //tcpServer.startListen();
     return 0;
 }
 }

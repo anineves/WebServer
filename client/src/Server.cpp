@@ -22,14 +22,15 @@ Server::Server(std::string ipAddr, int port, std::string root, std::string index
     _executable = "";
     _redirect = false;
     _auto_index = false;
+    memset(&s_socketAddress, 0, sizeof(s_socketAddress));
     s_socketAddress.sin_family = AF_INET;
-    s_socketAddress.sin_port = htons(this->s_port);
     s_socketAddress.sin_addr.s_addr = htonl(INADDR_ANY);
-    if (setSocket()) {
+    s_socketAddress.sin_port = htons(this->s_port);
+/*     if (setSocket()) {
         std::ostringstream ss;
         ss << "Failed to start server with Port: " << ntohs(s_socketAddress.sin_port);
         log(ss.str());
-    }
+    } */
     verificErrorServer();
 }
 
@@ -92,8 +93,20 @@ void Server::setSocket(int set_socket) {
     this->s_socket = set_socket;
 }
 
+void    Server::setSocketAddr(struct sockaddr_in n_socketaddr) {
+    this->s_socketAddress = n_socketaddr;
+}
+
+void    Server::setSocketAddr_len(socklen_t n_socketaddr_len) {
+    this->s_socketAddress_len = n_socketaddr_len;
+}
+
+// ---- END GETTERS -----
+
+
 
 // ---- GETTERS ----
+
 std::string Server::getIpAddr_s() {
     return this->s_ip_address;
 }
@@ -126,6 +139,15 @@ int Server::getSocket() {
     return this->s_socket;
 }
 
+struct sockaddr_in Server::getSocketAddr() {
+    return this->s_socketAddress;
+}
+
+socklen_t  Server::getSocketAddr_len() {
+    return this->s_socketAddress_len;
+}   
+
+// ---- END GETTERS -----
 void Server::verificErrorServer()
 {
     if(s_ip_address.empty() || s_root.empty() || s_root.empty() || s_index.empty())
@@ -135,7 +157,7 @@ void Server::verificErrorServer()
     }
 }
 
-void    Server::startListen() {
+/* void    Server::startListen() {
     if (listen(this->s_socket, 20) < 0) {
         exitWithError("Socket listen Failed.");
         exit(1);
@@ -151,4 +173,6 @@ void    Server::startListen() {
     }
     else if (e_poll_fd) {    //close(m_socket);
         log("Epoll Accepted!"); 
-    }{return this->s_socket;}
+    }
+    return this->s_socket;
+} */

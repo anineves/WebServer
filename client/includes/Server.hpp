@@ -21,13 +21,13 @@ class Server {
         std::string             _return;
         std::vector <Location>  _locations;
         int                     s_socket;
-        socklen_t               s_socketAddress_len;
         std::string             s_ServerMessage;
-        struct epoll_event      event;
+        //struct epoll_event      event;
         int                     e_poll_fd;
+        struct sockaddr_in      s_socketAddress;
+        socklen_t               s_socketAddress_len;
 
     public:
-        struct sockaddr_in      s_socketAddress;
         bool        _redirect;
         std::vector<std::string> _methods;
         Server();
@@ -50,15 +50,19 @@ class Server {
         void    setRedirect(std::string redirect);
         void    setReturn(std::string returnn);
         void    setSocket(int set_socket);
+        void    setSocketAddr(struct sockaddr_in n_socketaddr);
+        void    setSocketAddr_len(socklen_t n_socketaddr_len);
         // ---- GETTERS ----
-        std::string getIpAddr_s();
-        int         getPort_s();
-        std::string getRoot_s();
-        std::string getIndex_s();
-        std::string getErrorPage_s();
-        std::vector<Location> getLocations();
-        std::vector<std::string> getMethods_s();
-        int getSocket();
+        std::string                 getIpAddr_s();
+        int                         getPort_s();
+        std::string                 getRoot_s();
+        std::string                 getIndex_s();
+        std::string                 getErrorPage_s();
+        std::vector<Location>       getLocations();
+        std::vector<std::string>    getMethods_s();
+        int                         getSocket();
+        struct sockaddr_in          getSocketAddr();
+        socklen_t                   getSocketAddr_len();
 
         void    verificErrorServer();
         
