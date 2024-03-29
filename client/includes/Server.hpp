@@ -22,7 +22,6 @@ class Server {
         std::vector <Location>  _locations;
         int                     s_socket;
         std::string             s_ServerMessage;
-        //struct epoll_event      event;
         int                     e_poll_fd;
         struct sockaddr_in      s_socketAddress;
         socklen_t               s_socketAddress_len;

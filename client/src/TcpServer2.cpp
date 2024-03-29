@@ -7,7 +7,7 @@ TcpServer2::TcpServer2(std::vector<Server> servers) : m_server(servers){
         ss << "Failed to start server with Port: " ;
         log(ss.str());
     } */
-    extractSockets();
+    setAddresses();
     startServer();
 }
 
@@ -17,23 +17,66 @@ TcpServer2::~TcpServer2() {
 }
 
 void TcpServer2::startServer() {
-    struct epoll_event          m_event;
-    struct epoll_event          m_events[MAX_EVENTS];
-    //char buffer[BUFFER_SIZE]; 
+    std::vector<struct sockaddr_in>::iterator it;
 
-    epoll_fd = epoll_create(20);
+    for (it = m_addresses.begin(); it != m_addresses.end(); it++) {
+        int curr_socket = socket(AF_INET, SOCK_STREAM, 0);
+        if (curr_socket < 0) {
+            exitWithError("Socket creation failed");
+            exit(EXIT_FAILURE);
+        }
+        int optval = 1;
+        if (setsockopt(curr_socket, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) != 0) {
+            exitWithError("Not Reusing Socket");
+            exit (EXIT_FAILURE);
+        }
+        if (bind(curr_socket, (struct sockaddr *)&*it, sizeof(*it)) < 0) {
+            exitWithError("Bind failed");
+            exit(EXIT_FAILURE);
+        }
+        if (listen(curr_socket,20) < 0) {
+            exitWithError("Socket listen Failed");
+            exit(EXIT_FAILURE);
+        }
+        std::cout << "\n\n * * * Listening Server at following ports * * *   \n\n";
+        std::cout << ntohl(it->sin_addr.s_addr) << " : sockfd " << curr_socket << std::endl;
+        this->m_sockets.push_back(curr_socket);
+    }
+
+    
+    
+    
+    this->epoll_fd = epoll_create(MAXEPOLLSIZE);
     if(epoll_fd == -1)
     {
         exitWithError("Create epoll");
         exit(EXIT_FAILURE);
     }
 
+    struct epoll_event          m_event;
+    memset(&m_event, 0,sizeof(m_event));
+
+    struct epoll_event          m_event_list[MAX_EVENTS];
     
+    std::vector<int>::iterator it2;
+    for (it2 = this->m_sockets.begin(); it2 != this->m_sockets.end(); it2++) {
+        int add;
+        m_event.events = EPOLLIN;
+        m_event.data.fd = *it2;
+
+        add = epoll_ctl(this->epoll_fd, EPOLL_CTL_ADD, *it2, &m_event);
+        if (add == -1) {
+            exitWithError("failed to add to epoll");
+            exit(EXIT_FAILURE);
+        }
+    }
+
+/*
     for (size_t i = 0; i < m_server.size(); i++) {
 
         // Set socket for each server
         
-        m_server[i].setSocket(socket(AF_INET, SOCK_STREAM, 0));
+         m_server[i].setSocket(socket(AF_INET, SOCK_STREAM, 0));
         if (m_server[i].getSocket() == -1) {
             exitWithError("Socket creation failed");
             exit(EXIT_FAILURE);
@@ -48,37 +91,38 @@ void TcpServer2::startServer() {
         if (listen(m_server[i].getSocket(), 20) < 0) {
             exitWithError("Socket listen Failed");
             exit(EXIT_FAILURE);
-        }
+        } 
 
         std::cout << "\n\n * * * Listening Server at following ports * * *   \n\n";
-        m_event.events = EPOLLIN;
+        m_event.events = EPOLLIN | EPOLLRDHUP;
         m_event.data.fd = m_server[i].getSocket();
         if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, m_server[i].getSocket(), &m_event) == -1) {
             exitWithError("epoll_ctl listen_sock");
             exit(EXIT_FAILURE);
         }
-        std::cout << "\n\n * * * 2222Listening Server at following ports * * *   ";
-        std::cout << "lista= "<< m_events[i].events << std::endl;
+        std::cout << "\n\n * * * 2222Listening Server at following ports * * *   \n";
+        std::cout << "lista= "<< m_event.events << std::endl;
     }
+    */
     
 
 
-    /* while(1) {
-        int num_events = epoll_wait(epoll_fd, m_events, MAX_EVENTS, 2000);
+    while(1) {
+        int num_events = epoll_wait(epoll_fd, m_event_list, MAXEPOLLSIZE, 2000);
         if (num_events == -1) {
             exitWithError("Epoll wait");
-            exit(EXIT_FAILURE);
+            continue ;
         }
-        std::cout << num_events << std::endl;
+        std::cout << "num_events= "<< num_events << std::endl;
         for (int i = 0; i < num_events; i++) {
             std::cout << "ENTREI ===222222222============= \n";
             for (size_t j = 0; j < this->m_server.size(); j++) {
                 std::cout << "ENTREI ======================= \n";
-                if (m_events[i].data.fd == m_server[j].getSocket()) {
+                if (m_event_list[i].data.fd == m_server[j].getSocket()) {
                     m_server[j].setSocketAddr_len(sizeof(m_server[j].getSocketAddr()));
                     struct sockaddr_in addr = m_server[j].getSocketAddr();
                     socklen_t addr_len = m_server[j].getSocketAddr_len();
-                    int client_socket = accept(m_events[i].data.fd, (struct sockaddr *)&addr, &addr_len);
+                    int client_socket = accept(m_event_list[i].data.fd, (struct sockaddr *)&addr, &addr_len);
                     if (client_socket == -1) {
                         exitWithError("Can't Accept something");
                         continue;
@@ -92,20 +136,20 @@ void TcpServer2::startServer() {
                         exit(EXIT_FAILURE);
                     }
                 } 
-                else if (m_events[i].events & EPOLLIN)
+                else if (m_event_list[i].events & EPOLLIN)
                 {
-                    std::string clientRequest = showClientHeader(*m_events);
+                    std::string clientRequest = showClientHeader(*m_event_list);
                     Request request(clientRequest);
                     Response response(m_server[i]);
                     std::string serverResponse = response.buildResponse(request);
 
-                    sendResponse(m_events[i].data.fd, serverResponse);
+                    sendResponse(m_event_list[i].data.fd, serverResponse);
 
-                    close(m_events[i].data.fd);
+                    close(m_event_list[i].data.fd);
                 }
             }
         }
-    } */
+    }
 
 
 }
@@ -194,12 +238,9 @@ int TcpServer2::getEpoll() {
     return this->epoll_fd;
 }
 
-void    TcpServer2::extractSockets() {
+void TcpServer2::setAddresses () {
     for (size_t i = 0; i < m_server.size(); i++) {
-        m_sockets.push_back(m_server[i].getSocket());
+        m_addresses.push_back(m_server[i].getSocketAddr());
     }
-}
-
-std::vector<int> TcpServer2::getAllSockets() {
-    return this->m_sockets;
+    std::cout << "m_adresses size = " << m_addresses.size() << std::endl;
 }

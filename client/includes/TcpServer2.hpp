@@ -23,6 +23,11 @@
 class Request; 
 
 class TcpServer2 {
+private:
+    std::vector<Server>             m_server;
+    std::vector<struct sockaddr_in> m_addresses;
+    std::vector<int>                m_sockets;
+    int                             epoll_fd;
 public:
     TcpServer2(std::vector<Server> server);
     ~TcpServer2();
@@ -33,11 +38,6 @@ public:
     std::vector<int> getAllSockets();
     //struct epoll_event          m_events[MAX_EVENTS];
 
-private:
-    std::vector<Server>         m_server;
-    int                         epoll_fd;
-    std::vector<int>            m_sockets;
-    //struct epoll_event          m_event;
 
     void startServer();
     void acceptConnection();
@@ -45,7 +45,8 @@ private:
     void sendResponse(int client_socket, const std::string& response);
     void closeServer();
     uint32_t strToNet(const std::string &ip_address);
-    void extractSockets();
+
+    void setAddresses();
 };
 
 #endif

@@ -1,11 +1,7 @@
 #include "../includes/Server.hpp"
 
-Server::Server()
-{
-}
+Server::Server() {}
 
-
-//Acho que nao e necessario 
 Server::Server(std::string ipAddr, int port, std::string root, std::string index) {
 
     s_ip_address = ipAddr;
@@ -26,11 +22,6 @@ Server::Server(std::string ipAddr, int port, std::string root, std::string index
     s_socketAddress.sin_family = AF_INET;
     s_socketAddress.sin_addr.s_addr = htonl(INADDR_ANY);
     s_socketAddress.sin_port = htons(this->s_port);
-/*     if (setSocket()) {
-        std::ostringstream ss;
-        ss << "Failed to start server with Port: " << ntohs(s_socketAddress.sin_port);
-        log(ss.str());
-    } */
     verificErrorServer();
 }
 
@@ -156,23 +147,3 @@ void Server::verificErrorServer()
             exit(1);
     }
 }
-
-/* void    Server::startListen() {
-    if (listen(this->s_socket, 20) < 0) {
-        exitWithError("Socket listen Failed.");
-        exit(1);
-    }
-
-    std::ostringstream ss;
-    ss << "\n*** Listening on ADDRESS: " << inet_ntoa(s_socketAddress.sin_addr) << " Port: " << ntohs(s_socketAddress.sin_port) << " ***\n\n";
-    log(ss.str());
-    this->e_poll_fd = epoll_create(MAXEPOLLSIZE);
-    if (e_poll_fd < 0) {
-        exitWithError("Epoll creat failed");
-        exit(1);
-    }
-    else if (e_poll_fd) {    //close(m_socket);
-        log("Epoll Accepted!"); 
-    }
-    return this->s_socket;
-} */
