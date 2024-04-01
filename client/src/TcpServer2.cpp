@@ -8,12 +8,15 @@ TcpServer2::TcpServer2(std::vector<Server> servers) : m_server(servers){
         log(ss.str());
     } */
 
-      memset(&m_server[0].s_socketAddress, 0, sizeof(m_server[0].s_socketAddress));
-    m_server[0].s_socketAddress.sin_family = AF_INET;
-    m_server[0].s_socketAddress.sin_addr.s_addr = htonl(INADDR_ANY);
-    std::cout << "valor Porta" << htons(m_server[0].getPort_s()) << std::endl;
-    m_server[0].s_socketAddress.sin_port = htons(m_server[0].getPort_s());
-    m_addresses.push_back(m_server[0].getSocketAddr());
+    for(long unsigned int i = 0; i < m_server.size(); i++)
+    {
+      memset(&m_server[i].s_socketAddress, 0, sizeof(m_server[i].s_socketAddress));
+        m_server[i].s_socketAddress.sin_family = AF_INET;
+        m_server[i].s_socketAddress.sin_addr.s_addr = htonl(INADDR_ANY);
+        std::cout << "valor Porta" << htons(m_server[i].getPort_s()) << std::endl;
+        m_server[i].s_socketAddress.sin_port = htons(m_server[i].getPort_s());
+        m_addresses.push_back(m_server[i].getSocketAddr());
+    }
     //setAddresses();
     startServer();
 }
@@ -161,7 +164,7 @@ void TcpServer2::startServer() {
                     sendResponse(m_event_list[i].data.fd, serverResponse);
                     responseMap.erase(m_event_list[i].data.fd);
                     m_event_list[i].events = EPOLLIN;
-    epoll_ctl(this->getEpoll(), EPOLL_CTL_MOD, m_event_list[i].data.fd, &m_event_list[i]);
+                    epoll_ctl(this->getEpoll(), EPOLL_CTL_MOD, m_event_list[i].data.fd, &m_event_list[i]);
         
                 }
             }
