@@ -32,6 +32,7 @@ public:
     TcpServer2(std::vector<Server> server);
     ~TcpServer2();
 
+    std::string clientRequest;
     void startListen();
     void printPorts();
     int getEpoll();

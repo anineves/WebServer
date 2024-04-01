@@ -38,8 +38,12 @@ int main(int ac, char **av) {
     std::cout << "ip ======== " << ip << std::endl;
 
     std::vector<Server>& servers = configFile.getServers();
-    std::cout << "Number of servers: " << servers.size() << std::endl; 
+     //std::vector<struct sockaddr_in> unique_addrs = configFile.get_unique_addresses();
+
+    
     TcpServer2 tcpServer(servers);
+    //tcpServer.startServer(unique_addrs);
+
     //tcpServer.startListen();
     return 0;
 }

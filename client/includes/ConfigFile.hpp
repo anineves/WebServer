@@ -41,6 +41,7 @@ public:
     std::string getErrorPage() const;
     std::vector<Server> &getServers();
     std::vector<Location>& getLocations();
+    std::vector<struct sockaddr_in> get_unique_addresses();
 
     //--- SETTERS ---
     void setPort(int set_port);
@@ -50,6 +51,8 @@ public:
     void setErrorPage(std::string set_error_page);
     //--- PARSER ---
     void parser(std::string conFile);
+
+    //u_int32_t strToNet(const std::string &ip_address);
 };
 
 #endif

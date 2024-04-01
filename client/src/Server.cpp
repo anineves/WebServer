@@ -1,6 +1,13 @@
 #include "../includes/Server.hpp"
 
-Server::Server() {}
+Server::Server() {
+    
+    memset(&s_socketAddress, 0, sizeof(s_socketAddress));
+    s_socketAddress.sin_family = AF_INET;
+    s_socketAddress.sin_addr.s_addr = htonl(INADDR_ANY);
+    std::cout << "valor Porta" << htons(this->s_port) << std::endl;
+    s_socketAddress.sin_port = htons(this->s_port);
+}
 
 Server::Server(std::string ipAddr, int port, std::string root, std::string index) {
 
@@ -18,10 +25,6 @@ Server::Server(std::string ipAddr, int port, std::string root, std::string index
     _executable = "";
     _redirect = false;
     _auto_index = false;
-    memset(&s_socketAddress, 0, sizeof(s_socketAddress));
-    s_socketAddress.sin_family = AF_INET;
-    s_socketAddress.sin_addr.s_addr = htonl(INADDR_ANY);
-    s_socketAddress.sin_port = htons(this->s_port);
     verificErrorServer();
 }
 

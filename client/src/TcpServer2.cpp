@@ -7,7 +7,14 @@ TcpServer2::TcpServer2(std::vector<Server> servers) : m_server(servers){
         ss << "Failed to start server with Port: " ;
         log(ss.str());
     } */
-    setAddresses();
+
+      memset(&m_server[0].s_socketAddress, 0, sizeof(m_server[0].s_socketAddress));
+    m_server[0].s_socketAddress.sin_family = AF_INET;
+    m_server[0].s_socketAddress.sin_addr.s_addr = htonl(INADDR_ANY);
+    std::cout << "valor Porta" << htons(m_server[0].getPort_s()) << std::endl;
+    m_server[0].s_socketAddress.sin_port = htons(m_server[0].getPort_s());
+    m_addresses.push_back(m_server[0].getSocketAddr());
+    //setAddresses();
     startServer();
 }
 
@@ -20,6 +27,7 @@ void TcpServer2::startServer() {
     std::vector<struct sockaddr_in>::iterator it;
 
     for (it = m_addresses.begin(); it != m_addresses.end(); it++) {
+        
         int curr_socket = socket(AF_INET, SOCK_STREAM, 0);
         if (curr_socket < 0) {
             exitWithError("Socket creation failed");
@@ -39,7 +47,7 @@ void TcpServer2::startServer() {
             exit(EXIT_FAILURE);
         }
         std::cout << "\n\n * * * Listening Server at following ports * * *   \n\n";
-        std::cout << ntohl(it->sin_addr.s_addr) << " : sockfd " << curr_socket << std::endl;
+        std::cout << convert_uint32_to_str(ntohl(it->sin_addr.s_addr)) << " : sockfd " << curr_socket << std::endl;
         this->m_sockets.push_back(curr_socket);
     }
 
@@ -144,9 +152,10 @@ void TcpServer2::startServer() {
                     std::string serverResponse = response.buildResponse(request);
 
                     sendResponse(m_event_list[i].data.fd, serverResponse);
-
                     close(m_event_list[i].data.fd);
                 }
+                else if (m_event_list[i].events & EPOLLOUT)
+                {}
             }
         }
     }
@@ -240,7 +249,9 @@ int TcpServer2::getEpoll() {
 
 void TcpServer2::setAddresses () {
     for (size_t i = 0; i < m_server.size(); i++) {
+
         m_addresses.push_back(m_server[i].getSocketAddr());
+
     }
     std::cout << "m_adresses size = " << m_addresses.size() << std::endl;
 }

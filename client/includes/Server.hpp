@@ -7,13 +7,14 @@
 
 class Server {
     private:
-        std::string             s_ip_address;
-        int                     s_port;
+        
         std::string             s_root;
         std::string             s_index;
         std::string             s_error_page;
         std::string             _upload_to;
        
+        std::string             s_ip_address;
+        int                     s_port;
         std::string             _cgi_path;
         std::string             _cgi_ext;
         bool                    _auto_index;
@@ -23,10 +24,10 @@ class Server {
         int                     s_socket;
         std::string             s_ServerMessage;
         int                     e_poll_fd;
-        struct sockaddr_in      s_socketAddress;
         socklen_t               s_socketAddress_len;
 
     public:
+        struct sockaddr_in      s_socketAddress;
         bool        _redirect;
         std::vector<std::string> _methods;
         Server();
