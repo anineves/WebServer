@@ -17,6 +17,7 @@
 # include "./Server.hpp"
 # include "./Request.hpp"
 # include "./Response.hpp"
+#include    <map>
 
 
 
@@ -28,9 +29,12 @@ private:
     std::vector<struct sockaddr_in> m_addresses;
     std::vector<int>                m_sockets;
     int                             epoll_fd;
+
 public:
     TcpServer2(std::vector<Server> server);
     ~TcpServer2();
+
+    std::map<int, std::string> responseMap;
 
     std::string clientRequest;
     void startListen();

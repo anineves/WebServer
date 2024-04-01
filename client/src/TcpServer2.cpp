@@ -146,16 +146,24 @@ void TcpServer2::startServer() {
                 } 
                 else if (m_event_list[i].events & EPOLLIN)
                 {
-                    std::string clientRequest = showClientHeader(*m_event_list);
+                    std::string clientRequest = showClientHeader(m_event_list[i]);
                     Request request(clientRequest);
                     Response response(m_server[i]);
                     std::string serverResponse = response.buildResponse(request);
-
-                    sendResponse(m_event_list[i].data.fd, serverResponse);
-                    close(m_event_list[i].data.fd);
+                    m_event_list[i].events = EPOLLOUT;
+                    epoll_ctl(this->getEpoll(), EPOLL_CTL_MOD, m_event_list[i].data.fd, &m_event_list[i]);
+                    responseMap[m_event_list[i].data.fd] = serverResponse;
+                   
                 }
                 else if (m_event_list[i].events & EPOLLOUT)
-                {}
+                {
+                    std::string serverResponse = responseMap[m_event_list[i].data.fd];
+                    sendResponse(m_event_list[i].data.fd, serverResponse);
+                    responseMap.erase(m_event_list[i].data.fd);
+                    m_event_list[i].events = EPOLLIN;
+    epoll_ctl(this->getEpoll(), EPOLL_CTL_MOD, m_event_list[i].data.fd, &m_event_list[i]);
+        
+                }
             }
         }
     }
