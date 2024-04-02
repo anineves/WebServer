@@ -141,6 +141,10 @@ socklen_t  Server::getSocketAddr_len() {
     return this->s_socketAddress_len;
 }   
 
+bool Server::getExecutable()
+{
+    return this->_executable;
+}
 // ---- END GETTERS -----
 void Server::verificErrorServer()
 {

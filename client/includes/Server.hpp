@@ -20,7 +20,7 @@ class Server {
         bool                    _auto_index;
         bool                    _executable;
         std::string             _return;
-        std::vector <Location>  _locations;
+        std::vector<Location>  _locations;
         int                     s_socket;
         std::string             s_ServerMessage;
         int                     e_poll_fd;
@@ -63,7 +63,7 @@ class Server {
         int                         getSocket();
         struct sockaddr_in          getSocketAddr();
         socklen_t                   getSocketAddr_len();
-
+        bool                        getExecutable();
         void    verificErrorServer();
         
 };

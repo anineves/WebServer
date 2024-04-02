@@ -271,7 +271,15 @@ bool ConfigFile::parserServer( std::vector<Location>& _locations, std::vector<Se
     }
         server.setLocation(_locations);
         server.verificErrorServer();
+        //Location tmp = server.getLocations()[1];
+        //td::cout << " %%%%%%%% "  << tmp.getCgiExt() << std::endl;
     _servers.push_back(server);
+    //std::vector<Server>::iterator it;
+        /*for (it = _servers.begin() ; it != _servers.end(); it++)
+        {
+            Location tmp = it.getLocations();
+            std::cout << "\n\n$$$$$$$ Valor EXT" << tmp.getCgiExt() << std::endl;
+        }*/
     if (_servers.empty()) {
         std::cout << "No servers found in the vector.\n";
         return false;

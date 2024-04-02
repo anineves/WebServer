@@ -118,12 +118,12 @@ void Request::setPath( std::string path)
 void    Request::verifyLocations( Server server) 
 {
     std::string pathRequest = this->_path;
-    std::cout << "######PathReq-" << pathRequest << "$" << std::endl;
+    //std::cout << "######PathReq-" << pathRequest << "$" << std::endl;
 
     std::cout << "" << this->_method << std::endl;
     std::vector<std::string> methodstmp = server.getMethods_s();
     for (size_t i= 0; i < methodstmp.size(); i++) {
-        std::cout << "..........aqui methods inciais ........";
+        //std::cout << "..........aqui methods inciais ........";
         std::cout << methodstmp[i] << " ";
     }
     std::cout << std::endl;
@@ -131,7 +131,7 @@ void    Request::verifyLocations( Server server)
     if (server.getLocations().size() != 0) {
         for (int i = 0; i < (int)server.getLocations().size(); i++) 
         {
-            std::cout << "##### Path Location" << server.getLocations()[i].getPath() << std::endl;
+            //std::cout << "##### Path Location" << server.getLocations()[i].getPath() << std::endl;
             if(!pathRequest.find(server.getLocations()[i].getPath()))
             {
                 if(pathRequest == "/red.html")
@@ -141,14 +141,16 @@ void    Request::verifyLocations( Server server)
                 }
 
             //pathLocation = server.getLocations[i].pathLocation;
-            std::cout << "###############- Path Location " << server.getLocations()[i].getPath() << " Path request " << pathRequest  << std::endl;
+            std::cout << "\n\n###############- Path Location " << server.getLocations()[i].getPath() << " Path request " << pathRequest  << std::endl;
                 if(server.getLocations()[i].getUploadTo() != "" )
                     server.setUploadTo(server.getLocations()[i].getUploadTo());
                 if(server.getLocations()[i].getCgiPath() != "" )
                     server.setCgiPath(server.getLocations()[i].getCgiPath());
+                std::cout << "!!!!!!!!!!!!ext CGI:" << server.getLocations()[i].getCgiExt()<< "." << std::endl;
                 if(server.getLocations()[i].getCgiExt() != "" )
                 {
                     server.setExecutable("true");
+                    std::cout << "\n\n### entrei Locations Executable" << std::endl;
                     server.setCgiPath(server.getLocations()[i].getCgiPath());
                 }
                 if(server.getLocations()[i].getAutoIndex() != "" )

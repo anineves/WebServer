@@ -1,6 +1,10 @@
 #include "../includes/TcpServer2.hpp"
 #include "../includes/ConfigFile.hpp"
 
+
+bool g_stopServer = false;
+
+
 int validFile(std::string arg) {
     size_t dotPosition = arg.find_last_of('.');
     std::string extension = arg.substr(dotPosition);

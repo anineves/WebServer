@@ -150,8 +150,11 @@ void TcpServer2::startServer() {
                 else if (m_event_list[i].events & EPOLLIN)
                 {
                     std::string clientRequest = showClientHeader(m_event_list[i]);
+                    std::cout << "########### get " << m_server[j].getExecutable() << std::endl;
                     Request request(clientRequest);
-                    Response response(m_server[i]);
+                    std::cout << "@@@@@@@@@@@@ TCP Location" << m_server[j].getLocations()[1].getCgiExt() << std::endl;
+                    request.verifyLocations(m_server[j]);
+                    Response response(m_server[j]);
                     std::string serverResponse = response.buildResponse(request);
                     m_event_list[i].events = EPOLLOUT;
                     epoll_ctl(this->getEpoll(), EPOLL_CTL_MOD, m_event_list[i].data.fd, &m_event_list[i]);
@@ -204,7 +207,7 @@ void TcpServer2::startListen() {
 } */
 
 std::string TcpServer2::showClientHeader(struct epoll_event &m_events) {
-    char buffer[1024]; 
+    char buffer[2048]; 
     int bytesReceived = recv(m_events.data.fd, buffer, sizeof(buffer), 0);
     if (bytesReceived < 0) {
         log("Error receiving data from client");
