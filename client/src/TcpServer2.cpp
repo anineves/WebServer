@@ -2,21 +2,10 @@
 
 TcpServer2::TcpServer2(std::vector<Server> servers) : m_server(servers){
     
-/*     if (this->startServer() != 0) {
-        std::ostringstream ss;
-        ss << "Failed to start server with Port: " ;
-        log(ss.str());
-    } */
 
-    
-      memset(&m_server[0].s_socketAddress, 0, sizeof(m_server[0].s_socketAddress));
-        m_server[0].s_socketAddress.sin_family = AF_INET;
-        m_server[0].s_socketAddress.sin_addr.s_addr = htonl(INADDR_ANY);
-        std::cout << "valor Porta" << htons(m_server[0].getPort_s()) << std::endl;
-        m_server[0].s_socketAddress.sin_port = htons(m_server[0].getPort_s());
-        m_addresses.push_back(m_server[0].getSocketAddr());
-    //setAddresses();
+    setAddresses();
     startServer();
+    
 }
 
 TcpServer2::~TcpServer2() {
@@ -27,6 +16,7 @@ TcpServer2::~TcpServer2() {
 void TcpServer2::startServer() {
     std::vector<struct sockaddr_in>::iterator it;
 
+     std::cout << "@#$@#@$##@$$# Tamanho addresses :" << m_addresses.size() << std::endl;;
     for (it = m_addresses.begin(); it != m_addresses.end(); it++) {
         
         int curr_socket = socket(AF_INET, SOCK_STREAM, 0);
@@ -80,40 +70,6 @@ void TcpServer2::startServer() {
         }
     }
 
-/*
-    for (size_t i = 0; i < m_server.size(); i++) {
-
-        // Set socket for each server
-        
-         m_server[i].setSocket(socket(AF_INET, SOCK_STREAM, 0));
-        if (m_server[i].getSocket() == -1) {
-            exitWithError("Socket creation failed");
-            exit(EXIT_FAILURE);
-        }
-
-        struct sockaddr_in addr = m_server[i].getSocketAddr();
-        if (bind(m_server[i].getSocket(), (struct sockaddr *)&addr, sizeof(m_server[i].getSocketAddr())) < 0) {
-            exitWithError("Bind failed");
-            exit(EXIT_FAILURE);
-        }
-        //std::cout << m_server[i].getSocket() << std::endl;
-        if (listen(m_server[i].getSocket(), 20) < 0) {
-            exitWithError("Socket listen Failed");
-            exit(EXIT_FAILURE);
-        } 
-
-        std::cout << "\n\n * * * Listening Server at following ports * * *   \n\n";
-        m_event.events = EPOLLIN | EPOLLRDHUP;
-        m_event.data.fd = m_server[i].getSocket();
-        if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, m_server[i].getSocket(), &m_event) == -1) {
-            exitWithError("epoll_ctl listen_sock");
-            exit(EXIT_FAILURE);
-        }
-        std::cout << "\n\n * * * 2222Listening Server at following ports * * *   \n";
-        std::cout << "lista= "<< m_event.events << std::endl;
-    }
-    */
-    
 
 
     while(1) {
@@ -175,35 +131,6 @@ void TcpServer2::startServer() {
 
 }
 
-void TcpServer2::startListen() {
-
-}
-
-/* void TcpServer2::acceptConnection() {
-    int new_socket = accept(m_socket, (sockaddr *)&m_socketAddress, &m_socketAddress_len);
-    if (new_socket < 0) {
-        std::ostringstream ss;
-        ss << "Server failed to accept incoming connection from ADDRESS: " << inet_ntoa(m_socketAddress.sin_addr) << "; PORT: " << ntohs(m_socketAddress.sin_port);
-        exitWithError(ss.str());
-    }
-
-    std::ostringstream ss;
-    ss << "Accepted connection from address: " << inet_ntoa(m_socketAddress.sin_addr) << "; PORT: " << ntohs(m_socketAddress.sin_port);
-    log(ss.str());
-
-    //Buscar dados do pedido do clinte Metodo, path...
-    std::string clientRequest = showClientHeader(new_socket);
-    //Criar Resposta como os dados do Pedido
-    Request request(clientRequest);
-    Response response(m_server);
-    request.verifyLocations(m_server);
-    std::string serverResponse = response.buildResponse(request);
-    //Enviar a resposta para o Cliente
-    sendResponse(new_socket, serverResponse);
-
-    close(new_socket);
-} */
-
 std::string TcpServer2::showClientHeader(struct epoll_event &m_events) {
     char buffer[2048]; 
     int bytesReceived = recv(m_events.data.fd, buffer, sizeof(buffer), 0);
@@ -260,10 +187,16 @@ int TcpServer2::getEpoll() {
 }
 
 void TcpServer2::setAddresses () {
-    for (size_t i = 0; i < m_server.size(); i++) {
-
+    for( size_t i = 0; i < m_server.size(); i++)
+    {
+        memset(&m_server[i].s_socketAddress, 0, sizeof(m_server[i].s_socketAddress));
+        m_server[i].s_socketAddress.sin_family = AF_INET;
+        m_server[i].s_socketAddress.sin_addr.s_addr = htonl(INADDR_ANY);
+        std::cout << "valor Porta htons: " << htons(m_server[i].getPort_s()) << std::endl;
+        std::cout << "valor Porta: " << m_server[i].getPort_s() << std::endl;
+        m_server[i].s_socketAddress.sin_port = htons(m_server[i].getPort_s());
         m_addresses.push_back(m_server[i].getSocketAddr());
-
     }
+
     std::cout << "m_adresses size = " << m_addresses.size() << std::endl;
 }
