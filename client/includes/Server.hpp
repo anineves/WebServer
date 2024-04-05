@@ -65,7 +65,7 @@ class Server {
         socklen_t                   getSocketAddr_len();
         bool                        getExecutable();
         void    verificErrorServer();
-        
+       
 };
 
 #endif

@@ -5,6 +5,7 @@ TcpServer2::TcpServer2(std::vector<Server> servers) : m_server(servers){
 
     setAddresses();
     startServer();
+    startListen();
     
 }
 
@@ -12,6 +13,8 @@ TcpServer2::~TcpServer2() {
     this->closeServer();
     std::cout << "TcpServer Destructor called.\n";
 }
+
+
 
 void TcpServer2::startServer() {
     std::vector<struct sockaddr_in>::iterator it;
@@ -42,8 +45,9 @@ void TcpServer2::startServer() {
         this->m_sockets.push_back(curr_socket);
     }
 
-    
-    
+}   
+
+void TcpServer2::startListen() {
     
     this->epoll_fd = epoll_create(MAXEPOLLSIZE);
     if(epoll_fd == -1)
@@ -53,12 +57,12 @@ void TcpServer2::startServer() {
     }
 
     struct epoll_event          m_event;
-    memset(&m_event, 0,sizeof(m_event));
+    ft_memset(&m_event, 0,sizeof(m_event));
 
     struct epoll_event          m_event_list[MAX_EVENTS];
     
     std::vector<int>::iterator it2;
-    for (it2 = this->m_sockets.begin(); it2 != this->m_sockets.end(); it2++) {
+    for (it2 = this->m_sockets.begin(); it2 != this->m_sockets.end(); ++it2) {
         int add;
         m_event.events = EPOLLIN;
         m_event.data.fd = *it2;
@@ -83,18 +87,20 @@ void TcpServer2::startServer() {
             std::cout << "ENTREI ===222222222============= \n";
             for (size_t j = 0; j < this->m_server.size(); j++) {
                 std::cout << "ENTREI ======================= \n";
+                struct sockaddr_in addr;
+                    socklen_t addr_len = sizeof(addr);
                 if (m_event_list[i].data.fd == m_server[j].getSocket()) {
                     m_server[j].setSocketAddr_len(sizeof(m_server[j].getSocketAddr()));
-                    struct sockaddr_in addr = m_server[j].getSocketAddr();
-                    socklen_t addr_len = m_server[j].getSocketAddr_len();
+                    std::cout << "entrei accept " << std::endl;
                     int client_socket = accept(m_event_list[i].data.fd, (struct sockaddr *)&addr, &addr_len);
+                    std::cout << "entrei accept " << std::endl;
                     if (client_socket == -1) {
                         exitWithError("Can't Accept something");
                         continue;
                     }
                     std::cout << "New Connection on port: " << ntohs(m_server[j].getSocketAddr().sin_port) << std::endl;
              
-                    m_event.events = EPOLLIN;
+                    m_event.events = EPOLLIN  | EPOLLRDHUP;
                     m_event.data.fd = client_socket;
                     if (epoll_ctl(this->getEpoll(), EPOLL_CTL_ADD, client_socket, &m_event) == -1) {
                         exitWithError("Problems in Epoll_CTL.");

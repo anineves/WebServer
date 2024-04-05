@@ -15,3 +15,12 @@ std::string convert_uint32_to_str(u_int32_t nb) {
 
     return (ss.str().c_str());
 }
+
+void *ft_memset(void *s, int c, std::size_t n) {
+    unsigned char *f;
+
+    f = (unsigned char *)s;
+    while (n--)
+        *f++ = c;
+    return (s);
+}
