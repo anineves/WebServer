@@ -85,12 +85,13 @@ void TcpServer2::startListen() {
         std::cout << "num_events= "<< num_events << std::endl;
         for (int i = 0; i < num_events; i++) {
             std::cout << "ENTREI ===222222222============= \n";
-            for (size_t j = 0; j < this->m_server.size(); j++) {
+            for (size_t j = 0; j < this->m_server.size(); ++j) {
                 std::cout << "ENTREI ======================= \n";
                 struct sockaddr_in addr;
-                    socklen_t addr_len = sizeof(addr);
-                if (m_event_list[i].data.fd == m_server[j].getSocket()) {
-                    m_server[j].setSocketAddr_len(sizeof(m_server[j].getSocketAddr()));
+                socklen_t addr_len = sizeof(addr);
+                    std::cout << "entrei antes  valor socket" <<   m_sockets[j] << std::endl;
+                if (m_event_list[i].data.fd == m_sockets[j]) {
+                    m_server[j].setSocketAddr_len(sizeof(m_sockets[j]));
                     std::cout << "entrei accept " << std::endl;
                     int client_socket = accept(m_event_list[i].data.fd, (struct sockaddr *)&addr, &addr_len);
                     std::cout << "entrei accept " << std::endl;
