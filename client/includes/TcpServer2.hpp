@@ -35,7 +35,8 @@ public:
     ~TcpServer2();
 
     std::map<int, std::string> responseMap;
-
+    std::map<int, Server*> clientServerMap;
+    
     std::string clientRequest;
     void startListen();
     void printPorts();

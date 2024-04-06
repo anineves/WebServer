@@ -12,6 +12,7 @@ class Server {
         std::string             s_index;
         std::string             s_error_page;
         std::string             _upload_to;
+        std::string             s_server_name;
        
         std::string             s_ip_address;
         int                     s_port;
@@ -52,6 +53,7 @@ class Server {
         void    setSocket(int set_socket);
         void    setSocketAddr(struct sockaddr_in n_socketaddr);
         void    setSocketAddr_len(socklen_t n_socketaddr_len);
+        void    setServerName_s(std::string cgi_ext);
         // ---- GETTERS ----
         std::string                 getIpAddr_s();
         int                         getPort_s();

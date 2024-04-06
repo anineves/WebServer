@@ -107,19 +107,23 @@ void TcpServer2::startListen() {
                         exitWithError("Problems in Epoll_CTL.");
                         exit(EXIT_FAILURE);
                     }
+                    //Associar cadaa socket a cada client
+                    clientServerMap[client_socket] = &m_server[j];
                 } 
                 else if (m_event_list[i].events & EPOLLIN)
                 {
-                    std::string clientRequest = showClientHeader(m_event_list[i]);
-                    std::cout << "########### get " << m_server[j].getExecutable() << std::endl;
-                    Request request(clientRequest);
-                    std::cout << "@@@@@@@@@@@@ TCP Location" << m_server[j].getLocations()[1].getCgiExt() << std::endl;
-                    request.verifyLocations(m_server[j]);
-                    Response response(m_server[j]);
-                    std::string serverResponse = response.buildResponse(request);
-                    m_event_list[i].events = EPOLLOUT;
-                    epoll_ctl(this->getEpoll(), EPOLL_CTL_MOD, m_event_list[i].data.fd, &m_event_list[i]);
-                    responseMap[m_event_list[i].data.fd] = serverResponse;
+                    //if(m_server[j].getPort_s() == 8008)
+                    Server* server = clientServerMap[m_event_list[i].data.fd];
+                    if (server != NULL) {
+                        std::string clientRequest = showClientHeader(m_event_list[i]);
+                        Request request(clientRequest);
+                        request.verifyLocations(*server);
+                        Response response(*server);
+                        std::string serverResponse = response.buildResponse(request);
+                        m_event_list[i].events = EPOLLOUT;
+                        epoll_ctl(this->getEpoll(), EPOLL_CTL_MOD, m_event_list[i].data.fd, &m_event_list[i]);
+                        responseMap[m_event_list[i].data.fd] = serverResponse;
+                    }
                    
                 }
                 else if (m_event_list[i].events & EPOLLOUT)

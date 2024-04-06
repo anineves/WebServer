@@ -37,36 +37,6 @@ std::vector<Server>& ConfigFile::getServers()
 
 
 
-/*std::vector<struct sockaddr_in> ConfigFile::get_unique_addresses() {
-    std::vector<struct sockaddr_in> uniques;
-
-    std::vector<Server>::iterator it;
-    for (it = this->_servers.begin(); it != this->_servers.end(); it++) {
-        struct sockaddr_in curr;
-
-        memset(&(curr), 0, sizeof(curr));
-
-        // Define curr struct
-        curr.sin_family = AF_INET;
-        curr.sin_port = it->s_port;      // host to network short
-        curr.sin_addr.s_addr = strToNet(it->s_ip_address); // ip
-
-        std::vector<struct sockaddr_in>::iterator it2;
-        for (it2 = uniques.begin(); it2 != uniques.end(); it2++) {
-            if (it2->sin_addr.s_addr == curr.sin_addr.s_addr && it2->sin_port == curr.sin_port)
-                break;
-        }
-
-        // if it2 is pointing to the end means it didnt found in the uniques
-        if (it2 == uniques.end())
-            uniques.push_back(curr);
-    }
-
-    return uniques;
-}*/
-
-
-
         //--- SETTERS ---
 void    ConfigFile::setPort(int set_port) {
     this->_port = set_port;
@@ -268,6 +238,8 @@ bool ConfigFile::parserServer( std::vector<Location>& _locations, std::vector<Se
             server.setIndex_s(obtainValue(line, "index"));
         if (fword == "error_page")
             server.setErrorPage_s(obtainValue(line, "error_page"));
+        if (fword == "server_name")
+            server.setServerName_s(obtainValue(line, "server_name"));
     }
         server.setLocation(_locations);
         server.verificErrorServer();
@@ -362,6 +334,11 @@ std::string ConfigFile::obtainValue(const std::string& line, const std::string& 
                 } else {
                     return line.substr(pos, end_pos);
                 }
+            }
+            else
+            {
+                exitWithError("missing ;");
+                exit(EXIT_FAILURE);
             }
         }
     }

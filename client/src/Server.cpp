@@ -43,6 +43,8 @@ void    Server::setIndex_s(std::string index) {this->s_index = index;}
 
 void    Server::setErrorPage_s(std::string error_page) {this->s_error_page = error_page;}
 
+void    Server::setServerName_s(std::string server_name) {this->s_server_name = server_name;}
+
 void    Server::setLocation( std::vector<Location> locations) { this->_locations = locations; }
 
 void    Server::setUploadTo(std::string upload_to) {this->_upload_to = upload_to;}
