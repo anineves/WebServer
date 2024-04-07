@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <iostream>
 
 class Location {
 private:
@@ -33,6 +34,7 @@ public:
     std::string getCgiExt();
     std::string getAutoIndex();
     std::string getReturn();
+    void    printLoc();
 };
 
 #endif 

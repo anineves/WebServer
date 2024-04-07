@@ -124,19 +124,45 @@ void Request::setPath(std::string path)
 
 void Request::verifyLocations(Server server)
 {
+/*     std::vector<Location> tmp = server.getLocations();
+    for (size_t i = 0; i < tmp.size(); i++) {
+        tmp[i].printLoc();
+    } */
     std::string pathRequest = this->_path;
-   
 
     std::string bestMatchPath;
     //size_t bestMatchLength = 0;
 
 
-     size_t extensionPos = pathRequest.find_last_of('.');
+    size_t extensionPos = pathRequest.find_last_of('.');
     if (extensionPos != std::string::npos) {
         pathRequest = pathRequest.substr(0, extensionPos);
     }
 
-    for (size_t i = 0; i < server.getLocations().size(); ++i) {
+    int location_found = 0;
+    std::vector<Location> locationStack = server.getLocations(); 
+    while (!location_found) {
+        for (size_t i = 0; i < locationStack.size(); i++) {
+            if (pathRequest.compare(locationStack[i].getPath()) == 0) {
+                bestMatchPath = locationStack[i].getPath();
+                location_found++;
+            }
+            std::cout << "-------------------pathRequest: " << pathRequest << std::endl;
+            std::cout << "-------------------locationPathComparing: " << locationStack[i].getPath() << std::endl;
+        }
+        if (!location_found) {
+            extensionPos = pathRequest.find_last_of('/');
+            if (extensionPos != std::string::npos) {
+                pathRequest = pathRequest.substr(0, extensionPos);
+            } else {
+                bestMatchPath = "/";
+                location_found++;
+            }
+        }
+    }
+
+
+/*     for (size_t i = 0; i < server.getLocations().size(); ++i) {
         Location location = server.getLocations()[i];
         std::string locationPath = location.getPath();
         
@@ -149,7 +175,7 @@ void Request::verifyLocations(Server server)
             bestMatchPath = locationPath;
             //bestMatchLength = locationPath.size();
         }
-    }
+    } */
      
     std::cout << std::endl;
     // std::cout << server.getLocations()[1].getAllowMethods() << std::endl;

@@ -117,6 +117,7 @@ void TcpServer2::startListen() {
                     if (server != NULL) {
                         std::string clientRequest = showClientHeader(m_event_list[i]);
                         Request request(clientRequest);
+                        std::cout << "Path from request = " << request.getPath() << std::endl;
                         request.verifyLocations(*server);
                         Response response(*server);
                         std::string serverResponse = response.buildResponse(request);
