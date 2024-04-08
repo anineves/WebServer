@@ -147,6 +147,11 @@ bool Server::getExecutable()
 {
     return this->_executable;
 }
+
+bool Server::getRedirect()
+{
+    return this->_redirect;
+}
 // ---- END GETTERS -----
 void Server::verificErrorServer()
 {

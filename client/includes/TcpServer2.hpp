@@ -3,7 +3,7 @@
 
 # include <iostream>
 # include <sstream>
-#include <fstream> 
+# include <fstream> 
 # include <string>
 # include <vector>
 # include <unistd.h>
@@ -17,11 +17,11 @@
 # include "./Server.hpp"
 # include "./Request.hpp"
 # include "./Response.hpp"
-#include    <map>
+# include <map>
 
+class Connection;
 
-
-class Request; 
+class Request;
 
 class TcpServer2 {
 private:

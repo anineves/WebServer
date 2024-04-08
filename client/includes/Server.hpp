@@ -25,11 +25,12 @@ class Server {
         int                     s_socket;
         std::string             s_ServerMessage;
         int                     e_poll_fd;
+        bool                    _redirect;
         socklen_t               s_socketAddress_len;
 
     public:
         struct sockaddr_in      s_socketAddress;
-        bool        _redirect;
+        //bool        _redirect;
         std::vector<std::string> _methods;
         Server();
         Server(std::string ipAddr, int port, std::string root, std::string index);
@@ -66,6 +67,7 @@ class Server {
         struct sockaddr_in          getSocketAddr();
         socklen_t                   getSocketAddr_len();
         bool                        getExecutable();
+        bool                        getRedirect();
         void    verificErrorServer();
        
 };

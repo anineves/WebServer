@@ -6,9 +6,9 @@ Request::Request(std::string request) : _fullRequest(request)
     _code = 200;
 }
 
-Request::~Request()
-{
-}
+Request::Request() {}
+
+Request::~Request() {}
 
 void Request::parser(std::string header)
 {
@@ -134,11 +134,7 @@ void Request::verifyLocations(Server server)
     //size_t bestMatchLength = 0;
 
 
-    size_t extensionPos = pathRequest.find_last_of('.');
-    if (extensionPos != std::string::npos) {
-        pathRequest = pathRequest.substr(0, extensionPos);
-    }
-
+    size_t extensionPos;
     int location_found = 0;
     std::vector<Location> locationStack = server.getLocations(); 
     while (!location_found) {
@@ -182,6 +178,7 @@ void Request::verifyLocations(Server server)
     // std::cout << server.getLocations()[1].getAllowMethods() << std::endl;
     if (!bestMatchPath.empty())
     {
+        //Connection connect;
         std::cout << "\n\n###############- Path Location " << bestMatchPath << " Path request " << pathRequest << std::endl;
 
         for (size_t i = 0; i < server.getLocations().size(); ++i)
@@ -207,7 +204,7 @@ void Request::verifyLocations(Server server)
                 }
                 if (!location.getReturn().empty()) {
                     server.setRedirect("true");
-                    server.setIndex_s(location.getReturn());
+                    //server.setIndex_s(location.getReturn());
                 }
                 break;
             }

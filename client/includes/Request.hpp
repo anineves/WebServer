@@ -23,6 +23,7 @@
 class Request{
 public:
     Request(std::string request);
+    Request();
     ~Request();
     std::string getMethod();
 	std::string getPath();
@@ -31,6 +32,7 @@ public:
     void printMessage();
     void setPath( std::string path);
     void verifyLocations(Server server);
+    Server  r_server;
 
 private:
     std::string _fullRequest;

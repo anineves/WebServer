@@ -10,7 +10,7 @@ SRC = src/MainServer.cpp \
 	src/Utils.cpp \
 	src/Request.cpp \
 	src/Location.cpp \
-	src/Response.cpp
+	src/Response.cpp \
 
 OBJ = $(SRC:.cpp=.o)
 

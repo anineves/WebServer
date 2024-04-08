@@ -27,13 +27,12 @@ public:
     Response();
     Response(Server server);
     ~Response();
-     std::string obtainFilePath(const std::string& request);
+    std::string obtainFilePath(const std::string& request);
     std::string getContentType(const std::string& filePath);
     bool isValidPath(std::string& fullPath);
     std::string responseStatus (int code);
     std::string buildResponse(Request request);
     Server m_server; 
-
 private:
 };
 

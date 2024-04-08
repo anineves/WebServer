@@ -8,8 +8,7 @@ ConfigFile::ConfigFile(std::string conFile) : _ip_address(""), _port(0), _root("
 
 ConfigFile::~ConfigFile() {}
 
-///!!!!!!ACho que nao precisamos dos geters e setters aqui~!!!!
-        //--- GETTERS ---
+
 int ConfigFile::getPort() const {
     return this->_port;
 }

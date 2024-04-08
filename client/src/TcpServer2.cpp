@@ -6,7 +6,6 @@ TcpServer2::TcpServer2(std::vector<Server> servers) : m_server(servers){
     setAddresses();
     startServer();
     startListen();
-    
 }
 
 TcpServer2::~TcpServer2() {
@@ -86,12 +85,13 @@ void TcpServer2::startListen() {
         }
         std::cout << "num_events= "<< num_events << std::endl;
         for (int i = 0; i < num_events; i++) {
+            
             std::cout << "ENTREI ===222222222============= \n";
             for (size_t j = 0; j < this->m_server.size(); ++j) {
                 std::cout << "ENTREI ======================= \n";
                 struct sockaddr_in addr;
                 socklen_t addr_len = sizeof(addr);
-                    std::cout << "entrei antes  valor socket" <<   m_sockets[j] << std::endl;
+                std::cout << "entrei antes  valor socket" <<   m_sockets[j] << std::endl;
                 if (m_event_list[i].data.fd == m_sockets[j]) {
                     m_server[j].setSocketAddr_len(sizeof(m_sockets[j]));
                     std::cout << "entrei accept " << std::endl;
@@ -115,12 +115,17 @@ void TcpServer2::startListen() {
                 else if (m_event_list[i].events & EPOLLIN)
                 {
                     //if(m_server[j].getPort_s() == 8008)
-                    Server* server = clientServerMap[m_event_list[i].data.fd];
+                    Server *server = clientServerMap[m_event_list[i].data.fd];
                     if (server != NULL) {
                         std::string clientRequest = showClientHeader(m_event_list[i]);
                         Request request(clientRequest);
                         std::cout << "Path from request = " << request.getPath() << std::endl;
                         request.verifyLocations(*server);
+                        std::cout << CYAN << server->getRedirect() << RESET << std::endl;
+                        if (server->getRedirect() == true) {
+                            std::cout << CYAN << "ENTREI NO REDIRECT\n" << RESET;
+
+                        }
                         Response response(*server);
                         std::string serverResponse = response.buildResponse(request);
                         m_event_list[i].events = EPOLLOUT;

@@ -8,6 +8,9 @@ Response::Response()
 Response::Response(Server server)
 {
     m_server = server;
+    if (m_server.getRedirect() == true) {
+        std::cout << CYAN << "ENTREI NO REDIRECT\n" << RESET;
+    }
    /*m_server.set_ip_addr_s = server.getIpAddr_s();
    m_server.set_port_s = server.getPort_s();
    m_server.setRoot_s = server.getRoot_s();
@@ -28,7 +31,7 @@ std::string Response::buildResponse(Request request) {
     request.printMessage();
     if (request.getMethod() == "GET" || request.getMethod() == "POST" || request.getMethod() == "DELETE") 
     {
-        std::cout << "valor redirect " << m_server._redirect << std::endl;
+        //std::cout << "valor redirect " << m_server.getredirect << std::endl;
         std::string filePath = obtainFilePath(request.getPath());
         std::ifstream file(filePath.c_str());
         if (file) {
