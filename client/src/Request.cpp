@@ -160,6 +160,7 @@ void Request::verifyLocations(Server server)
             }
         }
     }
+    std::cout << RED << "BESTMATCHPATH = " << RESET << bestMatchPath << std::endl;
 
 
 /*     for (size_t i = 0; i < server.getLocations().size(); ++i) {

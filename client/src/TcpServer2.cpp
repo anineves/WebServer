@@ -19,7 +19,8 @@ TcpServer2::~TcpServer2() {
 void TcpServer2::startServer() {
     std::vector<struct sockaddr_in>::iterator it;
 
-     std::cout << "@#$@#@$##@$$# Tamanho addresses :" << m_addresses.size() << std::endl;;
+    std::cout << "@#$@#@$##@$$# Tamanho addresses :" << m_addresses.size() << std::endl;
+    int index = 0;
     for (it = m_addresses.begin(); it != m_addresses.end(); it++) {
         
         int curr_socket = socket(AF_INET, SOCK_STREAM, 0);
@@ -41,8 +42,9 @@ void TcpServer2::startServer() {
             exit(EXIT_FAILURE);
         }
         std::cout << "\n\n * * * Listening Server at following ports * * *   \n\n";
-        std::cout << convert_uint32_to_str(ntohl(it->sin_addr.s_addr)) << " : sockfd " << curr_socket << std::endl;
+        std::cout << GREEN << m_server[index].getIpAddr_s() << RESET << ":" << BLUE << m_server[index].getPort_s() << RESET << " : sockfd " << curr_socket << std::endl;
         this->m_sockets.push_back(curr_socket);
+        index++;
     }
 
 }   
@@ -134,13 +136,11 @@ void TcpServer2::startListen() {
                     responseMap.erase(m_event_list[i].data.fd);
                     m_event_list[i].events = EPOLLIN;
                     epoll_ctl(this->getEpoll(), EPOLL_CTL_MOD, m_event_list[i].data.fd, &m_event_list[i]);
-        
+
                 }
             }
         }
     }
-
-
 }
 
 std::string TcpServer2::showClientHeader(struct epoll_event &m_events) {
