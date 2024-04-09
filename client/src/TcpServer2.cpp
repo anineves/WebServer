@@ -127,7 +127,12 @@ void TcpServer2::startListen() {
                         Location locationSettings = server->verifyLocations(request.getPath());
                         std::cout << CYAN << "Entrou Location :" << locationSettings.getPath() << RESET << std::endl;
                         
-                        int n = isvalid(request.getPath());
+                        int  n = 1;
+                        //size_t tam = request.getPath().size();
+                        if(!request.getPath().find_last_of('.')) {
+                            std::cout << CYAN << "@@@@@@@@@@@@ Request path" << request.getPath() << RESET << std::endl;
+                            n = 0;
+                        }
                         std::cout << "n ===================================================" << n << std::endl; 
                         if (!locationSettings.getPath().empty()) {
                             std::string serverResponse;

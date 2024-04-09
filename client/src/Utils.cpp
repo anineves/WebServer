@@ -90,10 +90,25 @@ std::string dirListHtml(std::vector<std::string> content)
 }
 
 int isvalid(std::string fullPath) {
-    std::ifstream readPath(fullPath.c_str());
+    std::ifstream readPath(("frontend/html/" + fullPath ).c_str());
+    std::cout << "!!!!!!!!!!FullPath " << readPath << std::endl;
 
-    if (!readPath.is_open()) {
-        return 1;
+
+    struct stat buffer;
+    if (stat(fullPath.c_str(), &buffer) != 0) {
+        return (0); 
     }
-    return 0;
+    return S_ISREG(buffer.st_mode);
+
 }
+
+
+
+/*int isFile(const char* path) 
+{
+    struct stat buffer;
+    if (stat(path, &buffer) != 0) {
+        return (1); // Falha ao obter informações sobre o arquivo
+    }
+    return (0); // Verifica se é um arquivo regular
+}*/
