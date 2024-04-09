@@ -17,6 +17,7 @@
 # include "./Server.hpp"
 # include "./Request.hpp"
 # include "./Response.hpp"
+# include <dirent.h>
 # include <map>
 
 class Connection;

@@ -161,3 +161,33 @@ void Server::verificErrorServer()
             exit(1);
     }
 }
+
+
+Location Server::verifyLocations(std::string pathRequest) {
+    std::string bestMatchPath;
+    Location location;
+
+    int location_found = 0;
+    size_t extensionPos;
+
+    while (!location_found) {
+        for (size_t i = 0; i < _locations.size(); i++) {
+            if (pathRequest == _locations[i].getPath()) {
+                location = _locations[i];
+                location_found++;
+                break;
+            }
+        }
+        if (!location_found) {
+            extensionPos = pathRequest.find_last_of('/');
+            if (extensionPos != std::string::npos) {
+                pathRequest = pathRequest.substr(0, extensionPos);
+            } else {
+                location = _locations[0];
+                location_found++;
+            }
+        }
+    }
+
+    return location;
+}

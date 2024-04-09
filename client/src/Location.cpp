@@ -106,7 +106,7 @@ void    Location::printLoc() {
     if (_cgi_ext != "") {
         std::cout << _cgi_ext << std::endl;
     } else {
-        std::cout << "Empty\n";
+        std::cout << "Emptrey\n";
     }
     std::cout << "Autoindex: ";
     if (_autoindex != "") {

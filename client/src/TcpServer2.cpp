@@ -23,10 +23,12 @@ void TcpServer2::startServer() {
     for (it = m_addresses.begin(); it != m_addresses.end(); it++) {
         
         int curr_socket = socket(AF_INET, SOCK_STREAM, 0);
+        
         if (curr_socket < 0) {
             exitWithError("Socket creation failed");
             exit(EXIT_FAILURE);
         }
+
         int optval = 1;
         if (setsockopt(curr_socket, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) != 0) {
             exitWithError("Not Reusing Socket");
@@ -63,7 +65,7 @@ void TcpServer2::startListen() {
     struct epoll_event          m_event_list[MAX_EVENTS];
     
     std::vector<int>::iterator it2;
-    for (it2 = this->m_sockets.begin(); it2 != this->m_sockets.end(); ++it2) {
+    for (it2 = this->m_sockets.begin(); it2 != this->m_sockets.end(); it2++) {
         int add;
         m_event.events = EPOLLIN;
         m_event.data.fd = *it2;
@@ -120,18 +122,66 @@ void TcpServer2::startListen() {
                         std::string clientRequest = showClientHeader(m_event_list[i]);
                         Request request(clientRequest);
                         std::cout << "Path from request = " << request.getPath() << std::endl;
-                        request.verifyLocations(*server);
-                        std::cout << CYAN << server->getRedirect() << RESET << std::endl;
-                        if (server->getRedirect() == true) {
-                            std::cout << CYAN << "ENTREI NO REDIRECT\n" << RESET;
+                        
+                        //request.verifyLocations(*server);
+                        Location locationSettings = server->verifyLocations(request.getPath());
+                        std::cout << CYAN << "Entrou Location :" << locationSettings.getPath() << RESET << std::endl;
+                        
+                        if (!locationSettings.getPath().empty()) {
+                            std::string serverResponse;
+                            if (!locationSettings.getReturn().empty()) {
+                                std::cout << CYAN << "ENTREI NO REDIRECT : " << locationSettings.getReturn() << RESET << std::endl;
+                                std::istringstream iss(locationSettings.getReturn() );
+                                std::string response;
+                                std::string code ;
+                                std::string loc;
+                                iss >> code;
+                                iss >> loc;
+                                response = "HTTP/1.1 " + code + " Moved Permanently \r\n";
+                                response += "Content-Length: 0\r\n";
+                                response += "Location: " +  loc +  "\r\n\r\n";
+                                //std::cout << CYAN << "Response:" << response << RESET << std::endl;
+                                serverResponse = response;
+                            } 
+                            else if(locationSettings.getAutoIndex() == "on")
+                            {
+                                    std::cout << CYAN << "Entrei AutoIndex on"<< RESET << std::endl;
 
+                                    DIR *dir;
+                                    struct dirent *ent;
+	                                std::vector<std::string> content;
+
+	                                if ((dir = opendir(locationSettings.getPath().c_str())) != NULL)
+                                    {
+                                        while ((ent = readdir(dir)) != NULL)
+                                        {
+                                            if (ent->d_type == DT_REG)
+                                            {
+                                                std::string file_name = ent->d_name;
+                                                content.push_back(file_name);
+                                            }
+                                            else if (ent->d_type == DT_DIR)
+                                            {
+                                                std::string dir_name = ent->d_name;
+
+                                                if (dir_name != "." && dir_name != "..")
+                                                    content.push_back(dir_name + "/");
+                                            }
+                                        }
+                                        closedir(dir);
+                                    }
+
+                                    serverResponse = dirListHtml(content);
+                            }
+                             else {
+                            Response response(*server);
+                            serverResponse = response.buildResponse(request);
                         }
-                        Response response(*server);
-                        std::string serverResponse = response.buildResponse(request);
-                        m_event_list[i].events = EPOLLOUT;
-                        epoll_ctl(this->getEpoll(), EPOLL_CTL_MOD, m_event_list[i].data.fd, &m_event_list[i]);
-                        responseMap[m_event_list[i].data.fd] = serverResponse;
+                    m_event_list[i].events = EPOLLOUT;
+                    epoll_ctl(this->getEpoll(), EPOLL_CTL_MOD, m_event_list[i].data.fd, &m_event_list[i]);
+                    responseMap[m_event_list[i].data.fd] = serverResponse;
                     }
+                }
                    
                 }
                 else if (m_event_list[i].events & EPOLLOUT)

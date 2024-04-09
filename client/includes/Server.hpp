@@ -69,6 +69,7 @@ class Server {
         bool                        getExecutable();
         bool                        getRedirect();
         void    verificErrorServer();
+        Location                    verifyLocations(std::string pathRequest);
        
 };
 
