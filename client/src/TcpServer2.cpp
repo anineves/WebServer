@@ -127,6 +127,8 @@ void TcpServer2::startListen() {
                         Location locationSettings = server->verifyLocations(request.getPath());
                         std::cout << CYAN << "Entrou Location :" << locationSettings.getPath() << RESET << std::endl;
                         
+                        int n = isvalid(request.getPath());
+                        std::cout << "n ===================================================" << n << std::endl; 
                         if (!locationSettings.getPath().empty()) {
                             std::string serverResponse;
                             if (!locationSettings.getReturn().empty()) {
@@ -143,15 +145,15 @@ void TcpServer2::startListen() {
                                 //std::cout << CYAN << "Response:" << response << RESET << std::endl;
                                 serverResponse = response;
                             } 
-                            else if(locationSettings.getAutoIndex() == "on")
+                            else if(locationSettings.getAutoIndex() == "on" && n)
                             {
                                     std::cout << CYAN << "Entrei AutoIndex on"<< RESET << std::endl;
 
                                     DIR *dir;
                                     struct dirent *ent;
 	                                std::vector<std::string> content;
-
-	                                if ((dir = opendir(locationSettings.getPath().c_str())) != NULL)
+                                    std::cout << "locationsettings = " << locationSettings.getPath() << std::endl;
+	                                if ((dir = opendir(("frontend/html" + locationSettings.getPath() + "/").c_str())) != NULL)
                                     {
                                         while ((ent = readdir(dir)) != NULL)
                                         {
@@ -173,7 +175,7 @@ void TcpServer2::startListen() {
 
                                     serverResponse = dirListHtml(content);
                             }
-                             else {
+                            else {
                             Response response(*server);
                             serverResponse = response.buildResponse(request);
                         }

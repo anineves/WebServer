@@ -1,4 +1,5 @@
 #include "../includes/Utils.hpp"
+#include "../includes/webServer.hpp"
 
 void log(const std::string &message) {
     std::cout << message << std::endl;
@@ -64,8 +65,11 @@ std::string dirListHtml(std::vector<std::string> content)
                     "		<h1>DirList</h1>\n"
                     "		<ul>\n");
 
+    std::cout << RED << "content.size() = " << RESET << content.size() << std::endl;
+    
     for (unsigned i = 0; i < content.size(); i++)
     {
+        std::cout << RED << "content[i] = " << RESET << content[i] << std::endl;
         htmlCode.append("			<li><a href=\"" + content[i] + "\">" + content[i] + "</a></li>\n");
     }
 
@@ -83,4 +87,13 @@ std::string dirListHtml(std::vector<std::string> content)
     response.append(htmlCode);
 
     return response;
+}
+
+int isvalid(std::string fullPath) {
+    std::ifstream readPath(fullPath.c_str());
+
+    if (!readPath.is_open()) {
+        return 1;
+    }
+    return 0;
 }
