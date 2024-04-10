@@ -39,7 +39,7 @@ std::string dirListHtml(std::vector<std::string> content)
                     "<head>\n"
                     "	<meta charset=\"UTF-8\">\n"
                     "	<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
-                    "	<title>Directory Lis</title>\n"
+                    "	<title>Directory List</title>\n"
                     "	<style>\n"
                     "		html, body {\n"
                     "			font-family: Arial, sans-serif;\n"
@@ -58,25 +58,62 @@ std::string dirListHtml(std::vector<std::string> content)
                     "			background-color: linear-gradient(to right, rgb(20, 17, 25) 0%, rgb(69, 61, 52) 80%, rgb(57, 50, 45) 100%);\n"
                     "			border-radius: 10px;\n"
                     "		}\n"
+                    "       .delete-button {\n"
+                    "           background-color: #ff4d4d;\n"
+                    "           border: none;\n"
+                    "           color: white;\n"
+                    "           padding: 8px 20px;\n"
+                    "           text-align: center;\n"
+                    "           text-decoration: none;\n"
+                    "           display: inline-block;\n"
+                    "           font-size: 14px;\n"
+                    "           margin: 4px 2px;\n"
+                    "           cursor: pointer;\n"
+                    "           border-radius: 5px;\n"
+                    "       }\n"
+                    "       .delete-button:hover {\n"
+                    "           background-color: #ff6666;\n"
+                    "       }\n"
                     "	</style>\n"
                     "</head>\n"
                     "<body>\n"
                     "	<div class=\"container\">\n"
-                    "		<h1>DirList</h1>\n"
+                    "		<h1>Directory List</h1>\n"
                     "		<ul>\n");
 
-    std::cout << RED << "content.size() = " << RESET << content.size() << std::endl;
-    
+    htmlCode.append("			<li><a href=\"/\">Back</a></li>\n");
+
     for (unsigned i = 0; i < content.size(); i++)
     {
-        std::cout << RED << "content[i] = " << RESET << content[i] << std::endl;
-        htmlCode.append("			<li><a href=\"" + content[i] + "\">" + content[i] + "</a></li>\n");
+        htmlCode.append("			<li>" + content[i] + " <button id=\"delete-button-" + intToString(i) + "\" class=\"delete-button\">X</button></li>\n");
     }
 
     htmlCode.append("		</ul>\n"
-                    "	</div>\n"
-                    "</body>\n"
-                    "</html>");
+                    "       <script>\n");
+                    
+    for (unsigned i = 0; i < content.size(); i++)
+    {
+        htmlCode.append(
+            "           document.getElementById('delete-button-" + intToString(i) + "').onclick = function() {\n"
+            "               var fileName = '" + content[i] + "';\n"
+            "               if (confirm('Are you sure ' + fileName + '?')) {\n"
+            "                   var xhr = new XMLHttpRequest();\n"
+            "                   xhr.open('DELETE', '/delete/' + fileName, true);\n"
+            "                   xhr.onreadystatechange = function() {\n"
+            "                       if (xhr.readyState == 4 && xhr.status == 200) {\n"
+            "                           alert(xhr.responseText);\n"
+            "                       }\n"
+            "                   };\n"
+            "                   xhr.send();\n"
+            "               }\n"
+            "           };\n");
+    }
+
+    htmlCode.append(
+        "       </script>\n"
+        "	</div>\n"
+        "</body>\n"
+        "</html>");
 
     std::stringstream contentSize;
     contentSize << htmlCode.size();
@@ -89,7 +126,25 @@ std::string dirListHtml(std::vector<std::string> content)
     return response;
 }
 
-int isvalid(std::string fullPath) {
+
+
+std::string intToString(int num)
+{
+    std::stringstream ss;
+    ss << num;
+    return ss.str();
+}
+
+std::string deleteFile(std::string fileName) {
+    std::string filePath = "frontend/html/" + fileName;
+    if (std::remove(filePath.c_str()) != 0) {
+        return "Erro ao excluir o arquivo " + fileName + ".";
+    } else {
+        return "Arquivo " + fileName + " excluído com sucesso!";
+    }
+}
+
+/*int isvalid(std::string fullPath) {
     std::ifstream readPath(("frontend/html/" + fullPath ).c_str());
     std::cout << "!!!!!!!!!!FullPath " << readPath << std::endl;
 
@@ -100,7 +155,7 @@ int isvalid(std::string fullPath) {
     }
     return S_ISREG(buffer.st_mode);
 
-}
+}*/
 
 
 
@@ -112,3 +167,12 @@ int isvalid(std::string fullPath) {
     }
     return (0); // Verifica se é um arquivo regular
 }*/
+
+
+int is_file(std::string path) {
+    struct stat buffer;
+    if (stat(path.c_str(), &buffer) != 0)
+        return 0; 
+
+    return S_ISREG(buffer.st_mode);
+}

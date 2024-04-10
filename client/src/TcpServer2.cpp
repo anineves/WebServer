@@ -122,20 +122,20 @@ void TcpServer2::startListen() {
                         std::string clientRequest = showClientHeader(m_event_list[i]);
                         Request request(clientRequest);
                         std::cout << "Path from request = " << request.getPath() << std::endl;
-                        
+
                         //request.verifyLocations(*server);
                         Location locationSettings = server->verifyLocations(request.getPath());
                         std::cout << CYAN << "Entrou Location :" << locationSettings.getPath() << RESET << std::endl;
                         
-                        int  n = 1;
-                        //size_t tam = request.getPath().size();
-                        if(!request.getPath().find_last_of('.')) {
-                            std::cout << CYAN << "@@@@@@@@@@@@ Request path" << request.getPath() << RESET << std::endl;
-                            n = 0;
-                        }
+                        int  n = 0;
+                        if( is_file("frontend/html" + request.getPath()) == 1)
+                        {
+                            n = 1;
+                        }  
                         std::cout << "n ===================================================" << n << std::endl; 
                         if (!locationSettings.getPath().empty()) {
                             std::string serverResponse;
+                           
                             if (!locationSettings.getReturn().empty()) {
                                 std::cout << CYAN << "ENTREI NO REDIRECT : " << locationSettings.getReturn() << RESET << std::endl;
                                 std::istringstream iss(locationSettings.getReturn() );
@@ -149,8 +149,9 @@ void TcpServer2::startListen() {
                                 response += "Location: " +  loc +  "\r\n\r\n";
                                 //std::cout << CYAN << "Response:" << response << RESET << std::endl;
                                 serverResponse = response;
+                                
                             } 
-                            else if(locationSettings.getAutoIndex() == "on" && n)
+                            else if(locationSettings.getAutoIndex() == "on" && n == 0)
                             {
                                     std::cout << CYAN << "Entrei AutoIndex on"<< RESET << std::endl;
 
@@ -178,7 +179,19 @@ void TcpServer2::startListen() {
                                         closedir(dir);
                                     }
 
-                                    serverResponse = dirListHtml(content);
+                                serverResponse = dirListHtml(content);
+
+                                //Tentativa de implementar o DELETE
+                                /*if (locationSettings.getAllowMethods()[0] == "DELETE") {
+                                std::string fileName = request.getPath();
+                                std::string deleteResponse = deleteFile(fileName);
+                                std::ostringstream oss;
+                                    oss << deleteResponse.size();
+                                std::string httpResponse = "HTTP/1.1 200 OK\r\nContent-Length: " + oss.str() + "\r\n\r\n" + deleteResponse;
+                                send(m_event_list[i].data.fd, httpResponse.c_str(), httpResponse.size(), 0);
+                                }*/
+                                
+        
                             }
                             else {
                             Response response(*server);

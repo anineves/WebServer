@@ -89,6 +89,11 @@ bool Response::isValidPath(std::string& fullPath) {
     return file.good();
 }
 
+
+
+
+
+
 std::string Response::getContentType(const std::string& filePath) {
     //Aqui e para colocar corretamente o ContentType, porque varia segundo o ficheiro
     //Ainda so pus os mais utilizados mas ha uma lista enorme
