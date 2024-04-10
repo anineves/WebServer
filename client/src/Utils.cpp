@@ -96,7 +96,7 @@ std::string dirListHtml(std::vector<std::string> content)
         htmlCode.append(
             "           document.getElementById('delete-button-" + intToString(i) + "').onclick = function() {\n"
             "               var fileName = '" + content[i] + "';\n"
-            "               if (confirm('Are you sure ' + fileName + '?')) {\n"
+            "               if (confirm('Are you sure ' + fileName + ' to be deleted?')) {\n"
             "                   var xhr = new XMLHttpRequest();\n"
             "                   xhr.open('DELETE', '/delete/' + fileName, true);\n"
             "                   xhr.onreadystatechange = function() {\n"

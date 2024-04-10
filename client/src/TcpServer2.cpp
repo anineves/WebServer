@@ -77,8 +77,6 @@ void TcpServer2::startListen() {
         }
     }
 
-
-
     while(1) {
         int num_events = epoll_wait(epoll_fd, m_event_list, MAXEPOLLSIZE, 2000);
         if (num_events == -1) {
@@ -180,18 +178,24 @@ void TcpServer2::startListen() {
                                     }
 
                                 serverResponse = dirListHtml(content);
+                                std::stringstream ss(serverResponse);
+                                std::string line;
+                                while (getline(ss, line)) {
+                                    std::cout << YELLOW << line << RESET << std::endl;
+                                }
 
                                 //Tentativa de implementar o DELETE
-                                /*if (locationSettings.getAllowMethods()[0] == "DELETE") {
-                                std::string fileName = request.getPath();
-                                std::string deleteResponse = deleteFile(fileName);
-                                std::ostringstream oss;
-                                    oss << deleteResponse.size();
-                                std::string httpResponse = "HTTP/1.1 200 OK\r\nContent-Length: " + oss.str() + "\r\n\r\n" + deleteResponse;
-                                send(m_event_list[i].data.fd, httpResponse.c_str(), httpResponse.size(), 0);
-                                }*/
-                                
-        
+                                // if (locationSettings.getAllowMethods()[0] == "DELETE") {
+
+                                //     std::string fileName = request.getPath();
+                                //     std::string deleteResponse = deleteFile(fileName);
+                                //     std::cout << MAGENTA << fileName << " / ";
+                                //     std::cout << deleteResponse << RESET << std::endl;
+                                //     std::ostringstream oss;
+                                //     oss << deleteResponse.size();
+                                //     std::string httpResponse = "HTTP/1.1 200 OK\r\nContent-Length: " + oss.str() + "\r\n\r\n" + deleteResponse;
+                                //     send(m_event_list[i].data.fd, httpResponse.c_str(), httpResponse.size(), 0);
+                                // }
                             }
                             else {
                             Response response(*server);
