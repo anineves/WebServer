@@ -89,28 +89,11 @@ std::string dirListHtml(std::vector<std::string> content)
     }
 
     htmlCode.append("		</ul>\n"
-                    "       <script>\n");
+                    "   \n");
                     
-    for (unsigned i = 0; i < content.size(); i++)
-    {
-        htmlCode.append(
-            "           document.getElementById('delete-button-" + intToString(i) + "').onclick = function() {\n"
-            "               var fileName = '" + content[i] + "';\n"
-            "               if (confirm('Are you sure ' + fileName + ' to be deleted?')) {\n"
-            "                   var xhr = new XMLHttpRequest();\n"
-            "                   xhr.open('DELETE', '/delete/' + fileName, true);\n"
-            "                   xhr.onreadystatechange = function() {\n"
-            "                       if (xhr.readyState == 4 && xhr.status == 200) {\n"
-            "                           alert(xhr.responseText);\n"
-            "                       }\n"
-            "                   };\n"
-            "                   xhr.send();\n"
-            "               }\n"
-            "           };\n");
-    }
+  
 
     htmlCode.append(
-        "       </script>\n"
         "	</div>\n"
         "</body>\n"
         "</html>");
@@ -126,6 +109,25 @@ std::string dirListHtml(std::vector<std::string> content)
     return response;
 }
 
+
+std::string verificDelete(std::vector<std::string> content)
+{
+    std::string scriptCode;
+
+    for (unsigned i = 0; i < content.size(); i++)
+    {
+        scriptCode.append(
+            "           document.getElementById('delete-button-" + intToString(i) + "').onclick = function() {\n"
+            "               var fileName = '" + content[i] + "';\n"
+            "               if (confirm('Are you sure ' + fileName + ' to be deleted?')) {\n"
+            "                   var filePath = '/delete/' + fileName;\n"
+            "                   deleteFile(filePath);\n"
+            "               }\n"
+            "           };\n");
+    }
+
+    return scriptCode;
+}
 
 
 std::string intToString(int num)
