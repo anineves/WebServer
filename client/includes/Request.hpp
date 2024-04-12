@@ -33,6 +33,7 @@ public:
     void setPath( std::string path);
     void verifyLocations(Server server);
     Server  r_server;
+    std::map<std::string, std::string> lines_body;
 
 private:
     std::string _fullRequest;
@@ -40,7 +41,6 @@ private:
 	std::string _protocol;
 	std::string _path;
     std::map<std::string, std::string> lines_header;
-    std::map<std::string, std::string> lines_body;
     int         _code;
     void parser(std::string header);
     void verific_errors();

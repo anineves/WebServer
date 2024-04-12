@@ -20,6 +20,7 @@
 # include <dirent.h>
 # include <map>
 
+#define TIMEOUT 20
 class Connection;
 
 class Request;
@@ -30,6 +31,7 @@ private:
     std::vector<struct sockaddr_in> m_addresses;
     std::vector<int>                m_sockets;
     int                             epoll_fd;
+    std::map<int, time_t>           socketCreation;
 
 public:
     TcpServer2(std::vector<Server> server);
@@ -43,6 +45,7 @@ public:
     void printPorts();
     int getEpoll();
     std::vector<int> getAllSockets();
+    void verificTimeOut();
     //struct epoll_event          m_events[MAX_EVENTS];
 
 

@@ -1,6 +1,18 @@
 #include "../includes/Utils.hpp"
 #include "../includes/webServer.hpp"
 
+#include <iostream>
+#include <vector>
+#include <string>
+#include <sstream>
+#include <cstdlib>
+#include <unistd.h>
+
+#include <fstream>
+#include <experimental/filesystem>
+
+
+
 void log(const std::string &message) {
     std::cout << message << std::endl;
 }
@@ -29,6 +41,26 @@ void *ft_memset(void *s, int c, std::size_t n) {
 
 
 
+std::string handleRequest(std::string request)
+{
+    // Analisar a solicitação
+    std::istringstream iss(request);
+    std::string method, uri, protocol;
+    iss >> method >> uri >> protocol;
+
+    if (method == "GET" && uri.find("/delete") == 0) {
+        std::string fileName;
+        size_t pos = uri.find('=');
+        if (pos != std::string::npos) {
+            fileName = uri.substr(pos + 1);
+            return deleteFile(fileName);
+        }
+    }
+
+    // Se a solicitação não for reconhecida ou não puder ser manipulada, retorne um erro
+    return "HTTP/1.1 400 Bad Request\r\nContent-Type: text/plain\r\n\r\nBad Request.";
+}
+
 std::string dirListHtml(std::vector<std::string> content)
 {
     std::string response;
@@ -37,27 +69,27 @@ std::string dirListHtml(std::vector<std::string> content)
     htmlCode.append("<!DOCTYPE html>\n"
                     "<html lang=\"en\">\n"
                     "<head>\n"
-                    "	<meta charset=\"UTF-8\">\n"
-                    "	<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
-                    "	<title>Directory List</title>\n"
-                    "	<style>\n"
-                    "		html, body {\n"
-                    "			font-family: Arial, sans-serif;\n"
-                    "			height: 100%;\n"
-                    "			margin: 0;\n"
+                    "   <meta charset=\"UTF-8\">\n"
+                    "   <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
+                    "   <title>Directory List</title>\n"
+                    "   <style>\n"
+                    "       html, body {\n"
+                    "           font-family: Arial, sans-serif;\n"
+                    "           height: 100%;\n"
+                    "           margin: 0;\n"
                     "           color: #000;\n"
-                    "			background-color: #ddd;\n"
-                    "		}\n"
+                    "           background-color: #ddd;\n"
+                    "       }\n"
                     "\n"
-                    "		.container {\n"
-                    "			text-align: center;\n"
-                    "			max-width: 500px;\n"
-                    "			margin: 0 auto;\n"
-                    "			padding: 20px;\n"
+                    "       .container {\n"
+                    "           text-align: center;\n"
+                    "           max-width: 500px;\n"
+                    "           margin: 0 auto;\n"
+                    "           padding: 20px;\n"
                     "           color:#ffffff;\n" 
-                    "			background-color: linear-gradient(to right, rgb(20, 17, 25) 0%, rgb(69, 61, 52) 80%, rgb(57, 50, 45) 100%);\n"
-                    "			border-radius: 10px;\n"
-                    "		}\n"
+                    "           background-color: linear-gradient(to right, rgb(20, 17, 25) 0%, rgb(69, 61, 52) 80%, rgb(57, 50, 45) 100%);\n"
+                    "           border-radius: 10px;\n"
+                    "       }\n"
                     "       .delete-button {\n"
                     "           background-color: #ff4d4d;\n"
                     "           border: none;\n"
@@ -74,29 +106,44 @@ std::string dirListHtml(std::vector<std::string> content)
                     "       .delete-button:hover {\n"
                     "           background-color: #ff6666;\n"
                     "       }\n"
-                    "	</style>\n"
+                    "   </style>\n"
                     "</head>\n"
                     "<body>\n"
-                    "	<div class=\"container\">\n"
-                    "		<h1>Directory List</h1>\n"
-                    "		<ul>\n");
+                    "   <div class=\"container\">\n"
+                    "       <h1>Directory List</h1>\n"
+                    "       <ul>\n");
 
-    htmlCode.append("			<li><a href=\"/\">Back</a></li>\n");
+    htmlCode.append("           <li><a href=\"/\">Back</a></li>\n");
 
-    for (unsigned i = 0; i < content.size(); i++)
+    for (size_t i = 0; i < content.size(); ++i)
     {
-        htmlCode.append("			<li>" + content[i] + " <button id=\"delete-button-" + intToString(i) + "\" class=\"delete-button\">X</button></li>\n");
+        htmlCode.append("           <li>" + content[i] + " <button id=\"delete-button-" + intToString(i) + "\" class=\"delete-button\" onclick=\"deleteFile('" + content[i] + "')\">X</button></li>\n");
     }
 
-    htmlCode.append("		</ul>\n"
-                    "   \n");
-                    
-  
-
-    htmlCode.append(
-        "	</div>\n"
-        "</body>\n"
-        "</html>");
+    htmlCode.append("       </ul>\n"
+                    "   </div>\n"
+                    "</body>\n"
+                    "<script>\n"
+                    "   function deleteFile(fileName) {\n"
+                    "       if (confirm('Are you sure you want to delete ' + fileName + '?')) {\n"
+                    "           fetch('/delete?fileName=' + fileName, { method: 'GET' })\n"
+                    "               .then(response => {\n"
+                    "                   if (!response.ok) {\n"
+                    "                       throw new Error('Network response was not ok');\n"
+                    "                   }\n"
+                    "                   return response.text();\n"
+                    "               })\n"
+                    "               .then(data => {\n"
+                    "                   alert(data);\n"
+                    "                   location.reload();\n"
+                    "               })\n"
+                    "               .catch(error => {\n"
+                    "                   console.error('There has been a problem with your fetch operation:', error);\n"
+                    "               });\n"
+                    "       }\n"
+                    "   }\n"
+                    "</script>\n"
+                    "</html>");
 
     std::stringstream contentSize;
     contentSize << htmlCode.size();
@@ -108,27 +155,6 @@ std::string dirListHtml(std::vector<std::string> content)
 
     return response;
 }
-
-
-std::string verificDelete(std::vector<std::string> content)
-{
-    std::string scriptCode;
-
-    for (unsigned i = 0; i < content.size(); i++)
-    {
-        scriptCode.append(
-            "           document.getElementById('delete-button-" + intToString(i) + "').onclick = function() {\n"
-            "               var fileName = '" + content[i] + "';\n"
-            "               if (confirm('Are you sure ' + fileName + ' to be deleted?')) {\n"
-            "                   var filePath = '/delete/' + fileName;\n"
-            "                   deleteFile(filePath);\n"
-            "               }\n"
-            "           };\n");
-    }
-
-    return scriptCode;
-}
-
 
 std::string intToString(int num)
 {
@@ -145,31 +171,6 @@ std::string deleteFile(std::string fileName) {
         return "Arquivo " + fileName + " excluído com sucesso!";
     }
 }
-
-/*int isvalid(std::string fullPath) {
-    std::ifstream readPath(("frontend/html/" + fullPath ).c_str());
-    std::cout << "!!!!!!!!!!FullPath " << readPath << std::endl;
-
-
-    struct stat buffer;
-    if (stat(fullPath.c_str(), &buffer) != 0) {
-        return (0); 
-    }
-    return S_ISREG(buffer.st_mode);
-
-}*/
-
-
-
-/*int isFile(const char* path) 
-{
-    struct stat buffer;
-    if (stat(path, &buffer) != 0) {
-        return (1); // Falha ao obter informações sobre o arquivo
-    }
-    return (0); // Verifica se é um arquivo regular
-}*/
-
 
 int is_file(std::string path) {
     struct stat buffer;

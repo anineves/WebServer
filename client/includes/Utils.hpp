@@ -22,4 +22,6 @@ int is_file(std::string path);
 std::string deleteFile(std::string fileName);
 std::string intToString(int num);
 std::string verificDelete(std::vector<std::string> content);
+std::string handleRequest(std::string request);
+
 #endif
