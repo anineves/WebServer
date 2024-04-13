@@ -14,7 +14,11 @@ SRC = src/MainServer.cpp \
 
 OBJ = $(SRC:.cpp=.o)
 
+UPLOAD_DIR	= ./cgi-bin/uploads/
+
 all : $(NAME)
+	@rm -fr $(UPLOAD_DIR)
+	@mkdir $(UPLOAD_DIR)
 
 $(NAME) : $(OBJ)
 	$(CXX) $(CXXFLAGS) $(SRC) -o $(NAME)
@@ -24,6 +28,7 @@ clean :
 
 fclean : clean
 	$(RM) $(OBJ) $(NAME)
+	@rm -fr $(UPLOAD_DIR)
 
 re : fclean all
 

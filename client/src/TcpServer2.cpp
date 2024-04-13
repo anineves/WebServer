@@ -229,7 +229,7 @@ void TcpServer2::startListen()
 
 std::string TcpServer2::showClientHeader(struct epoll_event &m_events)
 {
-    char buffer[2048];
+    char buffer[5000];
     int bytesReceived = recv(m_events.data.fd, buffer, sizeof(buffer), 0);
     if (bytesReceived < 0)
     {

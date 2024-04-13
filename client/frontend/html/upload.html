@@ -1,12 +1,12 @@
+<!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload</title>
-    <link rel="stylesheet" href="../css/styles.css">
+    <title>Awesome File Manager</title>
+    <link rel="stylesheet" type="text/css" href="../css/styles.css">
+	<script src="upload_script.js" defer></script>
 </head>
-
 <body>
     <header>
         <div class="logo">
@@ -21,21 +21,18 @@
                 <li><a href="./upload.html">Upload</a></li>
                 <li><a href="./red.html">Redirection</a></li>
                 <li><a href="./redirect2.html">RedirectionTeste</a></li>
+                <li><a href="./timeout.sh">TimeOut</a></li>s
             </ul>
         </nav>
     </header>
-    <main>
-        <div class="register-form">
-            <h2>Upload</h2>
-            <form action="../../cgi/upload.py" method="post" enctype="multipart/form-data">
-                <input type="file" name="fileToUpload" id="fileToUpload">
-                <input type="submit" value="Upload File" name="submit">
-            </form>
-        </div>
-    </main>
-    <footer>
-        <p id="text-footer">Created by: alexfern, asousa-n, jegger-s</p>
-    </footer>
-</body>
+    <h1>POST File Upload</h1>
+	<form id="uploadForm" action="/" method="post" enctype="multipart/form-data">
+		<label for="file">File:</label>
+		<input type="file" id="file" name="file" required>
+		<br>
+		<button type="submit" id="submitBtn">Submit</button>
+	</form>
 
+    <ul id="fileList"></ul>
+</body>
 </html>
