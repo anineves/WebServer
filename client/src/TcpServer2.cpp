@@ -92,6 +92,12 @@ void TcpServer2::startListen()
         verificTimeOut();
 
         std::cout << "num_events= " << num_events << std::endl;
+
+        std::cout << "\n\n";
+        for (size_t i = 0; i < 2; i++) {
+            std::cout << m_event_list[i].data.fd << std::endl;
+        }
+        std::cout << "\n\n";
         for (int i = 0; i < num_events; i++)
         {
             std::cout << "ENTREI ===222222222============= \n";
@@ -100,12 +106,13 @@ void TcpServer2::startListen()
                 std::cout << "ENTREI ======================= \n";
                 struct sockaddr_in addr;
                 socklen_t addr_len = sizeof(addr);
-                std::cout << "entrei antes  valor socket" << m_sockets[j] << std::endl;
+                std::cout << m_event_list[i].data.fd << " entrei antes  valor socket" << m_sockets[j] << std::endl;
                 if (m_event_list[i].data.fd == m_sockets[j])
-                {
+                {  
                     m_server[j].setSocketAddr_len(sizeof(m_sockets[j]));
                     std::cout << "entrei accept " << std::endl;
                     int client_socket = accept(m_event_list[i].data.fd, (struct sockaddr *)&addr, &addr_len);
+                    std::cout << CYAN << client_socket << RESET << std::endl;
                     std::cout << "entrei accept " << std::endl;
                     if (client_socket == -1)
                     {
@@ -121,16 +128,17 @@ void TcpServer2::startListen()
                         exitWithError("Problems in Epoll_CTL.");
                         exit(EXIT_FAILURE);
                     }
+                    std::cout << "data.fd[iiiiiiiiiiiiiiiiiiiiiiii]" << m_event_list[i].data.fd << std::endl;
                     // Associar cada socket a cada client
                     clientServerMap[client_socket] = &m_server[j];
-                    socketCreation[client_socket] = time(NULL); // Atualiza o tempo de criação do socket
+                    socketCreation[m_sockets [j]] = time(NULL); // Atualiza o tempo de criação do socket
                 }
                 else if (m_event_list[i].events & EPOLLIN)
                 {
                     Server *server = clientServerMap[m_event_list[i].data.fd];
                     if (server != NULL)
                     {
-                        socketCreation[m_event_list[i].data.fd] = time(NULL); // Atualiza o tempo de criação do socket
+                        socketCreation[m_sockets[j]] = time(NULL); // Atualiza o tempo de criação do socket
                         std::string clientRequest = showClientHeader(m_event_list[i]);
                         Request request(clientRequest);
                         std::cout << "Path from request = " << request.getPath() << std::endl;
@@ -215,7 +223,7 @@ void TcpServer2::startListen()
                 }
                 else if (m_event_list[i].events & EPOLLOUT)
                 {
-                    socketCreation[m_event_list[i].data.fd] = time(NULL); // Atualiza o tempo de criação do socket
+                    //socketCreation[m_event_list[i].data.fd] = time(NULL); // Atualiza o tempo de criação do socket
                     std::string serverResponse = responseMap[m_event_list[i].data.fd];
                     sendResponse(m_event_list[i].data.fd, serverResponse);
                     responseMap.erase(m_event_list[i].data.fd);
@@ -307,13 +315,14 @@ void TcpServer2::verificTimeOut()
     for (std::map<int, time_t>::iterator it = socketCreation.begin(); it != socketCreation.end();)
     {
         time_t elapsedTime = currentTime - it->second;
+        std::cout << YELLOW << it->first << " elapsedTime = " << elapsedTime << RESET << std::endl;
         if (elapsedTime >= TIMEOUT)
         {
             std::cout << MAGENTA << "Vou fechar conexão :" << it->first << RESET << std::endl;
             close(it->first);
             epoll_ctl(this->epoll_fd, EPOLL_CTL_DEL, it->first, NULL);
-            //clientServerMap.erase(it->first); 
-            //responseMap.erase(it->first); 
+            clientServerMap.erase(it->first); 
+            responseMap.erase(it->first); 
             socketCreation.erase(it++); 
         }
         else
