@@ -35,6 +35,21 @@ void Request::parser(std::string header)
                 this->lines_header[name] = content;
             }
         }
+            std::stringstream ss(line);
+            std::string fword;
+            std::string sword;
+            ss >> fword;
+            ss >> sword;
+            if (fword == "Content-Length:")
+            {
+                _contentLength = sword;
+                std::cout << MAGENTA << "CONTENT LENGTH :" << _contentLength << RESET << std::endl;
+            }
+            if(fword == "Content-Type:")
+            {
+                _contentType = sword;
+                std::cout << MAGENTA << "CONTENT Type :" << _contentType << RESET << std::endl;
+            }
     }
     while (std::getline(ss, line) && line != "\r")
     {
@@ -212,6 +227,29 @@ void Request::verifyLocations(Server server)
     }
 }
 
+std::string Request::getContentType()
+{
+     return _contentType;
+}
+
+std::string Request::getContentLength()
+{
+     return _contentLength;
+}
+
+
+void Request::setContentType(std::string contentType)
+{
+    this->_contentType = contentType;
+}
+void Request::setContentLength(std::string contentLength)
+{
+    this->_contentLength = contentLength;
+}
+void Request::setCode(int code)
+{
+    this->_code = code;
+}
 /*
 GET /css/styles.css HTTP/1.1
 Host: localhost:8008

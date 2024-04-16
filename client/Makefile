@@ -11,6 +11,7 @@ SRC = src/MainServer.cpp \
 	src/Request.cpp \
 	src/Location.cpp \
 	src/Response.cpp \
+	src/Cgi.cpp
 
 OBJ = $(SRC:.cpp=.o)
 

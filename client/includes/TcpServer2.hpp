@@ -20,6 +20,8 @@
 # include <dirent.h>
 # include <map>
 
+# include "./Cgi.hpp"
+
 #define TIMEOUT 20
 class Connection;
 

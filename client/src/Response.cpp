@@ -68,9 +68,7 @@ std::string Response::obtainFilePath(const std::string& request) {
     }
 
     std::string fullPath;
-    if(path.find("cgi") != std::string::npos)
-        fullPath = path.substr(1);
-    else if(path.find(".html") != std::string::npos)
+    if(path.find(".html") != std::string::npos)
         fullPath = m_server.getRoot_s() + "/html" +  path;
     else
         fullPath = m_server.getRoot_s() + path;

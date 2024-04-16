@@ -175,6 +175,13 @@ void TcpServer2::startListen()
                                 // std::cout << CYAN << "Response:" << response << RESET << std::endl;
                                 serverResponse = response;
                             }
+                            else if(!locationSettings.getCgiPath().empty())
+                            {
+                                std::cout << CYAN << "ENTREI CGI LOCATION" RESET << std::endl;
+                                Cgi cgi("../cgi-bin/upload.py");
+                                cgi.initEnv(request);
+                                cgi.execute();
+                            }
                             else if (locationSettings.getAutoIndex() == "on" && n == 0)
                             {
                                 std::cout << CYAN << "Entrei AutoIndex on" << RESET << std::endl;

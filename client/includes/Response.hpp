@@ -18,7 +18,7 @@
 # include "./Server.hpp"
 # include "./TcpServer2.hpp"
 # include "./Request.hpp"
-
+# include "./Cgi.hpp"
 
 class Request;
 
