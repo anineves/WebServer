@@ -27,7 +27,7 @@ void	Cgi::initEnv(Request &request)
 	this->_env.push_back("CONTENT_LENGTH=" +request.getContentLength());
 	this->_env.push_back("CONTENT_TYPE=" + request.getContentType());
     this->_env.push_back("SCRIPT_FILENAME=" + request.getPath());
-
+	this->_env.push_back("REQUEST_METHOD=" + request.getMethod());
 
 
 	buildCharEnv();

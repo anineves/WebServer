@@ -36,9 +36,10 @@ public:
     void verifyLocations(Server server);
     void setContentType(std::string contentType);
     void setContentLength(std::string contentLength);
+    std::string getBody();
     void setCode(int code);
     Server  r_server;
-    std::map<std::string, std::string> lines_body;
+    std::string lines_body;
 
 private:
     std::string _fullRequest;

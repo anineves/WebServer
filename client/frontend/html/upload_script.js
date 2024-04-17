@@ -73,7 +73,7 @@ const sendDeleteRequest = (fileName) => {
 };
 
 // Fetch folder contents using JavaScript
-fetch('/folder-contents.php')
+fetch('/cgi-bin/folder-contents.php')
 	.then(response => response.json())
 	.then(data => {
 		const fileList = document.getElementById('fileList');

@@ -18,9 +18,9 @@ void TcpServer2::startServer()
     std::vector<struct sockaddr_in>::iterator it;
 
     std::cout << "@#$@#@$##@$$# Tamanho addresses :" << m_addresses.size() << std::endl;
-    int index = 0;
-    for (it = m_addresses.begin(); it != m_addresses.end(); it++)
+    for (it = m_addresses.begin(); it != m_addresses.end(); ++it)
     {
+
         int curr_socket = socket(AF_INET, SOCK_STREAM, 0);
         if (curr_socket < 0)
         {
@@ -45,10 +45,9 @@ void TcpServer2::startServer()
             exit(EXIT_FAILURE);
         }
         std::cout << "\n\n * * * Listening Server at following ports * * *   \n\n";
-        std::cout << GREEN << m_server[index].getIpAddr_s() << RESET << ":" << BLUE << m_server[index].getPort_s() << RESET << " : sockfd " << curr_socket << std::endl;
+        std::cout << "Server listening on " << BLUE << convert_uint32_to_str(ntohl(it->sin_addr.s_addr)) << ":" << ntohs(it->sin_port) << RESET << ", sockfd: " << curr_socket << std::endl;
         this->m_sockets.push_back(curr_socket);
         socketCreation[curr_socket] = time(NULL);
-        index++;
     }
 }
 

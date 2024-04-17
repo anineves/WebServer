@@ -61,10 +61,13 @@ void Request::parser(std::string header)
             if (content.length() != 0)
             {
 
-                this->lines_body[name] = content;
+                this->lines_body  += line;
             }
         }
+
     }
+    
+    std::cout << MAGENTA << "LINHAS " << this->lines_body << RESET << std::endl;
 
     verific_errors();
     /* std::map<std::string, std::string>::const_iterator it;
@@ -113,6 +116,12 @@ std::string Request::getPath()
 {
     return _path;
 }
+
+std::string Request::getBody()
+{
+    return lines_body;
+}
+
 
 std::string Request::getProtocol()
 {
