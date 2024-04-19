@@ -23,7 +23,7 @@ private:
     std::vector<Location> _locations;
 
     std::string obtainValue(const std::string &line, const std::string &type);
-    int obtainPort(std::string line);
+    int obtainPort(std::string line, std::string token);
     bool parserServer(std::vector<Location>& _locations, std::vector<Server> &_servers, std::stringstream *serverContent);
     bool parserLocation(std::string path, std::vector<Location> &_locations, std::stringstream *locationContent);
     std::string ft_trim(const std::string &line);

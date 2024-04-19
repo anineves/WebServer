@@ -13,9 +13,9 @@ class Server {
         std::string             s_error_page;
         std::string             _upload_to;
         std::string             s_server_name;
-       
         std::string             s_ip_address;
         int                     s_port;
+        int                     s_client_body;
         std::string             _cgi_path;
         std::string             _cgi_ext;
         bool                    _auto_index;
@@ -55,6 +55,7 @@ class Server {
         void    setSocketAddr(struct sockaddr_in n_socketaddr);
         void    setSocketAddr_len(socklen_t n_socketaddr_len);
         void    setServerName_s(std::string cgi_ext);
+        void    setClientMaxBody(int client_max_body);
         // ---- GETTERS ----
         std::string                 getIpAddr_s();
         int                         getPort_s();
@@ -66,6 +67,7 @@ class Server {
         int                         getSocket();
         struct sockaddr_in          getSocketAddr();
         socklen_t                   getSocketAddr_len();
+        int                         getClientMaxBody_s();
         bool                        getExecutable();
         bool                        getRedirect();
         void    verificErrorServer();

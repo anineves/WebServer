@@ -89,6 +89,11 @@ void Server::setSocket(int set_socket) {
     this->s_socket = set_socket;
 }
 
+
+void Server::setClientMaxBody(int client_max_body) {
+    this->s_client_body = client_max_body;
+}
+
 void    Server::setSocketAddr(struct sockaddr_in n_socketaddr) {
     this->s_socketAddress = n_socketaddr;
 }
@@ -133,6 +138,10 @@ std::vector<std::string> Server::getMethods_s() {
 
 int Server::getSocket() {
     return this->s_socket;
+}
+
+int Server::getClientMaxBody_s() {
+    return this->s_client_body;
 }
 
 struct sockaddr_in Server::getSocketAddr() {

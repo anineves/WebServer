@@ -228,7 +228,9 @@ bool ConfigFile::parserServer( std::vector<Location>& _locations, std::vector<Se
         std::string fword;
         ss >> fword;
         if (fword == "listen")
-            server.setPort_s(obtainPort(line));
+            server.setPort_s(obtainPort(line, "listen"));
+        if (fword == "client_max_body_size")
+            server.setClientMaxBody(obtainPort(line, "client_max_body_size"));
         if (fword == "host")
             server.setIpAddr_s(obtainValue(line, "host"));
         if (fword == "root")
@@ -346,8 +348,8 @@ std::string ConfigFile::obtainValue(const std::string& line, const std::string& 
 
 
 
-int ConfigFile::obtainPort(std::string line) {
-    std::string port = obtainValue(line, "listen");
+int ConfigFile::obtainPort(std::string line, std::string token) {
+    std::string port = obtainValue(line, token );
     return (port.empty()) ? 0 : std::atoi(port.c_str());
 }
 
