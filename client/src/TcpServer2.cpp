@@ -47,7 +47,7 @@ void TcpServer2::startServer()
         std::cout << "\n\n * * * Listening Server at following ports * * *   \n\n";
         std::cout << "Server listening on " << BLUE << convert_uint32_to_str(ntohl(it->sin_addr.s_addr)) << ":" << ntohs(it->sin_port) << RESET << ", sockfd: " << curr_socket << std::endl;
         this->m_sockets.push_back(curr_socket);
-        socketCreation[curr_socket] = time(NULL);
+        //socketCreation[curr_socket] = time(NULL);
     }
 }
 
@@ -88,7 +88,7 @@ void TcpServer2::startListen()
             exitWithError("Epoll wait");
             continue;
         }
-        verificTimeOut();
+        //verificTimeOut();
 
         std::cout << "num_events= " << num_events << std::endl;
 
@@ -301,18 +301,25 @@ int TcpServer2::getEpoll()
 
 void TcpServer2::setAddresses()
 {
-    for (size_t i = 0; i < m_server.size(); i++)
-    {
-        memset(&m_server[i].s_socketAddress, 0, sizeof(m_server[i].s_socketAddress));
-        m_server[i].s_socketAddress.sin_family = AF_INET;
-        m_server[i].s_socketAddress.sin_addr.s_addr = htonl(INADDR_ANY);
-        std::cout << "valor Porta htons: " << htons(m_server[i].getPort_s()) << std::endl;
-        std::cout << "valor Porta: " << m_server[i].getPort_s() << std::endl;
-        m_server[i].s_socketAddress.sin_port = htons(m_server[i].getPort_s());
-        m_addresses.push_back(m_server[i].getSocketAddr());
-    }
 
-    std::cout << "m_adresses size = " << m_addresses.size() << std::endl;
+    std::vector<Server>::iterator it;
+    for (it = this->m_server.begin(); it != this->m_server.end(); ++it) {
+         struct sockaddr_in curr;
+
+        ft_memset(&(curr), 0, sizeof(curr));
+        curr.sin_family = AF_INET;
+        curr.sin_port = it->s_sin_port;   
+        curr.sin_addr.s_addr = it->s_addr;
+
+        std::vector<struct sockaddr_in>::iterator it2;
+        for (it2 = m_addresses.begin(); it2 != m_addresses.end(); it2++) {
+            if (it2->sin_addr.s_addr == curr.sin_addr.s_addr && it2->sin_port == curr.sin_port)
+                break;
+        }
+        if (it2 == m_addresses.end())
+            m_addresses.push_back(curr);
+
+    }
 }
 
 void TcpServer2::verificTimeOut()
