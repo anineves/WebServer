@@ -24,7 +24,6 @@ void Request::parser(std::string header)
 
     while (std::getline(ss, line) && line != "\r")
     {
-        // std::cout << "linha:::::" << line << std::endl;
         if (line.find(':') != std::string::npos)
         {
             std::string name(line.substr(0, line.find(':')));
@@ -40,15 +39,22 @@ void Request::parser(std::string header)
             std::string sword;
             ss >> fword;
             ss >> sword;
+            // std::cout << "### SS: " << MAGENTA << line << RESET << std::endl;
             if (fword == "Content-Length:")
             {
                 _contentLength = sword;
-                std::cout << MAGENTA << "CONTENT LENGTH :" << _contentLength << RESET << std::endl;
+                // std::cout << MAGENTA << "CONTENT LENGTH :" << _contentLength << RESET << std::endl;
             }
             if(fword == "Content-Type:")
             {
+                std::string content_word;
+                ss >> content_word;
+                sword += " " + content_word;
                 _contentType = sword;
-                std::cout << MAGENTA << "CONTENT Type :" << _contentType << RESET << std::endl;
+            }
+            if(fword == "Host:")
+            {
+                _host = sword;
             }
     }
     while (std::getline(ss, line) && line != "\r")
