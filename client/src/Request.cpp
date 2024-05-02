@@ -128,6 +128,11 @@ std::string Request::getProtocol()
     return _protocol;
 }
 
+std::string Request::getHost()
+{
+    return _host;
+}
+
 int Request::getCode()
 {
     return _code;
@@ -139,6 +144,16 @@ void Request::printMessage()
     std::cout << " ==== fullRquest ==== \n"
               << _fullRequest << std::endl
               << "=== END fullrequest ====" << std::endl;
+}
+
+std::string Request::getFullRequest(void)
+{
+    std::string temp = _fullRequest;
+    std::size_t found;
+
+    found = temp.find("\r\n\r\n");
+    std::string new_request = temp.substr(found);
+    return new_request ;
 }
 
 void Request::setPath(std::string path)

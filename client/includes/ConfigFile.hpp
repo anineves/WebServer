@@ -32,8 +32,6 @@ private:
 public:
     //--- CONSTRUCTORS && DESTRUCTOR ---
     ConfigFile(std::string conFile);
-    ConfigFile();
-    ConfigFile(const ConfigFile &src);
     ~ConfigFile();
     //--- GETTERS ---
     int getPort() const;
@@ -43,9 +41,10 @@ public:
     std::string getErrorPage() const;
     std::vector<Server> &getServers();
     std::vector<Location>& getLocations();
+    std::vector<struct sockaddr_in> get_unique_addresses();
 
     //--- SETTERS ---
-    void setPort(std::string set_port);
+    void setPort(int set_port);
     void setIpAddr(std::string set_ip_addr);
     void setRoot(std::string set_root);
     void setIndex(std::string set_index);

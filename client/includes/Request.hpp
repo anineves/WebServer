@@ -31,6 +31,7 @@ public:
     int         getCode();
     std::string getContentType();
     std::string getContentLength();
+    std::string getHost();
     void printMessage();
     void setPath( std::string path);
     void verifyLocations(Server server);
@@ -40,6 +41,7 @@ public:
     void setCode(int code);
     Server  r_server;
     std::string lines_body;
+    std::string getFullRequest(void);
 
 private:
     std::string _fullRequest;
@@ -48,6 +50,7 @@ private:
 	std::string _path;
     std::string _contentType;
     std::string _contentLength;
+    std::string _host;
     std::map<std::string, std::string> lines_header;
     int         _code;
     void parser(std::string header);

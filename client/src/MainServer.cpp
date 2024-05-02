@@ -1,6 +1,5 @@
 #include "../includes/TcpServer2.hpp"
 #include "../includes/ConfigFile.hpp"
-#include "../includes/Server.hpp"
 
 
 
@@ -26,6 +25,8 @@ int main(int ac, char **av) {
             std::ifstream unexistingFile(av[1]);
             if (!unexistingFile.is_open()) {
                 confFile = "./config/Default.conf";
+                // HTTP status Code 204(No content)
+                //httpCode = 204;
             }
             confFile = "./" + std::string(av[1]);
         }

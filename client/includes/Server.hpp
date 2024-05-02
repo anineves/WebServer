@@ -10,16 +10,12 @@ class Server {
         
         std::string             s_root;
         std::string             s_index;
-        std::vector<std::string> s_index_pages;
         std::string             s_error_page;
-        std::string             s_server_name;
-        
-        std::string             s_ip_address;
-        std::string             s_port;
-        int                     s_client_body;
-
-
         std::string             _upload_to;
+        std::string             s_server_name;
+        std::string             s_ip_address;
+        int                     s_port;
+        int                     s_client_body;
         std::string             _cgi_path;
         std::string             _cgi_ext;
         bool                    _auto_index;
@@ -33,11 +29,6 @@ class Server {
         socklen_t               s_socketAddress_len;
 
     public:
-        uint32_t                s_addr;
-        uint16_t                s_sin_port;
-        std::string             s_host;
-        std::vector<std::string> s_server_names;
-        
         struct sockaddr_in      s_socketAddress;
         //bool        _redirect;
         std::vector<std::string> _methods;
@@ -47,7 +38,7 @@ class Server {
 
         // ----  SETTERS  ----
         void    setIpAddr_s(std::string ipAddr);
-        void    setPort_s(std::string port);
+        void    setPort_s(int port);
         void    setRoot_s(std::string root);
         void    setIndex_s(std::string index);
         void    setErrorPage_s(std::string error_page);
@@ -67,7 +58,7 @@ class Server {
         void    setClientMaxBody(int client_max_body);
         // ---- GETTERS ----
         std::string                 getIpAddr_s();
-        std::string                         getPort_s();
+        int                         getPort_s();
         std::string                 getRoot_s();
         std::string                 getIndex_s();
         std::string                 getErrorPage_s();

@@ -18,6 +18,7 @@ void TcpServer2::startServer()
     std::vector<struct sockaddr_in>::iterator it;
 
     std::cout << "@#$@#@$##@$$# Tamanho addresses :" << m_addresses.size() << std::endl;
+    std::cout << "\n\n * * * Listening Server at following ports * * *   \n\n";
     for (it = m_addresses.begin(); it != m_addresses.end(); ++it)
     {
 
@@ -44,10 +45,9 @@ void TcpServer2::startServer()
             exitWithError("Socket listen Failed");
             exit(EXIT_FAILURE);
         }
-        std::cout << "\n\n * * * Listening Server at following ports * * *   \n\n";
-        std::cout << "Server listening on " << BLUE << convert_uint32_to_str(ntohl(it->sin_addr.s_addr)) << ":" << ntohs(it->sin_port) << RESET << ", sockfd: " << curr_socket << std::endl;
+        std::cout << "listening Port :" << BLUE << convert_uint32_to_str(ntohl(it->sin_addr.s_addr)) << ":" << ntohs(it->sin_port) << " | Socket: " << curr_socket << RESET << std::endl;
         this->m_sockets.push_back(curr_socket);
-        //socketCreation[curr_socket] = time(NULL);
+        socketCreation[curr_socket] = time(NULL);
     }
 }
 
@@ -88,7 +88,7 @@ void TcpServer2::startListen()
             exitWithError("Epoll wait");
             continue;
         }
-        //verificTimeOut();
+        verificTimeOut();
 
         std::cout << "num_events= " << num_events << std::endl;
 
@@ -105,7 +105,7 @@ void TcpServer2::startListen()
                 std::cout << "ENTREI ======================= \n";
                 struct sockaddr_in addr;
                 socklen_t addr_len = sizeof(addr);
-                std::cout << m_event_list[i].data.fd << " entrei antes  valor socket" << m_sockets[j] << std::endl;
+                std::cout << GREEN << m_event_list[i].data.fd << " entrei antes  valor socket" << m_sockets[j] << RESET << std::endl;
                 if (m_event_list[i].data.fd == m_sockets[j])
                 {  
                     m_server[j].setSocketAddr_len(sizeof(m_sockets[j]));
@@ -176,10 +176,11 @@ void TcpServer2::startListen()
                             }
                             else if(!locationSettings.getCgiPath().empty())
                             {
-                                std::cout << CYAN << "ENTREI CGI LOCATION" RESET << std::endl;
-                                Cgi cgi("../cgi-bin/upload.py");
-                                cgi.initEnv(request);
-                                cgi.execute();
+                                 if (!request.getPath().empty()) {
+                                    request.printMessage();
+                                    Cgi cgi(request.getPath());
+                                    cgi.runCgi(request, m_event_list[i].data.fd);
+                                }
                             }
                             else if (locationSettings.getAutoIndex() == "on" && n == 0)
                             {
@@ -235,6 +236,12 @@ void TcpServer2::startListen()
                     responseMap.erase(m_event_list[i].data.fd);
                     m_event_list[i].events = EPOLLIN;
                     epoll_ctl(this->getEpoll(), EPOLL_CTL_MOD, m_event_list[i].data.fd, &m_event_list[i]);
+			 int ret = epoll_ctl(this->getEpoll(), EPOLL_CTL_DEL,  m_event_list[i].data.fd, &m_event_list[i]);
+    			if (ret == -1)
+    			{
+        		std::cout  << "failed to remove fd " << m_event_list[i].data.fd << " from EPOLL" << std::endl;
+   			 }
+			close(m_event_list[i].data.fd);
                 }
             }
         }
@@ -301,25 +308,18 @@ int TcpServer2::getEpoll()
 
 void TcpServer2::setAddresses()
 {
-
-    std::vector<Server>::iterator it;
-    for (it = this->m_server.begin(); it != this->m_server.end(); ++it) {
-         struct sockaddr_in curr;
-
-        ft_memset(&(curr), 0, sizeof(curr));
-        curr.sin_family = AF_INET;
-        curr.sin_port = it->s_sin_port;   
-        curr.sin_addr.s_addr = it->s_addr;
-
-        std::vector<struct sockaddr_in>::iterator it2;
-        for (it2 = m_addresses.begin(); it2 != m_addresses.end(); it2++) {
-            if (it2->sin_addr.s_addr == curr.sin_addr.s_addr && it2->sin_port == curr.sin_port)
-                break;
-        }
-        if (it2 == m_addresses.end())
-            m_addresses.push_back(curr);
-
+    for (size_t i = 0; i < m_server.size(); i++)
+    {
+        memset(&m_server[i].s_socketAddress, 0, sizeof(m_server[i].s_socketAddress));
+        m_server[i].s_socketAddress.sin_family = AF_INET;
+        m_server[i].s_socketAddress.sin_addr.s_addr = htonl(INADDR_ANY);
+        std::cout << "valor Porta htons: " << htons(m_server[i].getPort_s()) << std::endl;
+        std::cout << "valor Porta: " << m_server[i].getPort_s() << std::endl;
+        m_server[i].s_socketAddress.sin_port = htons(m_server[i].getPort_s());
+        m_addresses.push_back(m_server[i].getSocketAddr());
     }
+
+    std::cout << "m_adresses size = " << m_addresses.size() << std::endl;
 }
 
 void TcpServer2::verificTimeOut()
