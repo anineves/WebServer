@@ -6,7 +6,7 @@ form = cgi.FieldStorage()
 host = os.environ.get("HTTP_HOST", default=None);
 fileitem = form['file']
 if fileitem.filename:
-    upload_dir = "./frontend2/uploads/"
+    upload_dir = "./cgi-bin/uploads/"
     with open(os.path.join(upload_dir, fileitem.filename), 'wb') as f:
         f.write(fileitem.file.read())
         print('<html>')
