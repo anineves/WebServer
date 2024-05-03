@@ -17,17 +17,17 @@
                 <li><a href="./index.html">Home</a></li>
                 <li><a href="./about.htm">About</a></li>
                 <li><a href="./register.html">Register</a></li>
-                <li><a href="./files.html">Files</a></li>
-                <li><a href="#">Upload</a></li>
+                <li><a href="./uploads.html">Uploads</a></li>
+                <li><a href="#">Files</a></li>
             </ul>
         </nav>
     </header>
     <main>
         <div class="register-form">
             <h2>Upload</h2>
-            <form action="../../cgi-bin/upload.py" method="post" enctype="multipart/form-data">
-                <input type="file" name="file" id="file">
-                <input type="submit" value="Upload File" name="submit">
+            <form action="../../cgi-bin/files.py" method="get">
+                <!-- <input type="file" name="file" id="file"> -->
+                <input type="submit" value="Get Files" name="files">
             </form>
         </div>
     </main>

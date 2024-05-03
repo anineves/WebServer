@@ -15,7 +15,8 @@ Cgi::Cgi(std::string file_path)
 	this->_exec_env = NULL;
 	this->_cgi_argv = NULL;
 	this->_cgi_response = "";
-	this->_file_path = "." + file_path;
+	this->_file_path = file_path;
+	// this->_file_path = "." + file_path;
 	std::cout << "CGI constructor called with " << file_path << std::endl;
 }
 
@@ -101,7 +102,6 @@ void	Cgi::runCgi(Request &request, int client_fd)
         //               << "Content-Length: " << content_length << "\r\n"
         //               << "\r\n";
 
-        // # These lines send the message inside upload.py to the cliente
         header_stream << "HTTP/1.1 200 OK\r\n"
                       << "Content-Type: text/html\r\n"
                       << "Content-Length: " << content_length << "\r\n"
