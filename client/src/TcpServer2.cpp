@@ -251,7 +251,8 @@ void TcpServer2::startListen()
 std::string TcpServer2::showClientHeader(struct epoll_event &m_events)
 {
     char buffer[5000];
-    int bytesReceived = recv(m_events.data.fd, buffer, sizeof(buffer), 0);
+    memset(&buffer, 0, 4999);
+    int bytesReceived = recv(m_events.data.fd, buffer, sizeof(buffer) - 1, 0);
     if (bytesReceived < 0)
     {
         log("Error receiving data from client");

@@ -13,7 +13,7 @@ Request::~Request() {}
 void Request::parser(std::string header)
 {
 
-    //std::cout << "Header " << header << std::endl;
+    // std::cout << "Header " << header << std::endl;
     std::istringstream iss(header);
     std::stringstream ss(header);
     std::string line;
@@ -23,13 +23,14 @@ void Request::parser(std::string header)
     iss >> _protocol;
 
     if (_path.find('?') != std::string::npos)
-	{
-		_query = _path.substr(_path.find('?') + 1, _path.length());
-		_path = _path.substr(0, _path.find('?'));
-	}
+    {
+        _query = _path.substr(_path.find('?') + 1, _path.length());
+        _path = _path.substr(0, _path.find('?'));
+    }
 
     while (std::getline(ss, line) && line != "\r")
     {
+        std::cout << "linha:::::" << line << std::endl;
         if (line.find(':') != std::string::npos)
         {
             std::string name(line.substr(0, line.find(':')));
@@ -40,32 +41,30 @@ void Request::parser(std::string header)
                 this->lines_header[name] = content;
             }
         }
-            std::stringstream ss(line);
-            std::string fword;
-            std::string sword;
-            ss >> fword;
-            ss >> sword;
-            // std::cout << "### SS: " << MAGENTA << line << RESET << std::endl;
-            if (fword == "Content-Length:")
-            {
-                _contentLength = sword;
-                // std::cout << MAGENTA << "CONTENT LENGTH :" << _contentLength << RESET << std::endl;
-            }
-            if(fword == "Content-Type:")
-            {
-                std::string content_word;
-                ss >> content_word;
-                sword += " " + content_word;
-                _contentType = sword;
-            }
-            if(fword == "Host:")
-            {
-                _host = sword;
-            }
+        std::stringstream ss(line);
+        std::string fword;
+        std::string sword;
+        ss >> fword;
+        ss >> sword;
+        if (fword == "Content-Length:")
+        {
+            _contentLength = sword;
+        }
+        if (fword == "Content-Type:")
+        {
+            std::string content_word;
+            ss >> content_word;
+            sword += " " + content_word;
+            _contentType = sword;
+        }
+        if (fword == "Host:")
+        {
+            _host = sword;
+        }
     }
     while (std::getline(ss, line) && line != "\r")
     {
-        // std::cout << "linha:::::" << line << std::endl;
+        std::cout << "linha body:::::" << line << std::endl;
         if (line.find('=') != std::string::npos)
         {
             std::string name(line.substr(0, line.find('=')));
@@ -73,25 +72,14 @@ void Request::parser(std::string header)
             if (content.length() != 0)
             {
 
-                this->lines_body  += line;
+                this->lines_body += line;
             }
         }
-
     }
-    
+
     std::cout << MAGENTA << "LINHAS " << this->lines_body << RESET << std::endl;
 
     verific_errors();
-    /* std::map<std::string, std::string>::const_iterator it;
-     std::cout << "Maps Header:::::" << std::endl;
-    for (it = lines_header.begin(); it != lines_header.end(); ++it) {
-        std::cout << it->first << ": " << it->second << std::endl;
-    }*/
-    /*std::map<std::string, std::string>::const_iterator it;
-     std::cout << "Maps Location:::::" << std::endl;
-    for (it = lines_body.begin(); it != lines_body.end(); ++it) {
-        std::cout << it->first << ": " << it->second << std::endl;
-    }*/
 }
 
 void Request::verific_errors()
@@ -101,6 +89,11 @@ void Request::verific_errors()
     {
         _code = 504;
         exitWithError("Missing informations");
+    }
+    if ((this->_method == "POST" && this->lines_body.size() == 0))
+    {
+        _code = 400;
+        exitWithError("Post Without body");
     }
     if ((this->_method != "GET") && (this->_method != "POST") && (this->_method != "DELETE"))
     {
@@ -116,7 +109,6 @@ void Request::verific_errors()
     {
         _code = 200;
     }
-
 }
 
 std::string Request::getMethod()
@@ -133,7 +125,6 @@ std::string Request::getBody()
 {
     return lines_body;
 }
-
 
 std::string Request::getProtocol()
 {
@@ -170,7 +161,7 @@ std::string Request::getFullRequest(void)
 
     found = temp.find("\r\n\r\n");
     std::string new_request = temp.substr(found);
-    return new_request ;
+    return new_request;
 }
 
 void Request::setPath(std::string path)
@@ -180,33 +171,39 @@ void Request::setPath(std::string path)
 
 void Request::verifyLocations(Server server)
 {
-/*     std::vector<Location> tmp = server.getLocations();
-    for (size_t i = 0; i < tmp.size(); i++) {
-        tmp[i].printLoc();
-    } */
+    /*     std::vector<Location> tmp = server.getLocations();
+        for (size_t i = 0; i < tmp.size(); i++) {
+            tmp[i].printLoc();
+        } */
     std::string pathRequest = this->_path;
 
     std::string bestMatchPath;
-    //size_t bestMatchLength = 0;
-
+    // size_t bestMatchLength = 0;
 
     size_t extensionPos;
     int location_found = 0;
-    std::vector<Location> locationStack = server.getLocations(); 
-    while (!location_found) {
-        for (size_t i = 0; i < locationStack.size(); i++) {
-            if (pathRequest.compare(locationStack[i].getPath()) == 0) {
+    std::vector<Location> locationStack = server.getLocations();
+    while (!location_found)
+    {
+        for (size_t i = 0; i < locationStack.size(); i++)
+        {
+            if (pathRequest.compare(locationStack[i].getPath()) == 0)
+            {
                 bestMatchPath = locationStack[i].getPath();
                 location_found++;
             }
             std::cout << "-------------------pathRequest: " << pathRequest << std::endl;
             std::cout << "-------------------locationPathComparing: " << locationStack[i].getPath() << std::endl;
         }
-        if (!location_found) {
+        if (!location_found)
+        {
             extensionPos = pathRequest.find_last_of('/');
-            if (extensionPos != std::string::npos) {
+            if (extensionPos != std::string::npos)
+            {
                 pathRequest = pathRequest.substr(0, extensionPos);
-            } else {
+            }
+            else
+            {
                 bestMatchPath = "/";
                 location_found++;
             }
@@ -214,53 +211,42 @@ void Request::verifyLocations(Server server)
     }
     std::cout << RED << "BESTMATCHPATH = " << RESET << bestMatchPath << std::endl;
 
-
-/*     for (size_t i = 0; i < server.getLocations().size(); ++i) {
-        Location location = server.getLocations()[i];
-        std::string locationPath = location.getPath();
-        
-        // Remova a extensão do caminho da localização para a comparação
-        size_t extensionPos = locationPath.find_last_of('.');
-        std::string locationBasePath = (extensionPos != std::string::npos) ? locationPath.substr(0, extensionPos) : locationPath;
-
-        if (pathRequest.find(locationBasePath) == 0 && 
-            (pathRequest.size() == locationBasePath.size() || pathRequest[locationBasePath.size()] == '/')) {
-            bestMatchPath = locationPath;
-            //bestMatchLength = locationPath.size();
-        }
-    } */
-     
     std::cout << std::endl;
     // std::cout << server.getLocations()[1].getAllowMethods() << std::endl;
     if (!bestMatchPath.empty())
     {
-        //Connection connect;
+        // Connection connect;
         std::cout << "\n\n###############- Path Location " << bestMatchPath << " Path request " << pathRequest << std::endl;
 
         for (size_t i = 0; i < server.getLocations().size(); ++i)
         {
             Location location = server.getLocations()[i];
-             if (location.getPath() == bestMatchPath) {
-              
-                std::cout << "\n\n\n @@@@@entrei Location :"  << location.getPath() << "\n\n" << std::endl;
+            if (location.getPath() == bestMatchPath)
+            {
+
+                std::cout << "\n\n\n @@@@@entrei Location :" << location.getPath() << "\n\n"
+                          << std::endl;
                 if (!location.getUploadTo().empty())
                     server.setUploadTo(location.getUploadTo());
                 if (!location.getCgiPath().empty())
                     server.setCgiPath(location.getCgiPath());
-                if (!location.getCgiExt().empty()) {
+                if (!location.getCgiExt().empty())
+                {
                     server.setExecutable("true");
                     std::cout << "\n\n### entrei Locations Executable" << std::endl;
                     server.setCgiPath(location.getCgiPath());
                 }
                 if (!location.getAutoIndex().empty())
                     server.setAutoIndex(location.getAutoIndex());
-                if (!location.getAllowMethods().empty()) {
-                     server._methods.clear();
+                if (!location.getAllowMethods().empty())
+                {
+                    server._methods.clear();
                     server.setMethods(location.getAllowMethods());
                 }
-                if (!location.getReturn().empty()) {
+                if (!location.getReturn().empty())
+                {
                     server.setRedirect("true");
-                    //server.setIndex_s(location.getReturn());
+                    // server.setIndex_s(location.getReturn());
                 }
                 break;
             }
@@ -270,14 +256,13 @@ void Request::verifyLocations(Server server)
 
 std::string Request::getContentType()
 {
-     return _contentType;
+    return _contentType;
 }
 
 std::string Request::getContentLength()
 {
-     return _contentLength;
+    return _contentLength;
 }
-
 
 void Request::setContentType(std::string contentType)
 {
