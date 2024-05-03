@@ -22,6 +22,12 @@ void Request::parser(std::string header)
     iss >> _path;
     iss >> _protocol;
 
+    if (_path.find('?') != std::string::npos)
+	{
+		_query = _path.substr(_path.find('?') + 1, _path.length());
+		_path = _path.substr(0, _path.find('?'));
+	}
+
     while (std::getline(ss, line) && line != "\r")
     {
         if (line.find(':') != std::string::npos)
@@ -137,6 +143,11 @@ std::string Request::getProtocol()
 std::string Request::getHost()
 {
     return _host;
+}
+
+std::string Request::getQuery()
+{
+    return _query;
 }
 
 int Request::getCode()

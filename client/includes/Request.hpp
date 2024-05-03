@@ -32,6 +32,7 @@ public:
     std::string getContentType();
     std::string getContentLength();
     std::string getHost();
+    std::string getQuery();
     void printMessage();
     void setPath( std::string path);
     void verifyLocations(Server server);
@@ -41,6 +42,7 @@ public:
     void setCode(int code);
     Server  r_server;
     std::string lines_body;
+    std::string _query;
     std::string getFullRequest(void);
 
 private:
