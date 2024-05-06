@@ -142,10 +142,11 @@ void TcpServer2::startListen()
                         Request request(clientRequest);
                         request.verific_errors();
                         std::string serverResponse;
-                        std::cout << "Path from request = " << request.getPath() << std::endl;
-                        if(request.getMethod() == "POST" && request.lines_body.empty() ){
-                            std::cout << MAGENTA << " POST sem Body " << RESET <<std::endl;
-
+                        Response response(*server);
+                        std::cout << CYAN << "Path from request = " << request.getPath()  << " CODE " << request.getCode() << RESET << std::endl;
+                        if((request.getCode() != 200) && !request.getPath().empty()){
+            
+                            response.buildErrorResponse(request.getCode());
 
                         }
                         else{
@@ -220,7 +221,7 @@ void TcpServer2::startListen()
                                 {
                                     serverResponse = handleRequest(clientRequest);
                                 }
-                                Response response(*server);
+                                
                                 serverResponse = response.buildResponse(request);
                             }
                             m_event_list[i].events = EPOLLOUT;
@@ -253,7 +254,7 @@ void TcpServer2::startListen()
 std::string TcpServer2::showClientHeader(struct epoll_event &m_events)
 {
     char buffer[5000];
-    memset(&buffer, 0, 4999);
+    ft_memset(&buffer, 0, 4999);
     int bytesReceived = recv(m_events.data.fd, buffer, sizeof(buffer) - 1, 0);
     if (bytesReceived < 0)
     {

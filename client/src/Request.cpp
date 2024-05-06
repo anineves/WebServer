@@ -82,32 +82,37 @@ void Request::parser(std::string header)
     //verific_errors();
 }
 
-void Request::verific_errors()
+bool Request::verific_errors()
 {
     // Aqui Depois em vez do exitWithError colocar os erros, por exemplo se o metodo for diferente do esperado e o erro 501
     if (_method.empty() || _protocol.empty() || _path.empty())
     {
         _code = 504;
         exitWithError("Missing informations");
+        return 0;
     }
-    if ((this->_method == "POST" && this->lines_body.size() == 0))
+    if ((this->_method == "POST" && this->lines_header["Content-Length"].empty()))
     {
-        _code = 400;
+        _code = 411;
         exitWithError("Post Without body");
+        return 0;
     }
     if ((this->_method != "GET") && (this->_method != "POST") && (this->_method != "DELETE"))
     {
         _code = 501;
         exitWithError("Not allowed method");
+        return 0;
     }
     if (this->_protocol != "HTTP/1.1")
     {
         _code = 504;
         exitWithError(" Wrong Protocol");
+        return 0;
     }
     else
     {
         _code = 200;
+        return 1;
     }
 }
 

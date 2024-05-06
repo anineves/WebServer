@@ -44,7 +44,7 @@ public:
     std::string lines_body;
     std::string _query;
     std::string getFullRequest(void);
-    void verific_errors();
+    bool verific_errors();
 
 private:
     std::string _fullRequest;

@@ -78,7 +78,7 @@ std::string dirListHtml(std::vector<std::string> content)
                     "           height: 100%;\n"
                     "           margin: 0;\n"
                     "           color: #000;\n"
-                    "           background-color: #ddd;\n"
+                    "           background-color: #007bff;\n"
                     "       }\n"
                     "\n"
                     "       .container {\n"
@@ -89,22 +89,6 @@ std::string dirListHtml(std::vector<std::string> content)
                     "           color:#ffffff;\n" 
                     "           background-color: linear-gradient(to right, rgb(20, 17, 25) 0%, rgb(69, 61, 52) 80%, rgb(57, 50, 45) 100%);\n"
                     "           border-radius: 10px;\n"
-                    "       }\n"
-                    "       .delete-button {\n"
-                    "           background-color: #ff4d4d;\n"
-                    "           border: none;\n"
-                    "           color: white;\n"
-                    "           padding: 8px 20px;\n"
-                    "           text-align: center;\n"
-                    "           text-decoration: none;\n"
-                    "           display: inline-block;\n"
-                    "           font-size: 14px;\n"
-                    "           margin: 4px 2px;\n"
-                    "           cursor: pointer;\n"
-                    "           border-radius: 5px;\n"
-                    "       }\n"
-                    "       .delete-button:hover {\n"
-                    "           background-color: #ff6666;\n"
                     "       }\n"
                     "   </style>\n"
                     "</head>\n"
@@ -117,7 +101,7 @@ std::string dirListHtml(std::vector<std::string> content)
 
     for (size_t i = 0; i < content.size(); ++i)
     {
-        htmlCode.append("           <li>" + content[i] + " <button id=\"delete-button-" + intToString(i) + "\" class=\"delete-button\" onclick=\"deleteFile('" + content[i] + "')\">X</button></li>\n");
+        htmlCode.append("           <li>" + content[i] + "</li>\n");
     }
 
     htmlCode.append("       </ul>\n"
