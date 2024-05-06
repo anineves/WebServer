@@ -4,6 +4,17 @@ import os, cgi
 
 form = cgi.FieldStorage()
 host = os.environ.get("HTTP_HOST", default=None);
+
+not_found = '<html>\
+                <head>\
+                    <title>File Upload</title>\
+                </head>\
+                <body>\
+                    <h1>File Upload Status</h1>\
+                    <p>No file was uploaded</p>\
+                </body>\
+            </html>'
+
 fileitem = form['file']
 if fileitem.filename:
     upload_dir = "./cgi-bin/uploads/"
@@ -41,14 +52,9 @@ if fileitem.filename:
         print('</body>')
         print('</html>')
 else:
-    print('<html>')
-    print('<head>')
-    print('<title>File Upload</title>')
-    print('</head>')
-    print('<body>')
-    print('<h1>File Upload Status</h1>')
-    print('<p>No file was uploaded</p>')
-    print('</body>')
-    print('</html>')
-
-# exit(0)
+    http_header = f"HTTP/1.1 404 Not Found\r\n\
+                    Content-Type: text/html\r\n\
+                    Content-Length: << {len(not_found)} << \r\n\
+                    \r\n"
+    print(http_header)
+    print(not_found)

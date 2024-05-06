@@ -36,10 +36,7 @@ void Request::parser(std::string header)
             std::string name(line.substr(0, line.find(':')));
             std::string content(line.substr(line.find(':') + 2, line.find('\n')));
             if (content.length() != 0)
-            {
-
                 this->lines_header[name] = content;
-            }
         }
         std::stringstream ss(line);
         std::string fword;
@@ -47,9 +44,7 @@ void Request::parser(std::string header)
         ss >> fword;
         ss >> sword;
         if (fword == "Content-Length:")
-        {
             _contentLength = sword;
-        }
         if (fword == "Content-Type:")
         {
             std::string content_word;
@@ -58,9 +53,7 @@ void Request::parser(std::string header)
             _contentType = sword;
         }
         if (fword == "Host:")
-        {
             _host = sword;
-        }
     }
     while (std::getline(ss, line) && line != "\r")
     {
@@ -70,10 +63,7 @@ void Request::parser(std::string header)
             std::string name(line.substr(0, line.find('=')));
             std::string content(line.substr(line.find('=') + 1, line.find('\n')));
             if (content.length() != 0)
-            {
-
                 this->lines_body += line;
-            }
         }
     }
 
