@@ -44,6 +44,7 @@ public:
     std::string lines_body;
     std::string _query;
     std::string getFullRequest(void);
+    void verific_errors();
 
 private:
     std::string _fullRequest;
@@ -56,7 +57,6 @@ private:
     std::map<std::string, std::string> lines_header;
     int         _code;
     void parser(std::string header);
-    void verific_errors();
 };
 
 #endif

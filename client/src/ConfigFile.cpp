@@ -228,7 +228,18 @@ bool ConfigFile::parserServer( std::vector<Location>& _locations, std::vector<Se
         std::string fword;
         ss >> fword;
         if (fword == "listen")
+        {
             server.setPort_s(obtainPort(line, "listen"));
+            int servers_len = _servers.size();
+            for(int i = 0; i < servers_len; i++)
+            {
+                if(server.getPort_s() == _servers[i].getPort_s())
+                {
+                     std::cout << MAGENTA << "Repeated Port. Server Ignored.\n" << RESET;
+                    return false;
+                }
+            }
+        }
         if (fword == "client_max_body_size")
             server.setClientMaxBody(obtainPort(line, "client_max_body_size"));
         if (fword == "host")

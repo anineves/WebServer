@@ -79,7 +79,7 @@ void Request::parser(std::string header)
 
     std::cout << MAGENTA << "LINHAS " << this->lines_body << RESET << std::endl;
 
-    verific_errors();
+    //verific_errors();
 }
 
 void Request::verific_errors()

@@ -140,10 +140,13 @@ void TcpServer2::startListen()
                         socketCreation[m_sockets[j]] = time(NULL); // Atualiza o tempo de criação do socket
                         std::string clientRequest = showClientHeader(m_event_list[i]);
                         Request request(clientRequest);
+                        request.verific_errors();
+                        std::string serverResponse;
                         std::cout << "Path from request = " << request.getPath() << std::endl;
                         if(request.getMethod() == "POST" && request.lines_body.empty() ){
                             std::cout << MAGENTA << " POST sem Body " << RESET <<std::endl;
-                            verificTimeOut();
+
+
                         }
                         else{
                         Location locationSettings = server->verifyLocations(request.getPath());
@@ -157,8 +160,7 @@ void TcpServer2::startListen()
                         std::cout << "n ===================================================" << n << std::endl;
                         if (!locationSettings.getPath().empty())
                         {
-                            std::string serverResponse;
-
+                            
                             if (!locationSettings.getReturn().empty())
                             {
                                 std::cout << CYAN << "ENTREI NO REDIRECT : " << locationSettings.getReturn() << RESET << std::endl;
