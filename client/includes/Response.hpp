@@ -32,6 +32,7 @@ public:
     bool isValidPath(std::string& fullPath);
     std::string responseStatus (int code);
     std::string buildResponse(Request request);
+    std::string buildErrorResponse(int code);
 
     Server m_server; 
 private:
