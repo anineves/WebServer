@@ -2,11 +2,14 @@
 
 Request::Request(std::string request) : _fullRequest(request)
 {
-    parser(_fullRequest);
+    //parser(_fullRequest);
+    has_header = false;
     _code = 200;
 }
 
-Request::Request() {}
+Request::Request() {
+        has_header = false;
+}
 
 Request::~Request() {}
 
@@ -36,7 +39,10 @@ void Request::parser(std::string header)
             std::string name(line.substr(0, line.find(':')));
             std::string content(line.substr(line.find(':') + 2, line.find('\n')));
             if (content.length() != 0)
+            {
+
                 this->lines_header[name] = content;
+            }
         }
         std::stringstream ss(line);
         std::string fword;
@@ -44,7 +50,9 @@ void Request::parser(std::string header)
         ss >> fword;
         ss >> sword;
         if (fword == "Content-Length:")
+        {
             _contentLength = sword;
+        }
         if (fword == "Content-Type:")
         {
             std::string content_word;
@@ -53,18 +61,25 @@ void Request::parser(std::string header)
             _contentType = sword;
         }
         if (fword == "Host:")
+        {
             _host = sword;
+        }
     }
+    this->has_header = true; 
+
     while (std::getline(ss, line) && line != "\r")
     {
         std::cout << "linha body:::::" << line << std::endl;
-        if (line.find('=') != std::string::npos)
-        {
-            std::string name(line.substr(0, line.find('=')));
-            std::string content(line.substr(line.find('=') + 1, line.find('\n')));
-            if (content.length() != 0)
+        //if (line.find('=') != std::string::npos)
+        //{
+          //  std::string name(line.substr(0, line.find('=')));
+            //std::string content(line.substr(line.find('=') + 1, line.find('\n')));
+            //if (content.length() != 0)
+            //{
+
                 this->lines_body += line;
-        }
+            //}
+        //}
     }
 
     std::cout << MAGENTA << "LINHAS " << this->lines_body << RESET << std::endl;
@@ -72,7 +87,7 @@ void Request::parser(std::string header)
     //verific_errors();
 }
 
-bool Request::verific_errors()
+bool Request::verific_errors(Server server)
 {
     // Aqui Depois em vez do exitWithError colocar os erros, por exemplo se o metodo for diferente do esperado e o erro 501
     if (_method.empty() || _protocol.empty() || _path.empty())
@@ -97,6 +112,13 @@ bool Request::verific_errors()
     {
         _code = 504;
         exitWithError(" Wrong Protocol");
+        return 0;
+    }
+    std::cout << GREEN << this->lines_body.size() << static_cast<std::string::size_type>(server.getClientMaxBody_s());
+    if (this->lines_body.size() > static_cast<std::string::size_type>(server.getClientMaxBody_s()))
+    {
+        _code = 404;
+        exitWithError(" Wrong Client Max");
         return 0;
     }
     else

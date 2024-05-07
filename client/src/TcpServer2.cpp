@@ -134,23 +134,28 @@ void TcpServer2::startListen()
                     if (server != NULL)
                     {
                         socketCreation[m_event_list[i].data.fd] = time(NULL); // Atualiza o tempo de criação do socket
-                        std::string clientRequest = showClientHeader(m_event_list[i]);
-                        Request request(clientRequest);
-                        request.verific_errors();
+                        Request request1;
+
+                        showClientHeader(m_event_list[i], request1);
+                        //Request request(clientRequest);
+                        request1.verific_errors(*server);
                         std::string serverResponse;
                         Response response(*server);
-                        std::cout << CYAN << "Path from request = " << request.getPath()  << " CODE " << request.getCode() << RESET << std::endl;
-                        if(request.getCode() != 200 && !request.getPath().empty()){
-                            //std::cout << MAGENTA << " POST sem Body " << RESET <<std::endl;
-                            response.buildErrorResponse(request.getCode());
+                        std::cout << CYAN << "Path from request = " << request1.getPath()  << " CODE " << request1.getCode() << RESET << std::endl;
+                        if(request1.getCode() != 200 && !request1.getPath().empty()){
+                            std::cout << MAGENTA << " Entrei erros " << RESET <<std::endl;
+                            serverResponse = response.buildErrorResponse(request1.getCode());
+                            m_event_list[i].events = EPOLLOUT;
+                            epoll_ctl(this->getEpoll(), EPOLL_CTL_MOD, m_event_list[i].data.fd, &m_event_list[i]);
+                            responseMap[m_event_list[i].data.fd] = serverResponse;
 
                         }
                         else{
-                        Location locationSettings = server->verifyLocations(request.getPath());
+                        Location locationSettings = server->verifyLocations(request1.getPath());
                         std::cout << CYAN << "Entrou Location :" << locationSettings.getPath() << RESET << std::endl;
 
                         int n = 0;
-                        if (is_file("frontend/html" + request.getPath()) == 1)
+                        if (is_file("frontend/html" + request1.getPath()) == 1)
                         {
                             n = 1;
                         }
@@ -173,10 +178,10 @@ void TcpServer2::startListen()
                             }
                             else if(!locationSettings.getCgiPath().empty())
                             {
-                                 if (!request.getPath().empty()) {
-                                    request.printMessage();
-                                    Cgi cgi(request.getPath());
-                                    cgi.runCgi(request, m_event_list[i].data.fd);
+                                 if (!request1.getPath().empty()) {
+                                    //request1.printMessage();
+                                    Cgi cgi(request1.getPath());
+                                    cgi.runCgi(request1, m_event_list[i].data.fd);
                                 }
                             }
                             else if (locationSettings.getAutoIndex() == "on" && n == 0)
@@ -215,7 +220,7 @@ void TcpServer2::startListen()
                                     serverResponse = handleRequest(clientRequest);
                                 }
                                 
-                                serverResponse = response.buildResponse(request);
+                                serverResponse = response.buildResponse(request1);
                             }
                             m_event_list[i].events = EPOLLOUT;
                             epoll_ctl(this->getEpoll(), EPOLL_CTL_MOD, m_event_list[i].data.fd, &m_event_list[i]);
@@ -244,19 +249,29 @@ void TcpServer2::startListen()
     }
 }
 
-std::string TcpServer2::showClientHeader(struct epoll_event &m_events)
+void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request)
 {
     char buffer[5000];
-    memset(&buffer, 0, 4999);
+    ft_memset(&buffer, 0, 4999);
     int bytesReceived = recv(m_events.data.fd, buffer, sizeof(buffer) - 1, 0);
     if (bytesReceived < 0)
     {
         log("Error receiving data from client");
-        return "";
+        return;
     }
 
     buffer[bytesReceived] = '\0';
-    return std::string(buffer);
+    if(request.has_header == false)
+    {
+        request.parser(buffer);
+    }
+    else if(request.has_header == true)
+    {
+        std::cout << "Ja tem HEADEEEER" << std::endl;
+    }
+    request._fullRequest += buffer;
+    //std::cout << GREEN << "FULL REQUEST " << buffer << std::endl;
+    //return std::string(buffer);
 }
 
 void TcpServer2::sendResponse(int client_socket, const std::string &response)
@@ -332,3 +347,4 @@ void TcpServer2::verificTimeOut()
         }
     }
 }
+
