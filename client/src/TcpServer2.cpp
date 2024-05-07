@@ -179,7 +179,6 @@ void TcpServer2::startListen()
                             else if(!locationSettings.getCgiPath().empty())
                             {
                                  if (!request1.getPath().empty()) {
-                                    //request1.printMessage();
                                     Cgi cgi(request1.getPath());
                                     cgi.runCgi(request1, m_event_list[i].data.fd);
                                 }

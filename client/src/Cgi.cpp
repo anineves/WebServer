@@ -15,8 +15,8 @@ Cgi::Cgi(std::string file_path)
 	this->_exec_env = NULL;
 	this->_cgi_argv = NULL;
 	this->_cgi_response = "";
-	this->_file_path = file_path;
-	// this->_file_path = "." + file_path;
+	// this->_file_path = file_path;
+	this->_file_path = "." + file_path;
 	std::cout << "CGI constructor called with " << file_path << std::endl;
 }
 
@@ -68,7 +68,6 @@ size_t	Cgi::readCgiResponse(int fd)
         while ((bytesRead = read(fd, buffer, sizeof(buffer))) > 0) {
             this->_cgi_response.append(buffer, bytesRead);
         }
-        
         return this->_cgi_response.length();
 }
 
@@ -101,7 +100,8 @@ void	Cgi::runCgi(Request &request, int client_fd)
         std::string header = header_stream.str();
         write(client_fd, header.c_str(), header.length());
         write(client_fd, this->_cgi_response.c_str(), content_length);
-        close(fdResponse[0]);		
+        close(fdResponse[0]);	
+		close(fdRequest[0]);
 		waitpid(pid, NULL, 0);
 	}
 	else if (pid == 0) {

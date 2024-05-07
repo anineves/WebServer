@@ -33,7 +33,7 @@ void Request::parser(std::string header)
 
     while (std::getline(ss, line) && line != "\r")
     {
-        std::cout << "linha:::::" << line << std::endl;
+        // std::cout << "linha:::::" << line << std::endl;
         if (line.find(':') != std::string::npos)
         {
             std::string name(line.substr(0, line.find(':')));
