@@ -1,10 +1,22 @@
 #include "../includes/TcpServer2.hpp"
 
+
+bool g_stop = 1;
+
+void sighandler(int sig) {
+    if ( sig == SIGINT || sig == SIGQUIT )
+    {
+        g_stop = 0;
+        std::cout << " Thank you for your Time. " << std::endl;
+    }
+}
+
 TcpServer2::TcpServer2(std::vector<Server> servers) : m_server(servers)
 {
     setAddresses();
     startServer();
     startListen();
+ 
 }
 
 TcpServer2::~TcpServer2()
@@ -80,11 +92,15 @@ void TcpServer2::startListen()
         }
     }
 
-    while (1)
-    {
+    signal( SIGINT, sighandler);
+	signal( SIGQUIT, sighandler);
+
+    while (g_stop == 1)
+    {   std::cout << "Stop antes " << g_stop << std::endl;
         int num_events = epoll_wait(epoll_fd, m_event_list, MAXEPOLLSIZE, 2000);
         if (num_events == -1)
         {
+            std::cout << "Stop" << g_stop << std::endl;
             exitWithError("Epoll wait");
             continue;
         }
@@ -246,6 +262,8 @@ void TcpServer2::startListen()
             }
         }
     }
+    closeConnection();
+
 }
 
 void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request)
@@ -345,5 +363,29 @@ void TcpServer2::verificTimeOut()
             ++it;
         }
     }
+}
+
+
+
+void TcpServer2::closeConnection()
+{
+    std::cout << "Vou eliminar tudo" << std::endl;
+    for (std::vector<int>::iterator it = m_sockets.begin(); it != m_sockets.end();)
+    {
+        close(*it);
+        epoll_ctl(this->epoll_fd, EPOLL_CTL_DEL, *it, NULL);
+        it++;
+    }
+
+    for (std::map<int, time_t>::iterator it = socketCreation.begin(); it != socketCreation.end();)
+    {
+            close(it->first);
+            epoll_ctl(this->epoll_fd, EPOLL_CTL_DEL, it->first, NULL);
+            clientServerMap.erase(it->first); 
+            responseMap.erase(it->first); 
+            socketCreation.erase(it++); 
+    }
+
+    exit(EXIT_SUCCESS);
 }
 
