@@ -34,14 +34,12 @@ void	Cgi::initEnv(Request &request)
 {
 	this->_env.push_back("PATH_INFO=" + this->_file_path);
 	this->_env.push_back("HTTP_HOST=" + request.getHost());
-	this->_env.push_back("QUERY_STRING=" + request.getBody());
+	this->_env.push_back("QUERY_STRING=" + request.getQuery());
 	this->_env.push_back("CONTENT_LENGTH=" + request.getContentLength());
 	this->_env.push_back("CONTENT_TYPE=" + request.getContentType());
     this->_env.push_back("SCRIPT_FILENAME=" + request.getPath());
 	this->_env.push_back("REQUEST_METHOD=" + request.getMethod());
 
-	std::cout << "## ENV PATH_INFO: " << this->_env[0] << std::endl;
-	std::cout << "## VAR PATH_PATH: " << this->_file_path << std::endl;
 	buildCharEnv();
 }
 
@@ -95,13 +93,6 @@ void	Cgi::runCgi(Request &request, int client_fd)
 		close(fdRequest[1]);
 
 		content_length = readCgiResponse(fdResponse[0]);
-
-        // # These lines redirect the client to a new page.
-        // header_stream << "HTTP/1.1 302 OK\r\n"
-        //               << "Location: http://0.0.0.0:8004/index.html\r\n"
-        //               << "Content-Length: " << content_length << "\r\n"
-        //               << "\r\n";
-
         header_stream << "HTTP/1.1 200 OK\r\n"
                       << "Content-Type: text/html\r\n"
                       << "Content-Length: " << content_length << "\r\n"

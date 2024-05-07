@@ -32,6 +32,7 @@ public:
     std::string getContentType();
     std::string getContentLength();
     std::string getHost();
+    std::string getQuery();
     void printMessage();
     void setPath( std::string path);
     void verifyLocations(Server server);
@@ -41,10 +42,14 @@ public:
     void setCode(int code);
     Server  r_server;
     std::string lines_body;
+    std::string _query;
     std::string getFullRequest(void);
+    bool verific_errors(Server server);
+    bool has_header;
+    void parser(std::string header);
+    std::string _fullRequest;
 
 private:
-    std::string _fullRequest;
     std::string _method;
 	std::string _protocol;
 	std::string _path;
@@ -53,8 +58,6 @@ private:
     std::string _host;
     std::map<std::string, std::string> lines_header;
     int         _code;
-    void parser(std::string header);
-    void verific_errors();
 };
 
 #endif

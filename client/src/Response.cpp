@@ -22,6 +22,16 @@ Response::~Response()
 
 }
 
+std::string Response::buildErrorResponse(int code)
+{
+    std::string response;
+    std::stringstream stringCode;
+    stringCode << code;
+    response = "HTTP/1.1 " + stringCode.str() + " " + responseStatus(code) +"\r\n";
+    response += "Content-Type: Content-Type: text/html \r\n\r\n";
+    return response;
+}
+
 
 std::string Response::buildResponse(Request request) {
     std::string response;
@@ -46,7 +56,7 @@ std::string Response::buildResponse(Request request) {
             response = "HTTP/1.1 " + stringCode.str() + " " + responseStatus(request.getCode()) +"\r\n";
             response += "Content-Length: " + length.str() + "\r\n";
             response += "Content-Type: " + getContentType(filePath) + "\r\n\r\n";
-            std::cout << "response " << response << std::endl;
+            //std::cout << "response " << response << std::endl;
             
             response += fileContent;
         } else {

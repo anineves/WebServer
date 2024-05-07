@@ -47,7 +47,7 @@ void TcpServer2::startServer()
         }
         std::cout << "listening Port :" << BLUE << convert_uint32_to_str(ntohl(it->sin_addr.s_addr)) << ":" << ntohs(it->sin_port) << " | Socket: " << curr_socket << RESET << std::endl;
         this->m_sockets.push_back(curr_socket);
-        socketCreation[curr_socket] = time(NULL);
+        //socketCreation[curr_socket] = time(NULL);
     }
 }
 
@@ -99,17 +99,14 @@ void TcpServer2::startListen()
         std::cout << "\n\n";
         for (int i = 0; i < num_events; i++)
         {
-            std::cout << "ENTREI ===222222222============= \n";
             for (size_t j = 0; j < this->m_server.size(); ++j)
             {
-                std::cout << "ENTREI ======================= \n";
                 struct sockaddr_in addr;
                 socklen_t addr_len = sizeof(addr);
                 std::cout << GREEN << m_event_list[i].data.fd << " entrei antes  valor socket" << m_sockets[j] << RESET << std::endl;
                 if (m_event_list[i].data.fd == m_sockets[j])
                 {  
                     m_server[j].setSocketAddr_len(sizeof(m_sockets[j]));
-                    std::cout << "entrei accept " << std::endl;
                     int client_socket = accept(m_event_list[i].data.fd, (struct sockaddr *)&addr, &addr_len);
                     std::cout << CYAN << client_socket << RESET << std::endl;
                     std::cout << "entrei accept " << std::endl;
@@ -127,41 +124,47 @@ void TcpServer2::startListen()
                         exitWithError("Problems in Epoll_CTL.");
                         exit(EXIT_FAILURE);
                     }
-                    std::cout << "data.fd[iiiiiiiiiiiiiiiiiiiiiiii]" << m_event_list[i].data.fd << std::endl;
                     // Associar cada socket a cada client
                     clientServerMap[client_socket] = &m_server[j];
-                    socketCreation[m_sockets [j]] = time(NULL); // Atualiza o tempo de criação do socket
+                    socketCreation[client_socket] = time(NULL); // Atualiza o tempo de criação do socket
                 }
                 else if (m_event_list[i].events & EPOLLIN)
                 {
                     Server *server = clientServerMap[m_event_list[i].data.fd];
                     if (server != NULL)
                     {
-                        socketCreation[m_sockets[j]] = time(NULL); // Atualiza o tempo de criação do socket
-                        std::string clientRequest = showClientHeader(m_event_list[i]);
-                        Request request(clientRequest);
-                        std::cout << "Path from request = " << request.getPath() << std::endl;
-                        if(request.getMethod() == "POST" && request.lines_body.empty() ){
-                            std::cout << MAGENTA << " POST sem Body " << RESET <<std::endl;
-                            verificTimeOut();
+                        socketCreation[m_event_list[i].data.fd] = time(NULL); // Atualiza o tempo de criação do socket
+                        Request request1;
+
+                        showClientHeader(m_event_list[i], request1);
+                        //Request request(clientRequest);
+                        request1.verific_errors(*server);
+                        std::string serverResponse;
+                        Response response(*server);
+                        std::cout << CYAN << "Path from request = " << request1.getPath()  << " CODE " << request1.getCode() << RESET << std::endl;
+                        if(request1.getCode() != 200 && !request1.getPath().empty()){
+                            std::cout << MAGENTA << " Entrei erros " << RESET <<std::endl;
+                            serverResponse = response.buildErrorResponse(request1.getCode());
+                            m_event_list[i].events = EPOLLOUT;
+                            epoll_ctl(this->getEpoll(), EPOLL_CTL_MOD, m_event_list[i].data.fd, &m_event_list[i]);
+                            responseMap[m_event_list[i].data.fd] = serverResponse;
+
                         }
                         else{
-                        Location locationSettings = server->verifyLocations(request.getPath());
+                        Location locationSettings = server->verifyLocations(request1.getPath());
                         std::cout << CYAN << "Entrou Location :" << locationSettings.getPath() << RESET << std::endl;
 
                         int n = 0;
-                        if (is_file("frontend/html" + request.getPath()) == 1)
+                        if (is_file("frontend/html" + request1.getPath()) == 1)
                         {
                             n = 1;
                         }
                         std::cout << "n ===================================================" << n << std::endl;
                         if (!locationSettings.getPath().empty())
                         {
-                            std::string serverResponse;
-
+                            
                             if (!locationSettings.getReturn().empty())
                             {
-                                std::cout << CYAN << "ENTREI NO REDIRECT : " << locationSettings.getReturn() << RESET << std::endl;
                                 std::istringstream iss(locationSettings.getReturn());
                                 std::string response;
                                 std::string code;
@@ -171,21 +174,19 @@ void TcpServer2::startListen()
                                 response = "HTTP/1.1 " + code + " Moved Permanently \r\n";
                                 response += "Content-Length: 0\r\n";
                                 response += "Location: " + loc + "\r\n\r\n";
-                                // std::cout << CYAN << "Response:" << response << RESET << std::endl;
                                 serverResponse = response;
                             }
                             else if(!locationSettings.getCgiPath().empty())
                             {
-                                 if (!request.getPath().empty()) {
-                                    request.printMessage();
-                                    Cgi cgi(request.getPath());
-                                    cgi.runCgi(request, m_event_list[i].data.fd);
+                                 if (!request1.getPath().empty()) {
+                                    //request1.printMessage();
+                                    Cgi cgi(request1.getPath());
+                                    cgi.runCgi(request1, m_event_list[i].data.fd);
                                 }
                             }
                             else if (locationSettings.getAutoIndex() == "on" && n == 0)
                             {
-                                std::cout << CYAN << "Entrei AutoIndex on" << RESET << std::endl;
-
+                                //std::cout << CYAN << "Entrei AutoIndex on" << RESET << std::endl;
                                 DIR *dir;
                                 struct dirent *ent;
                                 std::vector<std::string> content;
@@ -218,8 +219,8 @@ void TcpServer2::startListen()
                                 {
                                     serverResponse = handleRequest(clientRequest);
                                 }
-                                Response response(*server);
-                                serverResponse = response.buildResponse(request);
+                                
+                                serverResponse = response.buildResponse(request1);
                             }
                             m_event_list[i].events = EPOLLOUT;
                             epoll_ctl(this->getEpoll(), EPOLL_CTL_MOD, m_event_list[i].data.fd, &m_event_list[i]);
@@ -236,30 +237,41 @@ void TcpServer2::startListen()
                     responseMap.erase(m_event_list[i].data.fd);
                     m_event_list[i].events = EPOLLIN;
                     epoll_ctl(this->getEpoll(), EPOLL_CTL_MOD, m_event_list[i].data.fd, &m_event_list[i]);
-			 int ret = epoll_ctl(this->getEpoll(), EPOLL_CTL_DEL,  m_event_list[i].data.fd, &m_event_list[i]);
-    			if (ret == -1)
-    			{
-        		std::cout  << "failed to remove fd " << m_event_list[i].data.fd << " from EPOLL" << std::endl;
-   			 }
-			close(m_event_list[i].data.fd);
+			        int ret = epoll_ctl(this->getEpoll(), EPOLL_CTL_DEL,  m_event_list[i].data.fd, &m_event_list[i]);
+    			    if (ret == -1)
+    			    {
+        		        std::cout  << "failed to remove fd " << m_event_list[i].data.fd << " from EPOLL" << std::endl;
+   			        }
+			        close(m_event_list[i].data.fd);
                 }
             }
         }
     }
 }
 
-std::string TcpServer2::showClientHeader(struct epoll_event &m_events)
+void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request)
 {
     char buffer[5000];
-    int bytesReceived = recv(m_events.data.fd, buffer, sizeof(buffer), 0);
+    ft_memset(&buffer, 0, 4999);
+    int bytesReceived = recv(m_events.data.fd, buffer, sizeof(buffer) - 1, 0);
     if (bytesReceived < 0)
     {
         log("Error receiving data from client");
-        return "";
+        return;
     }
 
     buffer[bytesReceived] = '\0';
-    return std::string(buffer);
+    if(request.has_header == false)
+    {
+        request.parser(buffer);
+    }
+    else if(request.has_header == true)
+    {
+        std::cout << "Ja tem HEADEEEER" << std::endl;
+    }
+    request._fullRequest += buffer;
+    //std::cout << GREEN << "FULL REQUEST " << buffer << std::endl;
+    //return std::string(buffer);
 }
 
 void TcpServer2::sendResponse(int client_socket, const std::string &response)
@@ -292,15 +304,6 @@ uint32_t TcpServer2::strToNet(const std::string &ip_address)
     return htonl(addr.s_addr);
 }
 
-void TcpServer2::printPorts()
-{
-    for (size_t i = 0; i < this->m_server.size(); i++)
-    {
-        std::cout << this->m_server[i].getPort_s() << " ";
-    }
-    std::cout << " * * * \n\n";
-}
-
 int TcpServer2::getEpoll()
 {
     return this->epoll_fd;
@@ -310,11 +313,11 @@ void TcpServer2::setAddresses()
 {
     for (size_t i = 0; i < m_server.size(); i++)
     {
-        memset(&m_server[i].s_socketAddress, 0, sizeof(m_server[i].s_socketAddress));
+        ft_memset(&m_server[i].s_socketAddress, 0, sizeof(m_server[i].s_socketAddress));
         m_server[i].s_socketAddress.sin_family = AF_INET;
         m_server[i].s_socketAddress.sin_addr.s_addr = htonl(INADDR_ANY);
-        std::cout << "valor Porta htons: " << htons(m_server[i].getPort_s()) << std::endl;
-        std::cout << "valor Porta: " << m_server[i].getPort_s() << std::endl;
+        //std::cout << "valor Porta htons: " << htons(m_server[i].getPort_s()) << std::endl;
+        //std::cout << "valor Porta: " << m_server[i].getPort_s() << std::endl;
         m_server[i].s_socketAddress.sin_port = htons(m_server[i].getPort_s());
         m_addresses.push_back(m_server[i].getSocketAddr());
     }
@@ -329,7 +332,7 @@ void TcpServer2::verificTimeOut()
     {
         time_t elapsedTime = currentTime - it->second;
         std::cout << YELLOW << it->first << " elapsedTime = " << elapsedTime << RESET << std::endl;
-        if (elapsedTime >= TIMEOUT)
+        if (elapsedTime >= TIMEOUT )
         {
             std::cout << MAGENTA << "Vou fechar conexão :" << it->first << RESET << std::endl;
             close(it->first);
@@ -344,3 +347,4 @@ void TcpServer2::verificTimeOut()
         }
     }
 }
+
