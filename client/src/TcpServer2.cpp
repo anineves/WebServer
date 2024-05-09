@@ -120,18 +120,17 @@ void TcpServer2::startListen()
             {
                 struct sockaddr_in addr;
                 socklen_t addr_len = sizeof(addr);
-                std::cout << GREEN << m_event_list[i].data.fd << " entrei antes  valor socket" << m_sockets[j] << RESET << std::endl;
                 if (m_event_list[i].data.fd == m_sockets[j])
                 {
                     m_server[j].setSocketAddr_len(sizeof(m_sockets[j]));
                     int client_socket = accept(m_event_list[i].data.fd, (struct sockaddr *)&addr, &addr_len);
                     std::cout << CYAN << client_socket << RESET << std::endl;
-                    std::cout << "entrei acceptsfsfg " << std::endl;
-                    /*if (client_socket == -1)
+                    std::cout << "entrei accept " << std::endl;
+                    if (client_socket == -1)
                     {
                         exitWithError("Can't Accept something");
                         continue;
-                    }*/
+                    }
                     std::cout << "New Connection on port: " << ntohs(m_server[j].sin_port) << "| fd:"<< client_socket << std::endl;
 
                     m_event.events = EPOLLIN | EPOLLRDHUP;
@@ -161,7 +160,6 @@ void TcpServer2::startListen()
                         std::cout << CYAN << "Path from request = " << request1.getPath() << " CODE " << request1.getCode() << RESET << std::endl;
                         if (request1.getCode() != 200 && !request1.getPath().empty())
                         {
-                            std::cout << MAGENTA << " Entrei erros " << RESET << std::endl;
                             serverResponse = response.buildErrorResponse(request1.getCode());
                             m_event_list[i].events = EPOLLOUT;
                             epoll_ctl(this->getEpoll(), EPOLL_CTL_MOD, m_event_list[i].data.fd, &m_event_list[i]);

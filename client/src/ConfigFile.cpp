@@ -132,9 +132,9 @@ void ConfigFile::parser(std::string conFile)
 
             ss >> sword;
 
-            if (sword.empty() || (sword.at(0) != '/'))
+            if (sword.empty() || ( (sword.at(0) != '/') && (sword.at(0) != '.')))
             {
-                log("ERROR: Invalid location path");
+                log("ERROR: Invalid location patssh");
                 exit(1);
             }
             path = sword;

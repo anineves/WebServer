@@ -181,6 +181,21 @@ Location Server::verifyLocations(std::string pathRequest) {
 
     while (!location_found) {
         for (size_t i = 0; i < _locations.size(); i++) {
+
+            size_t extensionPosDot = pathRequest.find_last_of('.');
+            if (extensionPosDot != std::string::npos) 
+            {
+                    pathRequest = pathRequest.substr(extensionPosDot);
+                    if(pathRequest == ".py")
+                    {
+                       if(_locations[i].getPath().find_last_of('.'))
+                       {
+                        std::cout << "Entrei para PPYYYY" << std::endl;
+                            location = _locations[i];
+                       }
+                    }
+                    
+            }
             if (pathRequest == _locations[i].getPath()) {
                 location = _locations[i];
                 location_found++;
