@@ -29,14 +29,14 @@ Server::Server(std::string ipAddr, int port, std::string root, std::string index
 }
 
 Server::~Server() {
-    close(this->s_socket);
+    //close(this->s_socket);
     std::cout << "Server port: " << this->s_port << " destructor called.\n";
 }
 
 // ---- SETTERS ----
 void    Server::setIpAddr_s(std::string ipAddr) {this->s_ip_address = ipAddr;}
 
-void    Server::setPort_s(int port) {this->s_port = port;}
+void    Server::setPort_s(std::string port) {this->s_port = port;}
 
 void    Server::setRoot_s(std::string root) {this->s_root = root;}
 void    Server::setIndex_s(std::string index) {this->s_index = index;}
@@ -112,7 +112,7 @@ std::string Server::getIpAddr_s() {
     return this->s_ip_address;
 }
 
-int     Server::getPort_s() {
+std::string     Server::getPort_s() {
     return this->s_port;
 }
 

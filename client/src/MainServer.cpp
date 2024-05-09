@@ -26,8 +26,6 @@ int main(int ac, char **av) {
             std::ifstream unexistingFile(av[1]);
             if (!unexistingFile.is_open()) {
                 confFile = "./config/Default.conf";
-                // HTTP status Code 204(No content)
-                //httpCode = 204;
             }
             confFile = "./" + std::string(av[1]);
         }
@@ -41,20 +39,10 @@ int main(int ac, char **av) {
     std::cout << "ip ======== " << ip << std::endl;
 
     std::vector<Server>& servers = configFile.getServers();
-     //std::vector<struct sockaddr_in> unique_addrs = configFile.get_unique_addresses();
 
     
     TcpServer2 tcpServer(servers);
-    //tcpServer.startServer(unique_addrs);
 
-    //tcpServer.startListen();
     return 0;
 }
 }
-//./webserv config/DefaultConfig.conf can work because the file doesnt exist, and should use default or error dunno :/
-
-// Fazes class server, que tem um vetor, onde garda a informacao de cada server. 
-// Ver o location o que e e como funciona. 
-// Ver respostas
-// Ver o CGI
-// Esta sempre a enviar o index.html,perceber como enviar o css e o register

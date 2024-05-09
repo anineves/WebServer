@@ -2,7 +2,7 @@
 
 Request::Request(std::string request) : _fullRequest(request)
 {
-    //parser(_fullRequest);
+
     has_header = false;
     _code = 200;
 }
@@ -16,7 +16,6 @@ Request::~Request() {}
 void Request::parser(std::string header)
 {
 
-    // std::cout << "Header " << header << std::endl;
     std::istringstream iss(header);
     std::stringstream ss(header);
     std::string line;
@@ -69,7 +68,7 @@ void Request::parser(std::string header)
 
     while (std::getline(ss, line) && line != "\r")
     {
-        std::cout << "linha body:::::" << line << std::endl;
+        //std::cout << "linha body:::::" << line << std::endl;
         //if (line.find('=') != std::string::npos)
         //{
           //  std::string name(line.substr(0, line.find('=')));
@@ -84,7 +83,7 @@ void Request::parser(std::string header)
 
     std::cout << MAGENTA << "LINHAS " << this->lines_body << RESET << std::endl;
 
-    //verific_errors();
+   
 }
 
 bool Request::verific_errors(Server server)
@@ -188,14 +187,8 @@ void Request::setPath(std::string path)
 
 void Request::verifyLocations(Server server)
 {
-    /*     std::vector<Location> tmp = server.getLocations();
-        for (size_t i = 0; i < tmp.size(); i++) {
-            tmp[i].printLoc();
-        } */
     std::string pathRequest = this->_path;
-
     std::string bestMatchPath;
-    // size_t bestMatchLength = 0;
 
     size_t extensionPos;
     int location_found = 0;
@@ -209,8 +202,8 @@ void Request::verifyLocations(Server server)
                 bestMatchPath = locationStack[i].getPath();
                 location_found++;
             }
-            std::cout << "-------------------pathRequest: " << pathRequest << std::endl;
-            std::cout << "-------------------locationPathComparing: " << locationStack[i].getPath() << std::endl;
+            //std::cout << "-------------------pathRequest: " << pathRequest << std::endl;
+            //std::cout << "-------------------locationPathComparing: " << locationStack[i].getPath() << std::endl;
         }
         if (!location_found)
         {
@@ -226,7 +219,7 @@ void Request::verifyLocations(Server server)
             }
         }
     }
-    std::cout << RED << "BESTMATCHPATH = " << RESET << bestMatchPath << std::endl;
+    //std::cout << RED << "BESTMATCHPATH = " << RESET << bestMatchPath << std::endl;
 
     std::cout << std::endl;
     // std::cout << server.getLocations()[1].getAllowMethods() << std::endl;
@@ -240,9 +233,7 @@ void Request::verifyLocations(Server server)
             Location location = server.getLocations()[i];
             if (location.getPath() == bestMatchPath)
             {
-
-                std::cout << "\n\n\n @@@@@entrei Location :" << location.getPath() << "\n\n"
-                          << std::endl;
+                //std::cout << "\n\n\n @@@@@entrei Location :" << location.getPath() << "\n\n"<< std::endl;
                 if (!location.getUploadTo().empty())
                     server.setUploadTo(location.getUploadTo());
                 if (!location.getCgiPath().empty())
@@ -250,7 +241,7 @@ void Request::verifyLocations(Server server)
                 if (!location.getCgiExt().empty())
                 {
                     server.setExecutable("true");
-                    std::cout << "\n\n### entrei Locations Executable" << std::endl;
+                    //std::cout << "\n\n### entrei Locations Executable" << std::endl;
                     server.setCgiPath(location.getCgiPath());
                 }
                 if (!location.getAutoIndex().empty())

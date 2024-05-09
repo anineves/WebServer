@@ -23,7 +23,7 @@
 # define BUFFER_SIZE 30200
 # define MAX_CLIENTS 20
 # define MAX_EVENTS 20
-# define MAXEPOLLSIZE SOMAXCONN
+# define MAXEPOLLSIZE 20
 
 // ------- colors
 # define RESET   "\033[0m"
