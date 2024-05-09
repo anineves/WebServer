@@ -80,7 +80,8 @@ void	Cgi::runCgi(Request &request, int client_fd)
 	std::stringstream	header_stream;
 
 	initEnv(request);
-	body = request.getFullRequest();
+	body = request.lines_body;
+
 	
 	if (pipe(fdResponse) == -1 || pipe(fdRequest) == -1)
 		return ; // Error

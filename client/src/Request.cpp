@@ -15,8 +15,7 @@ Request::~Request() {}
 
 void Request::parser(std::string header)
 {
-
-    // std::cout << "Header " << header << std::endl;
+    // std::cout << MAGENTA << "Header " << header << RESET << std::endl;
     std::istringstream iss(header);
     std::stringstream ss(header);
     std::string line;
