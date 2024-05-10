@@ -250,59 +250,24 @@ void TcpServer2::startListen()
 
 void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request)
 {
-    char    buffer[1024];
-    int     bytesReceived = 1;
+    char        buffer[1024];
+    int         bytesReceived;
     std::string header;
 
-    while (bytesReceived > 0) {
-        // ft_memset(&buffer, 0, 1023);
-        std::cout << MAGENTA << "\nBYTR 1 -> " << bytesReceived << RESET << std::endl;
-        bytesReceived = read(m_events.data.fd, buffer, sizeof(buffer));
-        // if(bytesReceived == -;
-        std::cout << MAGENTA << "BUFFER[i] -> " << buffer << ".\nSIZE -> " << sizeof(buffer) << RESET << std::endl;
-        std::cout << MAGENTA << "\nbytesReceived 2 -> " << bytesReceived << RESET << std::endl;
+    do {
+        ft_memset(&buffer, 0, 1023);
+        bytesReceived = recv(m_events.data.fd, buffer, sizeof(buffer) - 1, MSG_DONTWAIT);
+        if (bytesReceived == -1)
+            break ;
         header.append(buffer, bytesReceived);
-    }
-	// std::cout << MAGENTA << "FULL BODY: " << body << RESET << std::endl;
-    header[bytesReceived] = '\0';
+    } 
+    while (bytesReceived > 0); 
     if(request.has_header == false)
-    {
         request.parser(header);
-    }
     else if(request.has_header == true)
-    {
         std::cout << "Ja tem HEADEEEER" << std::endl;
-    }
-    request._fullRequest += buffer;
-    //std::cout << GREEN << "FULL REQUEST " << buffer << std::endl;
-    //return std::string(buffer);
+    request._fullRequest += header;
 }
-
-// void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request)
-// {
-//     char buffer[9000];
-//     ft_memset(&buffer, 0, 8999);
-//     int bytesReceived = recv(m_events.data.fd, buffer, sizeof(buffer) - 1, 0);
-//     if (bytesReceived < 0)
-//     {
-//         log("Error receiving data from client");
-//         return;
-//     }
-
-//     buffer[bytesReceived] = '\0';
-//     if(request.has_header == false)
-//     {
-//         std::cout << MAGENTA << "BUFFER[i] -> " << buffer << "\nSIZE -> " << sizeof(buffer) << RESET << std::endl;
-//         request.parser(buffer);
-//     }
-//     else if(request.has_header == true)
-//     {
-//         std::cout << "Ja tem HEADEEEER" << std::endl;
-//     }
-//     request._fullRequest += buffer;
-//     //std::cout << GREEN << "FULL REQUEST " << buffer << std::endl;
-//     //return std::string(buffer);
-// }
 
 void TcpServer2::sendResponse(int client_socket, const std::string &response)
 {
