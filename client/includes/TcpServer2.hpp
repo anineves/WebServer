@@ -33,6 +33,7 @@ private:
     std::vector<int>                m_sockets;
     int                             epoll_fd;
     std::map<int, time_t>           socketCreation;
+    std::string                     full_header;
 
 public:
     TcpServer2(std::vector<Server> server);
@@ -52,7 +53,7 @@ public:
 
     void startServer();
     void acceptConnection();
-    void showClientHeader(struct epoll_event &m_events, Request &request1);
+    int showClientHeader(struct epoll_event &m_events, Request &request1);
     void sendResponse(int client_socket, const std::string& response);
     void closeServer();
     uint32_t strToNet(const std::string &ip_address);

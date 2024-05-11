@@ -152,7 +152,8 @@ void TcpServer2::startListen()
                         socketCreation[m_event_list[i].data.fd] = time(NULL); // Atualiza o tempo de criação do socket
                         Request request1;
 
-                        showClientHeader(m_event_list[i], request1);
+                        if ( showClientHeader(m_event_list[i], request1) != 1)
+                            break;
                         // Request request(clientRequest);
                         request1.verific_errors(*server);
                         std::string serverResponse;
@@ -266,29 +267,34 @@ void TcpServer2::startListen()
     closeConnection();
 }
 
-void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request)
+int TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request)
 {
-    char buffer[5000];
-    ft_memset(&buffer, 0, 4999);
+    char buffer[24]; 
+    std::cout << "Entrei" << std::endl;
+    memset(buffer, 0, sizeof(buffer));
+
     int bytesReceived = recv(m_events.data.fd, buffer, sizeof(buffer) - 1, 0);
     if (bytesReceived < 0)
     {
         log("Error receiving data from client");
-        return;
+        return -1;
     }
+    full_header += buffer;
 
-    buffer[bytesReceived] = '\0';
-    if (request.has_header == false)
+    size_t pos = full_header.find("\r\n\r\n");
+    if (pos != std::string::npos)
     {
-        request.parser(buffer);
+        std::cout << "HEADERRRRRR"  << full_header << std::endl;
+        request.parser(full_header.substr(0, pos + 4));
+        full_header = "";
+        return 1;
     }
-    else if (request.has_header == true)
+    else
     {
-        std::cout << "Ja tem HEADEEEER" << std::endl;
+        
+        log("Header incomplete, waiting for more data");
+        return 0;
     }
-    request._fullRequest += buffer;
-    // std::cout << GREEN << "FULL REQUEST " << buffer << std::endl;
-    // return std::string(buffer);
 }
 
 void TcpServer2::sendResponse(int client_socket, const std::string &response)
