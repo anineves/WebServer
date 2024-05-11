@@ -46,8 +46,9 @@ public:
     std::string getFullRequest(void);
     bool verific_errors(Server server);
     bool has_header;
-    void parser(std::string header);
+    void parserHeader(std::string header);
     std::string _fullRequest;
+    void parserBody(std::string body);
 
 private:
     std::string _method;

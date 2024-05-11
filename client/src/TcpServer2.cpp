@@ -16,6 +16,8 @@ TcpServer2::TcpServer2(std::vector<Server> servers) : m_server(servers)
     setAddresses();
     startServer();
     startListen();
+    full_header_f = false;
+    full_body_f = false;
 }
 
 TcpServer2::~TcpServer2()
@@ -152,7 +154,8 @@ void TcpServer2::startListen()
                         socketCreation[m_event_list[i].data.fd] = time(NULL); // Atualiza o tempo de criação do socket
                         Request request1;
 
-                        if ( showClientHeader(m_event_list[i], request1) != 1)
+                        showClientHeader(m_event_list[i], request1);
+                        if(full_body_f == false)
                             break;
                         // Request request(clientRequest);
                         request1.verific_errors(*server);
@@ -245,6 +248,7 @@ void TcpServer2::startListen()
                             }
                         }
                     }
+                    full_body_f = false;
                 }
                 else if (m_event_list[i].events & EPOLLOUT)
                 {
@@ -267,34 +271,76 @@ void TcpServer2::startListen()
     closeConnection();
 }
 
-int TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request)
+void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request)
 {
-    char buffer[24]; 
-    std::cout << "Entrei" << std::endl;
+    char buffer[1024]; 
     memset(buffer, 0, sizeof(buffer));
-
     int bytesReceived = recv(m_events.data.fd, buffer, sizeof(buffer) - 1, 0);
     if (bytesReceived < 0)
     {
         log("Error receiving data from client");
-        return -1;
+        return ;
     }
-    full_header += buffer;
-
-    size_t pos = full_header.find("\r\n\r\n");
-    if (pos != std::string::npos)
+    std::string buffer_str(buffer, bytesReceived);
+    if(request.has_header == false)
     {
-        std::cout << "HEADERRRRRR"  << full_header << std::endl;
-        request.parser(full_header.substr(0, pos + 4));
-        full_header = "";
-        return 1;
-    }
-    else
-    {
+        size_t pos2 = buffer_str.find("\r\n\r\n");
+        std::string tmp_buffer = "";
+        if (pos2 != std::string::npos)
+        {
+            tmp_buffer = buffer_str.substr(0, pos2 + 4);
+            full_header += tmp_buffer;
+            full_header_f = true;
+        }
+        else
+        {
+            full_header += buffer_str;
+        }
         
-        log("Header incomplete, waiting for more data");
-        return 0;
+        if (full_header_f == true)
+        {
+            if((tmp_buffer.size()) < (size_t)bytesReceived)
+            {
+                std::cout << " Mais info" << std::endl;
+                std::cout << "HEADERRRRRR  true : \n"  << full_header << std::endl;
+                full_body += buffer_str.substr(pos2 + 4); 
+                request.parserHeader(full_header);
+                //full_header = "";
+                request.has_header = true;
+            }
+            else{
+                full_body_f = true;
+                std::cout << "HEADERRRRRR  true : \n"  << full_header << std::endl;
+                request.parserHeader(full_header);
+                full_header = "";
+            }
+        }
+        else
+        {
+            log("Header incomplete, waiting for more data");
+        }
     }
+    if(request.has_header == true)
+    {
+        std::cout << MAGENTA << "ENTREI  HAS REQUEST" << RESET << std::endl;
+        size_t pos2 = buffer_str.find("\r\n\r\n");
+        if (pos2 != std::string::npos)
+        {
+            full_body_f = true;
+        }
+        full_body += buffer_str;
+
+        if(full_body_f == true)
+        {
+            std::cout << MAGENTA << "ENTREI  Body" << full_body << RESET << std::endl;
+            request.parserBody(full_body);
+            request._fullRequest = full_body;
+            full_body = "";
+        }
+
+
+    }
+
 }
 
 void TcpServer2::sendResponse(int client_socket, const std::string &response)

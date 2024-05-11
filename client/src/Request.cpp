@@ -13,7 +13,7 @@ Request::Request() {
 
 Request::~Request() {}
 
-void Request::parser(std::string header)
+void Request::parserHeader(std::string header)
 {
 
     std::istringstream iss(header);
@@ -66,6 +66,17 @@ void Request::parser(std::string header)
     }
     this->has_header = true; 
 
+
+    std::cout << MAGENTA << "LINHAS " << this->lines_body << RESET << std::endl;
+
+   
+}
+
+void Request::parserBody(std::string body)
+{
+    std::stringstream ss(body);
+    std::string line;
+
     while (std::getline(ss, line) && line != "\r")
     {
         //std::cout << "linha body:::::" << line << std::endl;
@@ -80,10 +91,6 @@ void Request::parser(std::string header)
             //}
         //}
     }
-
-    std::cout << MAGENTA << "LINHAS " << this->lines_body << RESET << std::endl;
-
-   
 }
 
 bool Request::verific_errors(Server server)
@@ -172,12 +179,8 @@ void Request::printMessage()
 
 std::string Request::getFullRequest(void)
 {
-    std::string temp = _fullRequest;
-    std::size_t found;
-
-    found = temp.find("\r\n\r\n");
-    std::string new_request = temp.substr(found);
-    return new_request;
+    
+    return this->lines_body;
 }
 
 void Request::setPath(std::string path)
@@ -229,7 +232,7 @@ Accept-Language: en-US,en;q=0.9
 
 
 
-POST /register.html HTTP/1.1
+POST /register.html HTTP/1.1\r\n
 Host: localhost:8008
 Connection: keep-alive
 Content-Length: 70
@@ -250,7 +253,8 @@ Sec-Fetch-User: ?1
 Sec-Fetch-Dest: document
 Referer: http://localhost:8008/register.html
 Accept-Encoding: gzip, deflate, br, zstd
-Accept-Language: en-US,en;q=0.9
-
-std::string name = "name=alexandre&dob=1993-09-12&email=blahblah%40gmail.com&password=1234"
+Accept-Language: en-US,en;q=0.9\r\n
+\r\n
+std::string name = "name=alexandre&dob=1993-09-12&email=blahblah%40gmail.com&password=1234"\r\n
+\r\n
 */
