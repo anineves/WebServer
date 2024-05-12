@@ -2,7 +2,7 @@
 
 Request::Request(std::string request) : _fullRequest(request)
 {
-    //parser(_fullRequest);
+
     has_header = false;
     _code = 200;
 }
@@ -15,7 +15,6 @@ Request::~Request() {}
 
 void Request::parser(std::string header)
 {
-    // std::cout << MAGENTA << "Header " << header << RESET << std::endl;
     std::istringstream iss(header);
     std::stringstream ss(header);
     std::string line;
@@ -68,7 +67,7 @@ void Request::parser(std::string header)
 
     while (std::getline(ss, line) && line != "\r")
     {
-        std::cout << "linha body:::::" << line << std::endl;
+        //std::cout << "linha body:::::" << line << std::endl;
         //if (line.find('=') != std::string::npos)
         //{
           //  std::string name(line.substr(0, line.find('=')));
@@ -81,9 +80,9 @@ void Request::parser(std::string header)
         //}
     }
 
-    std::cout << MAGENTA << "LINHAS " << this->lines_body << RESET << std::endl;
+    // std::cout << MAGENTA << "LINHAS " << this->lines_body << RESET << std::endl;
 
-    //verific_errors();
+   
 }
 
 bool Request::verific_errors(Server server)
@@ -95,7 +94,7 @@ bool Request::verific_errors(Server server)
         exitWithError("Missing informations");
         return 0;
     }
-    if ((this->_method == "POST" && this->lines_header["Content-Length"].empty()))
+    if ((this->_method == "POST" && getBody().empty()))
     {
         _code = 411;
         exitWithError("Post Without body");
@@ -185,90 +184,6 @@ void Request::setPath(std::string path)
     this->_path = path;
 }
 
-void Request::verifyLocations(Server server)
-{
-    /*     std::vector<Location> tmp = server.getLocations();
-        for (size_t i = 0; i < tmp.size(); i++) {
-            tmp[i].printLoc();
-        } */
-    std::string pathRequest = this->_path;
-
-    std::string bestMatchPath;
-    // size_t bestMatchLength = 0;
-
-    size_t extensionPos;
-    int location_found = 0;
-    std::vector<Location> locationStack = server.getLocations();
-    while (!location_found)
-    {
-        for (size_t i = 0; i < locationStack.size(); i++)
-        {
-            if (pathRequest.compare(locationStack[i].getPath()) == 0)
-            {
-                bestMatchPath = locationStack[i].getPath();
-                location_found++;
-            }
-            std::cout << "-------------------pathRequest: " << pathRequest << std::endl;
-            std::cout << "-------------------locationPathComparing: " << locationStack[i].getPath() << std::endl;
-        }
-        if (!location_found)
-        {
-            extensionPos = pathRequest.find_last_of('/');
-            if (extensionPos != std::string::npos)
-            {
-                pathRequest = pathRequest.substr(0, extensionPos);
-            }
-            else
-            {
-                bestMatchPath = "/";
-                location_found++;
-            }
-        }
-    }
-    std::cout << RED << "BESTMATCHPATH = " << RESET << bestMatchPath << std::endl;
-
-    std::cout << std::endl;
-    // std::cout << server.getLocations()[1].getAllowMethods() << std::endl;
-    if (!bestMatchPath.empty())
-    {
-        // Connection connect;
-        std::cout << "\n\n###############- Path Location " << bestMatchPath << " Path request " << pathRequest << std::endl;
-
-        for (size_t i = 0; i < server.getLocations().size(); ++i)
-        {
-            Location location = server.getLocations()[i];
-            if (location.getPath() == bestMatchPath)
-            {
-
-                std::cout << "\n\n\n @@@@@entrei Location :" << location.getPath() << "\n\n"
-                          << std::endl;
-                if (!location.getUploadTo().empty())
-                    server.setUploadTo(location.getUploadTo());
-                if (!location.getCgiPath().empty())
-                    server.setCgiPath(location.getCgiPath());
-                if (!location.getCgiExt().empty())
-                {
-                    server.setExecutable("true");
-                    std::cout << "\n\n### entrei Locations Executable" << std::endl;
-                    server.setCgiPath(location.getCgiPath());
-                }
-                if (!location.getAutoIndex().empty())
-                    server.setAutoIndex(location.getAutoIndex());
-                if (!location.getAllowMethods().empty())
-                {
-                    server._methods.clear();
-                    server.setMethods(location.getAllowMethods());
-                }
-                if (!location.getReturn().empty())
-                {
-                    server.setRedirect("true");
-                    // server.setIndex_s(location.getReturn());
-                }
-                break;
-            }
-        }
-    }
-}
 
 std::string Request::getContentType()
 {

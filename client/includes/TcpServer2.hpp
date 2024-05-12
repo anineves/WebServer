@@ -19,6 +19,7 @@
 # include "./Response.hpp"
 # include <dirent.h>
 # include <map>
+#include <signal.h>
 
 #define TIMEOUT 20
 class Connection;
@@ -57,6 +58,8 @@ public:
     uint32_t strToNet(const std::string &ip_address);
 
     void setAddresses();
+    void closeConnection();
+
 };
 
 #endif

@@ -39,6 +39,49 @@ void *ft_memset(void *s, int c, std::size_t n) {
 }
 
 
+int ft_stoi(std::string str) {
+    std::stringstream ss(str);
+    int num = 0;
+    ss >> num;
+    return num;
+}
+
+void printVector(const std::vector<std::string>& vec) {
+
+    std::cout << MAGENTA << "Server Names" << RESET << std::endl;
+    for (size_t i = 0; i < vec.size(); ++i) {
+        std::cout << vec[i];
+        if (i < vec.size() - 1) {
+            std::cout << ", ";
+        }
+    }
+    std::cout << std::endl;
+}
+
+
+u_int32_t str_to_uint32(std::string str) {
+    std::istringstream iss(str);
+    uint32_t result = 0;
+    unsigned int oct;
+
+    for (int i = 0; i < 4; ++i) {
+        char p;
+        if (i > 0) {
+            if (!(iss >> p) || p != '.') {
+                return 0;
+            }
+        }
+        if (!(iss >> oct || oct > 255)) {
+            return 0;
+        }
+
+        result = (result << 8) | oct;
+    }
+
+    return result;
+}
+
+
 
 
 std::string handleRequest(std::string request)

@@ -25,29 +25,31 @@ public:
     Request(std::string request);
     Request();
     ~Request();
+    // GET methods
     std::string getMethod();
 	std::string getPath();
     std::string getProtocol();
-    int         getCode();
     std::string getContentType();
     std::string getContentLength();
     std::string getHost();
     std::string getQuery();
-    void printMessage();
-    void setPath( std::string path);
-    void verifyLocations(Server server);
-    void setContentType(std::string contentType);
-    void setContentLength(std::string contentLength);
     std::string getBody();
-    void setCode(int code);
-    Server  r_server;
+    std::string getFullRequest(void);
+    int         getCode();
+    // SET methods
+    void        setContentType(std::string contentType);
+    void        setContentLength(std::string contentLength);
+    void        setCode(int code);
+    void        setPath( std::string path);
+    void        printMessage();
+    void        verifyLocations(Server server);
+    bool        verific_errors(Server server);
+    void        parser(std::string header);
+    bool        has_header;
     std::string lines_body;
     std::string _query;
-    std::string getFullRequest(void);
-    bool verific_errors(Server server);
-    bool has_header;
-    void parser(std::string header);
     std::string _fullRequest;
+    Server      r_server;
 
 private:
     std::string _method;

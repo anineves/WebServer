@@ -11,6 +11,7 @@
 #include <vector>
 #include <sys/stat.h>
 #include <cstring>
+int ft_stoi(std::string str);
 
 void log(const std::string &message);
 void exitWithError(const std::string &errorMessage);
@@ -23,5 +24,7 @@ std::string deleteFile(std::string fileName);
 std::string intToString(int num);
 std::string verificDelete(std::vector<std::string> content);
 std::string handleRequest(std::string request);
+u_int32_t str_to_uint32(std::string str);
+void printVector(const std::vector<std::string>& vec);
 
 #endif

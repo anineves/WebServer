@@ -8,13 +8,6 @@ Response::Response()
 Response::Response(Server server)
 {
     m_server = server;
-    if (m_server.getRedirect() == true) {
-        std::cout << CYAN << "ENTREI NO REDIRECT\n" << RESET;
-    }
-   /*m_server.set_ip_addr_s = server.getIpAddr_s();
-   m_server.set_port_s = server.getPort_s();
-   m_server.setRoot_s = server.getRoot_s();
-   m_server.setIndex_s = server.getIndex_s();*/
 }
 
 Response::~Response()
@@ -76,7 +69,6 @@ std::string Response::obtainFilePath(const std::string& request) {
     if (path == "/") {
         path = "/index.html";
     }
-
     std::string fullPath;
     if(path.find(".html") != std::string::npos)
         fullPath = m_server.getRoot_s() + "/html" +  path;
@@ -86,7 +78,6 @@ std::string Response::obtainFilePath(const std::string& request) {
     if (!isValidPath(fullPath)) {
         fullPath = "frontend/error/404.html";
     }
-
      std::cout << "Path:" << fullPath << std::endl;
 
     return fullPath;
