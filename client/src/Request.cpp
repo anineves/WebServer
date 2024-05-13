@@ -16,6 +16,8 @@ Request::~Request() {}
 void Request::parserHeader(std::string header)
 {
 
+    std::cout << "REQUEST COMPLETO" << header << std::endl; 
+
     std::istringstream iss(header);
     std::stringstream ss(header);
     std::string line;
@@ -66,8 +68,24 @@ void Request::parserHeader(std::string header)
     }
     this->has_header = true; 
 
+    //std::cout << MAGENTA << "LINHAS " << this->lines_body << RESET << std::endl;
 
-    std::cout << MAGENTA << "LINHAS " << this->lines_body << RESET << std::endl;
+    while (std::getline(ss, line) && line != "\r")
+    {
+        //std::cout << "linha body:::::" << line << std::endl;
+        //if (line.find('=') != std::string::npos)
+        //{
+          //  std::string name(line.substr(0, line.find('=')));
+            //std::string content(line.substr(line.find('=') + 1, line.find('\n')));
+            //if (content.length() != 0)
+            //{
+
+                this->lines_body += line;
+            //}
+        //}
+    }
+
+    // std::cout << MAGENTA << "LINHAS " << this->lines_body << RESET << std::endl;
 
    
 }
@@ -134,6 +152,11 @@ bool Request::verific_errors(Server server)
     }
 }
 
+
+bool Request::isBodyComplete(const std::string &buffer) {
+    return buffer.find("\r\n\r\n") != std::string::npos;
+}
+
 std::string Request::getMethod()
 {
     return _method;
@@ -180,7 +203,12 @@ void Request::printMessage()
 std::string Request::getFullRequest(void)
 {
     
-    return this->lines_body;
+    std::string temp = _fullRequest;
+    std::size_t found;
+
+    found = temp.find("\r\n\r\n");
+    std::string new_request = temp.substr(found);
+    return new_request;
 }
 
 void Request::setPath(std::string path)

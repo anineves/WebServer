@@ -31,7 +31,7 @@ std::string Response::buildResponse(Request request) {
     //Aqui fiz um codigo meio porco, mas era para ver se funcionava. 
     //Acho que pode ser interessante criar um novo ficheiro.
     //Para fazer tipo o parser, Verificar se HTTP/1.1, Verificar se o metodo e GET, POST OU DELETE ... 
-    request.printMessage();
+    //request.printMessage();
     if (request.getMethod() == "GET" || request.getMethod() == "POST" || request.getMethod() == "DELETE") 
     {
         //std::cout << "valor redirect " << m_server.getredirect << std::endl;

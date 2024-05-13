@@ -49,6 +49,7 @@ public:
     void parserHeader(std::string header);
     std::string _fullRequest;
     void parserBody(std::string body);
+    bool isBodyComplete(const std::string &buffer);
 
 private:
     std::string _method;

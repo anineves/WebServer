@@ -63,6 +63,7 @@ public:
 
     void setAddresses();
     void closeConnection();
+    bool has_requestTCP;
 
 };
 
