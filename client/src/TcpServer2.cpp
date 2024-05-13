@@ -39,7 +39,6 @@ void TcpServer2::startServer()
             exitWithError("Socket creation failed");
             exit(EXIT_FAILURE);
         }
-
         int optval = 1;
         if (setsockopt(curr_socket, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) != 0)
         {
@@ -280,88 +279,163 @@ void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request
     
     char        buffer[5000];
     int         bytesReceived;
-    std::string temp_request;
+    bool        chunked = false;
+    bool        first = true;
+    std::string client_request;
     std::string header;
     std::string body;
     std::string chunk;    
+    std::string content_length;
+    std::string chunk_length_str;
 
     do {
         ft_memset(&buffer, 0, 5000);
         bytesReceived = recv(m_events.data.fd, buffer, sizeof(buffer) - 1, MSG_DONTWAIT);
-        if (bytesReceived == -1)
-            break ;
-        temp_request.append(buffer, bytesReceived);
-    }
-    while (bytesReceived > 0 && temp_request.find("\r\n\r\n") == std::string::npos);
+        if (bytesReceived == -1) {
+            break ;         
+        }
+        client_request.append(buffer, bytesReceived);
 
-    header = temp_request.substr(0, temp_request.find("\r\n\r\n") + 4);
-    // std::cout << RED << "# HEADER\n" << header << std::endl;
-    body = temp_request.substr(temp_request.find("\r\n\r\n") + 4, temp_request.size());
-    if (header.find("Content-Length") != std::string::npos) {
-        size_t pos = header.find("Content-Length:");
-        pos += 15;
-        size_t end_pos = header.find("\r\n", pos);
-        std::string content_length = header.substr(pos, end_pos - pos); // COmpare to how much we want to accept.
-        if (header.find("GET") != std::string::npos) { // Get withou body. Nothing else to receive.
+        size_t found_header = client_request.find("\r\n\r\n");
+        if (found_header != std::string::npos && header.empty()) {
+            header = client_request.substr(0, found_header + 4);
+            if (header.find("Content-Length") != std::string::npos) {
+                size_t pos = header.find("Content-Length:");
+                pos += 15;
+                size_t end_pos = header.find("\r\n", pos);
+                content_length = header.substr(pos, end_pos - pos);
+            }
+            else if (header.find("Transfer-Encoding") != std::string::npos)
+                chunked = true;
+        }
+        if (chunked == true) {
+            if (first == true) {
+                body = client_request.substr(found_header + 4, client_request.size());
+                client_request.clear();
+                first = false;
+            }
+            else {
+                body.append(client_request);
+                client_request.clear();
+            }
+            chunk_length_str = body.substr(0, body.find("\r\n"));
+            if (body.size() >= stringtohex(chunk_length_str)) {
+                while (body.size() > stringtohex(chunk_length_str)) {
+                    chunk += body.substr(body.find("\r\n") + 2, stringtohex(chunk_length_str));
+                    body.erase(0, stringtohex(chunk_length_str) + 2 + chunk_length_str.size() + 2);                
+                    chunk_length_str = body.substr(0, body.find("\r\n"));
+                }
+            }               
+            chunk_length_str.clear(); 
+        }
+    } 
+    while (bytesReceived > 0);
+
+    if(request.has_header == false) {
+        if (chunked) {
+            header += chunk;
+            request.parser(header);
             request._fullRequest += header;
         }
-        else { // Probably POST method
-            do {
-                ft_memset(&buffer, 0, 5000);
-                bytesReceived = recv(m_events.data.fd, buffer, sizeof(buffer) - 1, MSG_DONTWAIT);
-                // std::cout << CYAN << "# bytesReceived\n" << bytesReceived << std::endl;
-                if (bytesReceived == -1)
-                    break ;
-                body.append(buffer, bytesReceived);
-            }
-            while (bytesReceived > 0);
-            // std::cout << GREEN << "# BODY\n" << body << std::endl;
+        else {
+            request.parser(client_request);
+            request._fullRequest += client_request;
         }
     }
-    else if (header.find("Transfer-Encoding") != std::string::npos) {
-
-        std::string chunk_length_str; // String c/ size do chunk
-        
-        do {
-            // std::cout << YELLOW << "# body\n" << body << std::endl;
-            ft_memset(&buffer, 0, 5000);
-            bytesReceived = recv(m_events.data.fd, buffer, sizeof(buffer) - 1, MSG_DONTWAIT);
-            // std::cout << CYAN << "# bytesReceived\n" << bytesReceived << std::endl;
-            if (bytesReceived == -1) {
-                // std::cout << GREEN << "\nERROR\n" << std::endl;
-                break ;
-            }
-            body.append(buffer, bytesReceived);
-
-            chunk_length_str = body.substr(0, body.find("\r\n")); // Size of chunck -> somar com uma var
-            // std::cout << GREEN << "# chunk_hexa\n" << chunk_length_str << "#\nchunk_length\n" << stringtohex(chunk_length_str) << std::endl;
-
-            if (body.size() >= stringtohex(chunk_length_str)) { // body tem mais info que o tam do chunk
-                chunk += body.substr(body.find("\r\n") + 2, stringtohex(chunk_length_str));
-                body.erase(0, stringtohex(chunk_length_str) + 2 + chunk_length_str.size() + 2);
-                chunk_length_str.clear();
-                // std::cout << GREEN << "# CHUNK\n" << chunk << std::endl;
-            }
-            else
-                continue ;
-        }
-        while (bytesReceived > 0);
-    }
-    
-    if (chunk.size() == 0)
-        header += body;
-    else
-        header += chunk;
-
-    if(request.has_header == false)
-        request.parser(header);
     else if(request.has_header == true)
         std::cout << "Ja tem HEADEEEER" << std::endl;
-    request._fullRequest += header;
-    // std::cout << RED << "# FULL REQUEST\n" << request._fullRequest << std::endl;
     header.clear();
     body.clear();
 }
+
+// Backup
+// void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request)
+// {
+    
+//     char        buffer[5000];
+//     int         bytesReceived;
+//     std::string temp_request;
+//     std::string header;
+//     std::string body;
+//     std::string chunk;    
+
+//     do {
+//         ft_memset(&buffer, 0, 5000);
+//         bytesReceived = recv(m_events.data.fd, buffer, sizeof(buffer) - 1, MSG_DONTWAIT);
+//         if (bytesReceived == -1)
+//             break ;
+//         temp_request.append(buffer, bytesReceived);
+//     }
+//     while (bytesReceived > 0 && temp_request.find("\r\n\r\n") == std::string::npos);
+
+//     header = temp_request.substr(0, temp_request.find("\r\n\r\n") + 4);
+//     // std::cout << RED << "# HEADER\n" << header << std::endl;
+//     body = temp_request.substr(temp_request.find("\r\n\r\n") + 4, temp_request.size());
+//     if (header.find("Content-Length") != std::string::npos) {
+//         size_t pos = header.find("Content-Length:");
+//         pos += 15;
+//         size_t end_pos = header.find("\r\n", pos);
+//         std::string content_length = header.substr(pos, end_pos - pos); // COmpare to how much we want to accept.
+//         if (header.find("GET") != std::string::npos) { // Get withou body. Nothing else to receive.
+//             request._fullRequest += header;
+//         }
+//         else { // Probably POST method
+//             do {
+//                 ft_memset(&buffer, 0, 5000);
+//                 bytesReceived = recv(m_events.data.fd, buffer, sizeof(buffer) - 1, MSG_DONTWAIT);
+//                 std::cout << CYAN << "# bytesReceived\n" << bytesReceived << std::endl;
+//                 if (bytesReceived == -1)
+//                     break ;
+//                 body.append(buffer, bytesReceived);
+//             }
+//             while (bytesReceived > 0);
+//             std::cout << GREEN << "# BODY\n" << body << std::endl;
+//         }
+//     }
+//     else if (header.find("Transfer-Encoding") != std::string::npos) {
+
+//         std::string chunk_length_str; // String c/ size do chunk
+        
+//         do {
+//             // std::cout << YELLOW << "# body\n" << body << std::endl;
+//             ft_memset(&buffer, 0, 5000);
+//             bytesReceived = recv(m_events.data.fd, buffer, sizeof(buffer) - 1, MSG_DONTWAIT);
+//             // std::cout << CYAN << "# bytesReceived\n" << bytesReceived << std::endl;
+//             if (bytesReceived == -1) {
+//                 // std::cout << GREEN << "\nERROR\n" << std::endl;
+//                 break ;
+//             }
+//             body.append(buffer, bytesReceived);
+
+//             chunk_length_str = body.substr(0, body.find("\r\n")); // Size of chunck -> somar com uma var
+//             // std::cout << GREEN << "# chunk_hexa\n" << chunk_length_str << "#\nchunk_length\n" << stringtohex(chunk_length_str) << std::endl;
+
+//             if (body.size() >= stringtohex(chunk_length_str)) { // body tem mais info que o tam do chunk
+//                 chunk += body.substr(body.find("\r\n") + 2, stringtohex(chunk_length_str));
+//                 body.erase(0, stringtohex(chunk_length_str) + 2 + chunk_length_str.size() + 2);
+//                 chunk_length_str.clear();
+//                 // std::cout << GREEN << "# CHUNK\n" << chunk << std::endl;
+//             }
+//             else
+//                 continue ;
+//         }
+//         while (bytesReceived > 0);
+//     }
+    
+//     if (chunk.size() == 0)
+//         header += body;
+//     else
+//         header += chunk;
+
+//     if(request.has_header == false)
+//         request.parser(header);
+//     else if(request.has_header == true)
+//         std::cout << "Ja tem HEADEEEER" << std::endl;
+//     request._fullRequest += header;
+//     // std::cout << RED << "# FULL REQUEST\n" << request._fullRequest << std::endl;
+//     header.clear();
+//     body.clear();
+// }
 
 void TcpServer2::sendResponse(int client_socket, const std::string &response)
 {

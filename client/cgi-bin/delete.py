@@ -6,8 +6,8 @@ form = cgi.FieldStorage()
 
 host = os.environ.get("HTTP_HOST", default=None);
 filename = form.getvalue('filename')
+upload_dir = "./cgi-bin/uploads/"
 if filename:
-    upload_dir = "./cgi-bin/uploads/"
     to_remove = upload_dir + filename
     if os.path.isfile(to_remove):
         os.remove(to_remove)
