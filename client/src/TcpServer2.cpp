@@ -152,6 +152,8 @@ void TcpServer2::startListen()
                         Request request1;
 
                         showClientHeader(m_event_list[i], request1);
+                        if(request1.has_header ==false)
+                           break;
                         // Request request(clientRequest);
                         request1.verific_errors(*server);
                         std::string serverResponse;
@@ -281,9 +283,7 @@ void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request
     int         bytesReceived;
     bool        chunked = false;
     bool        first = true;
-    std::string client_request;
-    std::string header;
-    std::string body;
+ 
     std::string chunk;    
     std::string content_length;
     std::string chunk_length_str;
@@ -294,10 +294,13 @@ void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request
         if (bytesReceived == -1) {
             break ;         
         }
+        if(bytesReceived == 0)
+            close(m_events.data.fd);
         client_request.append(buffer, bytesReceived);
-
+        std::cout << MAGENTA << "Buffer : \n" << buffer << std::endl;
         size_t found_header = client_request.find("\r\n\r\n");
         if (found_header != std::string::npos && header.empty()) {
+            request.has_header = true;
             header = client_request.substr(0, found_header + 4);
             if (header.find("Content-Length") != std::string::npos) {
                 size_t pos = header.find("Content-Length:");
@@ -331,21 +334,23 @@ void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request
     } 
     while (bytesReceived > 0);
 
-    if(request.has_header == false) {
+    if(request.has_header == true) {
         if (chunked) {
             header += chunk;
+            std::cout << RED << "Header:\n" << header << std::endl;
             request.parser(header);
             request._fullRequest += header;
         }
         else {
+            std::cout << GREEN << "Client Request:\n" << client_request << std::endl;
             request.parser(client_request);
             request._fullRequest += client_request;
         }
+        std::cout << YELLOW << "Full Request:\n" << request._fullRequest << std::endl;
+        header.clear();
+        body.clear();
+        client_request.clear();
     }
-    else if(request.has_header == true)
-        std::cout << "Ja tem HEADEEEER" << std::endl;
-    header.clear();
-    body.clear();
 }
 
 // Backup

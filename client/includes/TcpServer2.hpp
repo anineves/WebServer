@@ -59,6 +59,9 @@ public:
 
     void setAddresses();
     void closeConnection();
+    std::string client_request;
+    std::string header;
+    std::string body;
 
 };
 
