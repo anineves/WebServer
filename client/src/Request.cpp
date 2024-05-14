@@ -96,8 +96,8 @@ bool Request::verific_errors(Server server)
     }
     if ((this->_method == "POST" && getBody().empty()))
     {
-        _code = 411;
-        exitWithError("Post Without body");
+        _code = 405;
+        exitWithError("Method not allowed");
         return 0;
     }
     if ((this->_method != "GET") && (this->_method != "POST") && (this->_method != "DELETE"))
