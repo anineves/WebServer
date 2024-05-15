@@ -291,41 +291,41 @@ void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request
     do {
         ft_memset(&buffer, 0, 5000);
         bytesReceived = recv(m_events.data.fd, buffer, sizeof(buffer) - 1, MSG_DONTWAIT);
-        if (bytesReceived < 0) {
+        if (bytesReceived < 0)
             break ;         
-        }
         if(bytesReceived == 0) 
             close(m_events.data.fd);
-        client_request.append(buffer, bytesReceived);
-        size_t found_header = client_request.find("\r\n\r\n");
-        if (found_header != std::string::npos && header.empty()) {
+        this->_client_request.append(buffer, bytesReceived);
+
+        size_t found_header = this->_client_request.find("\r\n\r\n");
+        if (found_header != std::string::npos && this->_header.empty()) {
             request.has_header = true;
-            header = client_request.substr(0, found_header + 4);
-            if (header.find("Content-Length") != std::string::npos) {
-                size_t pos = header.find("Content-Length:");
+            this->_header = this->_client_request.substr(0, found_header + 4);
+            if (this->_header.find("Content-Length") != std::string::npos) {
+                size_t pos = this->_header.find("Content-Length:");
                 pos += 15;
-                size_t end_pos = header.find("\r\n", pos);
-                content_length = header.substr(pos, end_pos - pos);
+                size_t end_pos = this->_header.find("\r\n", pos);
+                content_length = this->_header.substr(pos, end_pos - pos);
             }
-            else if (header.find("Transfer-Encoding") != std::string::npos)
+            else if (this->_header.find("Transfer-Encoding") != std::string::npos)
                 chunked = true;
         }
         if (chunked == true) {
             if (first == true) {
-                body = client_request.substr(found_header + 4, client_request.size());
-                client_request.clear();
+                this->_body = this->_client_request.substr(found_header + 4, this->_client_request.size());
+                this->_client_request.clear();
                 first = false;
             }
             else {
-                body.append(client_request);
-                client_request.clear();
+                this->_body.append(this->_client_request);
+                this->_client_request.clear();
             }
-            chunk_length_str = body.substr(0, body.find("\r\n"));
-            if (body.size() >= stringtohex(chunk_length_str)) {
-                while (body.size() > stringtohex(chunk_length_str)) {
-                    chunk += body.substr(body.find("\r\n") + 2, stringtohex(chunk_length_str));
-                    body.erase(0, stringtohex(chunk_length_str) + 2 + chunk_length_str.size() + 2);                
-                    chunk_length_str = body.substr(0, body.find("\r\n"));
+            chunk_length_str = this->_body.substr(0, this->_body.find("\r\n"));
+            if (this->_body.size() >= stringtohex(chunk_length_str)) {
+                while (this->_body.size() > stringtohex(chunk_length_str)) {
+                    chunk += this->_body.substr(this->_body.find("\r\n") + 2, stringtohex(chunk_length_str));
+                    this->_body.erase(0, stringtohex(chunk_length_str) + 2 + chunk_length_str.size() + 2);                
+                    chunk_length_str = this->_body.substr(0, this->_body.find("\r\n"));
                 }
             }               
             chunk_length_str.clear(); 
@@ -335,17 +335,17 @@ void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request
 
     if(request.has_header == true) {
         if (chunked) {
-            header += chunk;
-            request.parser(header);
-            request._fullRequest += header;
+            this->_header += chunk;
+            request.parser(this->_header);
+            request._fullRequest += this->_header;
         }
         else {
-            request.parser(client_request);
-            request._fullRequest += client_request;
+            request.parser(this->_client_request);
+            request._fullRequest += this->_client_request;
         }
-        header.clear();
-        body.clear();
-        client_request.clear();
+        this->_header.clear();
+        this->_body.clear();
+        this->_client_request.clear();
     }
 }
 

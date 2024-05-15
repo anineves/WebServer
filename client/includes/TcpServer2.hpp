@@ -19,11 +19,11 @@
 # include "./Response.hpp"
 # include <dirent.h>
 # include <map>
-#include <signal.h>
+# include <signal.h>
+# define TIMEOUT 20
 
-#define TIMEOUT 20
+
 class Connection;
-
 class Request;
 
 class TcpServer2 {
@@ -33,6 +33,9 @@ private:
     std::vector<int>                m_sockets;
     int                             epoll_fd;
     std::map<int, time_t>           socketCreation;
+    std::string                     _client_request;
+    std::string                     _header;
+    std::string                     _body;
 
 public:
     TcpServer2(std::vector<Server> server);
@@ -59,9 +62,6 @@ public:
 
     void setAddresses();
     void closeConnection();
-    std::string client_request;
-    std::string header;
-    std::string body;
 
 };
 
