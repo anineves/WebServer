@@ -225,10 +225,9 @@ void TcpServer2::handleInput(epoll_event &m_event, int fd)
                 }
                 else if (!locationSettings.getCgiPath().empty())
                 {
-                    if (!request1.getPath().empty())
-                    {
+                    if (!request1.getPath().empty()) {
                         Cgi cgi(request1.getPath());
-                        cgi.runCgi(request1, fd);
+                        serverResponse = cgi.runCgi(request1); // Armazena a resposta do CGI
                     }
                 }
                 else if (locationSettings.getAutoIndex() == "on" && n == 0)
