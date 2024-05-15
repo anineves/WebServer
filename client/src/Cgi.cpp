@@ -100,6 +100,7 @@ void	Cgi::runCgi(Request &request, int client_fd)
         std::string header = header_stream.str();
         write(client_fd, header.c_str(), header.length());
         write(client_fd, this->_cgi_response.c_str(), content_length);
+		
         close(fdResponse[0]);	
 		close(fdRequest[0]);
 		waitpid(pid, NULL, 0);

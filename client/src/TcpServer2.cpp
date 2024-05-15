@@ -117,161 +117,172 @@ void TcpServer2::startListen()
         {
             for (size_t j = 0; j < this->m_server.size(); ++j)
             {
-                struct sockaddr_in addr;
-                socklen_t addr_len = sizeof(addr);
                 if (m_event_list[i].data.fd == m_sockets[j])
                 {
-                    m_server[j].setSocketAddr_len(sizeof(m_sockets[j]));
-                    int client_socket = accept(m_event_list[i].data.fd, (struct sockaddr *)&addr, &addr_len);
-                    std::cout << CYAN << client_socket << RESET << std::endl;
-                    std::cout << "entrei accept " << std::endl;
-                    if (client_socket == -1)
-                    {
-                        exitWithError("Can't Accept something");
-                        continue;
-                    }
-                    std::cout << "New Connection on port: " << ntohs(m_server[j].sin_port) << "| fd:" << client_socket << std::endl;
-
-                    m_event.events = EPOLLIN | EPOLLRDHUP;
-                    m_event.data.fd = client_socket;
-                    if (epoll_ctl(this->getEpoll(), EPOLL_CTL_ADD, client_socket, &m_event) == -1)
-                    {
-                        exitWithError("Problems in Epoll_CTL.");
-                        exit(EXIT_FAILURE);
-                    }
-                    // Associar cada socket a cada client
-                    clientServerMap[client_socket] = &m_server[j];
-                    socketCreation[client_socket] = time(NULL); // Atualiza o tempo de criação do socket
+                    acceptNewConnection(m_event_list[i], m_event_list[i].data.fd, j);
                 }
                 else if (m_event_list[i].events & EPOLLIN)
                 {
-                    Server *server = clientServerMap[m_event_list[i].data.fd];
-                    if (server != NULL)
-                    {
-                        socketCreation[m_event_list[i].data.fd] = time(NULL); // Atualiza o tempo de criação do socket
-                        Request request1;
-
-                        showClientHeader(m_event_list[i], request1);
-                        if (request1.has_header == false)
-                            break;
-                        // Request request(clientRequest);
-                        request1.verific_errors(*server);
-                        std::string serverResponse;
-                        Response response(*server);
-                        std::cout << CYAN << "Path from request = " << request1.getPath() << " CODE " << request1.getCode() << RESET << std::endl;
-                        if (request1.getCode() != 200 && !request1.getPath().empty())
-                        {
-                            serverResponse = response.buildErrorResponse(request1.getCode());
-                            m_event_list[i].events = EPOLLOUT;
-                            epoll_ctl(this->getEpoll(), EPOLL_CTL_MOD, m_event_list[i].data.fd, &m_event_list[i]);
-                            responseMap[m_event_list[i].data.fd] = serverResponse;
-                        }
-                        else
-                        {
-                            Location locationSettings = server->verifyLocations(request1.getPath());
-                            int n = 0;
-                            if (is_file("frontend/html" + request1.getPath()) == 1)
-                            {
-                                n = 1;
-                            }
-                            std::cout << "n ===================================================" << n << std::endl;
-                            if (!locationSettings.getPath().empty())
-                            {
-                                std::cout << locationSettings.getPath() << " " << locationSettings.getAllowMethods()[0] << std::endl;
-                                if (locationSettings.getAllowMethods()[0] == "DELETE")
-                                {
-                                    std::string pathToDelete = "frontend2" + request1.getPath();
-                                    std::cout << "ENTREI AQUI " << pathToDelete << std::endl;
-                                    if (std::remove(pathToDelete.c_str()) != 0)
-                                    {
-        
-                                        serverResponse = response.buildErrorResponse(500);
-                                    }
-                                    else
-                                    {
-                                        serverResponse = "HTTP/1.1 200 OK\r\n";
-                                    }
-                                }else if (!locationSettings.getReturn().empty())
-                                {
-                                    std::istringstream iss(locationSettings.getReturn());
-                                    std::string response;
-                                    std::string code;
-                                    std::string loc;
-                                    iss >> code;
-                                    iss >> loc;
-                                    response = "HTTP/1.1 " + code + " Moved Permanently \r\n";
-                                    response += "Content-Length: 0\r\n";
-                                    response += "Location: " + loc + "\r\n\r\n";
-                                    serverResponse = response;
-                                }
-                                else if (!locationSettings.getCgiPath().empty())
-                                {
-                                    if (!request1.getPath().empty())
-                                    {
-                                        Cgi cgi(request1.getPath());
-                                        cgi.runCgi(request1, m_event_list[i].data.fd);
-                                    }
-                                }
-                                else if (locationSettings.getAutoIndex() == "on" && n == 0)
-                                {
-                                    // std::cout << CYAN << "Entrei AutoIndex on" << RESET << std::endl;
-                                    DIR *dir;
-                                    struct dirent *ent;
-                                    std::vector<std::string> content;
-                                    std::cout << "locationsettings = " << locationSettings.getPath() << std::endl;
-                                    if ((dir = opendir(("frontend/html" + locationSettings.getPath() + "/").c_str())) != NULL)
-                                    {
-                                        while ((ent = readdir(dir)) != NULL)
-                                        {
-                                            if (ent->d_type == DT_REG)
-                                            {
-                                                std::string file_name = ent->d_name;
-                                                content.push_back(file_name);
-                                            }
-                                            else if (ent->d_type == DT_DIR)
-                                            {
-                                                std::string dir_name = ent->d_name;
-
-                                                if (dir_name != "." && dir_name != "..")
-                                                    content.push_back(dir_name + "/");
-                                            }
-                                        }
-                                        closedir(dir);
-                                    }
-
-                                    serverResponse = dirListHtml(content);
-                                }
-                                else
-                                {
-
-                                    serverResponse = response.buildResponse(request1);
-                                }
-                                m_event_list[i].events = EPOLLOUT;
-                                epoll_ctl(this->getEpoll(), EPOLL_CTL_MOD, m_event_list[i].data.fd, &m_event_list[i]);
-                                responseMap[m_event_list[i].data.fd] = serverResponse;
-                            }
-                        }
-                    }
+                    handleInput(m_event_list[i], m_event_list[i].data.fd);
                 }
                 else if (m_event_list[i].events & EPOLLOUT)
                 {
-                    // socketCreation[m_event_list[i].data.fd] = time(NULL); // Atualiza o tempo de criação do socket
-                    std::string serverResponse = responseMap[m_event_list[i].data.fd];
-                    sendResponse(m_event_list[i].data.fd, serverResponse);
-                    responseMap.erase(m_event_list[i].data.fd);
-                    m_event_list[i].events = EPOLLIN;
-                    epoll_ctl(this->getEpoll(), EPOLL_CTL_MOD, m_event_list[i].data.fd, &m_event_list[i]);
-                    int ret = epoll_ctl(this->getEpoll(), EPOLL_CTL_DEL, m_event_list[i].data.fd, &m_event_list[i]);
-                    if (ret == -1)
-                    {
-                        std::cout << "failed to remove fd " << m_event_list[i].data.fd << " from EPOLL" << std::endl;
-                    }
-                    close(m_event_list[i].data.fd);
+                    handleOutput(m_event_list[i], m_event_list[i].data.fd);
                 }
             }
         }
     }
     closeConnection();
+}
+
+
+
+void TcpServer2::acceptNewConnection(epoll_event &m_event, int fd, int j)
+{
+    m_server[j].setSocketAddr_len(sizeof(m_sockets[j]));
+    struct sockaddr_in addr;
+    socklen_t addr_len = sizeof(addr);
+    int client_socket = accept(fd, (struct sockaddr *)&addr, &addr_len);
+    std::cout << CYAN << client_socket << RESET << std::endl;
+    std::cout << "entrei accept " << std::endl;
+    if (client_socket == -1)
+    {
+        exitWithError("Can't Accept something");
+        return;
+    }
+    std::cout << "New Connection on port: " << ntohs(m_server[j].sin_port) << "| fd:" << client_socket << std::endl;
+
+    m_event.events = EPOLLIN | EPOLLRDHUP;
+    m_event.data.fd = client_socket;
+    if (epoll_ctl(this->getEpoll(), EPOLL_CTL_ADD, client_socket, &m_event) == -1)
+    {
+        exitWithError("Problems in Epoll_CTL.");
+        exit(EXIT_FAILURE);
+    }
+    // Associar cada socket a cada client
+    clientServerMap[client_socket] = &m_server[j];
+    socketCreation[client_socket] = time(NULL); // Atualiza o tempo de criação do socket
+}
+
+
+
+void TcpServer2::handleInput(epoll_event &m_event, int fd)
+{
+    Server *server = clientServerMap[fd];
+    if (server != NULL)
+    {
+        socketCreation[fd] = time(NULL); // Atualiza o tempo de criação do socket
+        Request request1;
+
+        showClientHeader(m_event, request1);
+        if (!request1.has_header)
+        {
+            return;
+        }
+        // Request request(clientRequest);
+        request1.verific_errors(*server);
+        std::string serverResponse;
+        Response response(*server);
+        std::cout << CYAN << "Path from request = " << request1.getPath() << " CODE " << request1.getCode() << RESET << std::endl;
+        if (request1.getCode() != 200 && !request1.getPath().empty())
+        {
+            serverResponse = response.buildErrorResponse(request1.getCode());
+            m_event.events = EPOLLOUT;
+            epoll_ctl(this->getEpoll(), EPOLL_CTL_MOD, fd, &m_event);
+            responseMap[fd] = serverResponse;
+        }
+        else
+        {
+            Location locationSettings = server->verifyLocations(request1.getPath());
+            int n = 0;
+            if (is_file("frontend/html" + request1.getPath()) == 1)
+            {
+                n = 1;
+            }
+            if (!locationSettings.getPath().empty())
+            {
+                std::cout << locationSettings.getPath() << " " << locationSettings.getAllowMethods()[0] << std::endl;
+                if (locationSettings.getAllowMethods()[0] == "DELETE")
+                {
+                    std::string pathToDelete = "frontend2" + request1.getPath();
+                    if (std::remove(pathToDelete.c_str()) != 0)
+                        serverResponse = response.buildErrorResponse(500);
+                    else
+                        serverResponse = "HTTP/1.1 200 OK\r\n";
+                }
+                else if (!locationSettings.getReturn().empty())
+                {
+                    std::istringstream iss(locationSettings.getReturn());
+                    std::string response;
+                    std::string code;
+                    std::string loc;
+                    iss >> code;
+                    iss >> loc;
+                    response = "HTTP/1.1 " + code + " Moved Permanently \r\n";
+                    response += "Content-Length: 0\r\n";
+                    response += "Location: " + loc + "\r\n\r\n";
+                    serverResponse = response;
+                }
+                else if (!locationSettings.getCgiPath().empty())
+                {
+                    if (!request1.getPath().empty())
+                    {
+                        Cgi cgi(request1.getPath());
+                        cgi.runCgi(request1, fd);
+                    }
+                }
+                else if (locationSettings.getAutoIndex() == "on" && n == 0)
+                {
+                    DIR *dir;
+                    struct dirent *ent;
+                    std::vector<std::string> content;
+                    std::cout << "locationsettings = " << locationSettings.getPath() << std::endl;
+                    if ((dir = opendir(("frontend/html" + locationSettings.getPath() + "/").c_str())) != NULL)
+                    {
+                        while ((ent = readdir(dir)) != NULL)
+                        {
+                            if (ent->d_type == DT_REG)
+                            {
+                                std::string file_name = ent->d_name;
+                                content.push_back(file_name);
+                            }
+                            else if (ent->d_type == DT_DIR)
+                            {
+                                std::string dir_name = ent->d_name;
+
+                                if (dir_name != "." && dir_name != "..")
+                                    content.push_back(dir_name + "/");
+                            }
+                        }
+                        closedir(dir);
+                    }
+                    serverResponse = dirListHtml(content);
+                }
+                else
+                {
+                    serverResponse = response.buildResponse(request1);
+                }
+                m_event.events = EPOLLOUT;
+                epoll_ctl(this->getEpoll(), EPOLL_CTL_MOD, fd, &m_event);
+                responseMap[fd] = serverResponse;
+            }
+        }
+    }
+}
+
+void TcpServer2::handleOutput(epoll_event &event, int fd)
+{
+    std::string serverResponse = responseMap[fd];
+    sendResponse(fd, serverResponse);
+    responseMap.erase(fd);
+    event.events = EPOLLIN;
+    epoll_ctl(this->getEpoll(), EPOLL_CTL_MOD, fd, &event);
+    int ret = epoll_ctl(this->getEpoll(), EPOLL_CTL_DEL, fd, &event);
+    if (ret == -1)
+    {
+        std::cout << "failed to remove fd " << fd << " from EPOLL" << std::endl;
+    }
+    close(fd);
 }
 
 size_t stringtohex(std::string value)
