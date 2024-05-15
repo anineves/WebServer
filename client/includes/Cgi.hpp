@@ -27,7 +27,7 @@ class Cgi {
 		Cgi(std::string _file_path);
 		~Cgi();
 
-		void	runCgi(Request &request, int fd);
+		std::string runCgi(Request &request);
 };
 
 

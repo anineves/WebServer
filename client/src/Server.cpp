@@ -185,9 +185,10 @@ Location Server::verifyLocations(std::string pathRequest) {
             size_t extensionPosDot = pathRequest.find_last_of('.');
             if (extensionPosDot != std::string::npos) 
             {
-                    pathRequest = pathRequest.substr(extensionPosDot);
-                    if(pathRequest == ".py")
+                    std::string pathExt = pathRequest.substr(extensionPosDot);
+                    if(pathExt == ".py")
                     {
+                        pathRequest = pathExt;
                        if(_locations[i].getPath().find_last_of('.'))
                        {
                         std::cout << "Entrei para PPYYYY" << std::endl;
