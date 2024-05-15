@@ -25,7 +25,6 @@ class Server {
         bool                    _auto_index;
         bool                    _executable;
         std::string             _return;
-        std::vector<Location>  _locations;
         int                     s_socket;
         std::string             s_ServerMessage;
         int                     e_poll_fd;
@@ -33,6 +32,7 @@ class Server {
         socklen_t               s_socketAddress_len;
 
     public:
+        std::vector<Location>  _locations;
         uint32_t                s_addr;
         uint16_t                sin_port;
         std::string             s_host;

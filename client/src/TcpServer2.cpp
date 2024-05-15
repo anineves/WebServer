@@ -462,22 +462,28 @@ void TcpServer2::verificTimeOut()
 void TcpServer2::closeConnection()
 {
     std::cout << "Vou eliminar tudo" << std::endl;
-    for (std::vector<int>::iterator it = m_sockets.begin(); it != m_sockets.end();)
+     for (std::vector<int>::iterator it = m_sockets.begin(); it != m_sockets.end(); ++it) 
     {
-        close(*it);
-        it++;
         epoll_ctl(this->epoll_fd, EPOLL_CTL_DEL, *it, NULL);
+        close(*it);
     }
+    m_sockets.clear();
 
     for (std::map<int, time_t>::iterator it = socketCreation.begin(); it != socketCreation.end();)
     {
-        close(it->first);
         epoll_ctl(this->epoll_fd, EPOLL_CTL_DEL, it->first, NULL);
+        close(it->first);
         clientServerMap.erase(it->first);
         responseMap.erase(it->first);
         socketCreation.erase(it++);
     }
-    m_sockets.clear();
+
+    for (size_t i = 0; i < m_server.size(); ++i)
+    {
+        m_server[i]._locations.clear();
+    }
+
+    m_server.clear();
     m_addresses.clear();
     // m_sockets.erase();
 
