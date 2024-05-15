@@ -130,7 +130,7 @@ void TcpServer2::startListen()
                         exitWithError("Can't Accept something");
                         continue;
                     }
-                    std::cout << "New Connection on port: " << ntohs(m_server[j].sin_port) << "| fd:"<< client_socket << std::endl;
+                    std::cout << "New Connection on port: " << ntohs(m_server[j].sin_port) << "| fd:" << client_socket << std::endl;
 
                     m_event.events = EPOLLIN | EPOLLRDHUP;
                     m_event.data.fd = client_socket;
@@ -152,8 +152,8 @@ void TcpServer2::startListen()
                         Request request1;
 
                         showClientHeader(m_event_list[i], request1);
-                        if(request1.has_header ==false)
-                           break;
+                        if (request1.has_header == false)
+                            break;
                         // Request request(clientRequest);
                         request1.verific_errors(*server);
                         std::string serverResponse;
@@ -169,8 +169,6 @@ void TcpServer2::startListen()
                         else
                         {
                             Location locationSettings = server->verifyLocations(request1.getPath());
-                            std::cout << CYAN << "Entrou Location :" << locationSettings.getPath() << RESET << std::endl;
-
                             int n = 0;
                             if (is_file("frontend/html" + request1.getPath()) == 1)
                             {
@@ -179,8 +177,21 @@ void TcpServer2::startListen()
                             std::cout << "n ===================================================" << n << std::endl;
                             if (!locationSettings.getPath().empty())
                             {
-
-                                if (!locationSettings.getReturn().empty())
+                                std::cout << locationSettings.getPath() << " " << locationSettings.getAllowMethods()[0] << std::endl;
+                                if (locationSettings.getAllowMethods()[0] == "DELETE")
+                                {
+                                    std::string pathToDelete = "frontend2" + request1.getPath();
+                                    std::cout << "ENTREI AQUI " << pathToDelete << std::endl;
+                                    if (std::remove(pathToDelete.c_str()) != 0)
+                                    {
+        
+                                        serverResponse = response.buildErrorResponse(500);
+                                    }
+                                    else
+                                    {
+                                        serverResponse = "HTTP/1.1 200 OK\r\n";
+                                    }
+                                }else if (!locationSettings.getReturn().empty())
                                 {
                                     std::istringstream iss(locationSettings.getReturn());
                                     std::string response;
@@ -232,10 +243,6 @@ void TcpServer2::startListen()
                                 }
                                 else
                                 {
-                                    if (locationSettings.getAllowMethods()[0] == "DELETE")
-                                    {
-                                        serverResponse = handleRequest(clientRequest);
-                                    }
 
                                     serverResponse = response.buildResponse(request1);
                                 }
@@ -267,10 +274,10 @@ void TcpServer2::startListen()
     closeConnection();
 }
 
-
-size_t stringtohex(std::string value) {
-    std::istringstream  iss(value);
-    size_t                 int_value;
+size_t stringtohex(std::string value)
+{
+    std::istringstream iss(value);
+    size_t int_value;
 
     iss >> std::hex >> int_value;
     return int_value;
@@ -278,30 +285,34 @@ size_t stringtohex(std::string value) {
 
 void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request)
 {
-    
-    char        buffer[5000];
-    int         bytesReceived;
-    bool        chunked = false;
-    bool        first = true;
- 
-    std::string chunk;    
+
+    char buffer[5000];
+    int bytesReceived;
+    bool chunked = false;
+    bool first = true;
+
+    std::string chunk;
     std::string content_length;
     std::string chunk_length_str;
 
-    do {
+    do
+    {
         ft_memset(&buffer, 0, 5000);
         bytesReceived = recv(m_events.data.fd, buffer, sizeof(buffer) - 1, MSG_DONTWAIT);
-        if (bytesReceived < 0) {
-            break ;         
+        if (bytesReceived < 0)
+        {
+            break;
         }
-        if(bytesReceived == 0) 
+        if (bytesReceived == 0)
             close(m_events.data.fd);
         client_request.append(buffer, bytesReceived);
         size_t found_header = client_request.find("\r\n\r\n");
-        if (found_header != std::string::npos && header.empty()) {
+        if (found_header != std::string::npos && header.empty())
+        {
             request.has_header = true;
             header = client_request.substr(0, found_header + 4);
-            if (header.find("Content-Length") != std::string::npos) {
+            if (header.find("Content-Length") != std::string::npos)
+            {
                 size_t pos = header.find("Content-Length:");
                 pos += 15;
                 size_t end_pos = header.find("\r\n", pos);
@@ -310,36 +321,43 @@ void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request
             else if (header.find("Transfer-Encoding") != std::string::npos)
                 chunked = true;
         }
-        if (chunked == true) {
-            if (first == true) {
+        if (chunked == true)
+        {
+            if (first == true)
+            {
                 body = client_request.substr(found_header + 4, client_request.size());
                 client_request.clear();
                 first = false;
             }
-            else {
+            else
+            {
                 body.append(client_request);
                 client_request.clear();
             }
             chunk_length_str = body.substr(0, body.find("\r\n"));
-            if (body.size() >= stringtohex(chunk_length_str)) {
-                while (body.size() > stringtohex(chunk_length_str)) {
+            if (body.size() >= stringtohex(chunk_length_str))
+            {
+                while (body.size() > stringtohex(chunk_length_str))
+                {
                     chunk += body.substr(body.find("\r\n") + 2, stringtohex(chunk_length_str));
-                    body.erase(0, stringtohex(chunk_length_str) + 2 + chunk_length_str.size() + 2);                
+                    body.erase(0, stringtohex(chunk_length_str) + 2 + chunk_length_str.size() + 2);
                     chunk_length_str = body.substr(0, body.find("\r\n"));
                 }
-            }               
-            chunk_length_str.clear(); 
+            }
+            chunk_length_str.clear();
         }
-    } 
-    while (bytesReceived > 0);
+    } while (bytesReceived > 0);
 
-    if(request.has_header == true) {
-        if (chunked) {
+    if (request.has_header == true)
+    {
+        if (chunked)
+        {
             header += chunk;
             request.parser(header);
             request._fullRequest += header;
         }
-        else {
+        else
+        {
             request.parser(client_request);
             request._fullRequest += client_request;
         }
@@ -451,8 +469,7 @@ void TcpServer2::closeConnection()
     }
     m_sockets.clear();
     m_addresses.clear();
-    //m_sockets.erase();
-
+    // m_sockets.erase();
 
     exit(EXIT_SUCCESS);
 }

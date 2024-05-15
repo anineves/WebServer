@@ -106,6 +106,10 @@ bool Request::verific_errors(Server server)
         exitWithError("Not allowed method");
         return 0;
     }
+    if(this->_method == "DELETE")
+    {
+        
+    }
     if (this->_protocol != "HTTP/1.1")
     {
         _code = 504;
