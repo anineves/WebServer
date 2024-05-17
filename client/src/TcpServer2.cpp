@@ -194,15 +194,8 @@ void TcpServer2::handleInput(epoll_event &m_event, int fd)
             }
             if (!locationSettings.getPath().empty())
             {
-                if (locationSettings.getAllowMethods()[0] == "DELETE")
-                {
-                    std::string pathToDelete = "frontend2" + request1.getPath();
-                    if (std::remove(pathToDelete.c_str()) != 0)
-                        serverResponse = response.buildErrorResponse(500);
-                    else
-                        serverResponse = "HTTP/1.1 200 OK\r\n";
-                }
-                else if (!locationSettings.getReturn().empty())
+                
+                 if (!locationSettings.getReturn().empty())
                 {
                     std::istringstream iss(locationSettings.getReturn());
                     std::string response;
@@ -227,7 +220,6 @@ void TcpServer2::handleInput(epoll_event &m_event, int fd)
                     DIR *dir;
                     struct dirent *ent;
                     std::vector<std::string> content;
-                    //std::cout << "locationsettings = " << locationSettings.getPath() << std::endl;
                     if ((dir = opendir(("frontend/html" + locationSettings.getPath() + "/").c_str())) != NULL)
                     {
                         while ((ent = readdir(dir)) != NULL)
@@ -248,6 +240,14 @@ void TcpServer2::handleInput(epoll_event &m_event, int fd)
                         closedir(dir);
                     }
                     serverResponse = dirListHtml(content);
+                }
+                else if (locationSettings.getAllowMethods()[0] == "DELETE" )
+                {
+                    std::string pathToDelete = "frontend2" + request1.getPath();
+                    if (std::remove(pathToDelete.c_str()) != 0)
+                        serverResponse = response.buildErrorResponse(500);
+                    else
+                        serverResponse = "HTTP/1.1 200 OK\r\n";
                 }
                 else
                 {

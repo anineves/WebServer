@@ -36,7 +36,6 @@ public:
     std::string getCgiExt();
     std::string getAutoIndex();
     std::string getReturn();
-    void    printLoc();
 };
 
 #endif 

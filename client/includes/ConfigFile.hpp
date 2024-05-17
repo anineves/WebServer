@@ -10,6 +10,7 @@
 #include <fstream>
 
 class Server;
+class Location;
 
 class ConfigFile
 {

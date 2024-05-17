@@ -67,20 +67,11 @@ void Request::parser(std::string header)
 
     while (std::getline(ss, line) && line != "\r")
     {
-        //std::cout << "linha body:::::" << line << std::endl;
-        //if (line.find('=') != std::string::npos)
-        //{
-          //  std::string name(line.substr(0, line.find('=')));
-            //std::string content(line.substr(line.find('=') + 1, line.find('\n')));
-            //if (content.length() != 0)
-            //{
 
                 this->lines_body += line;
-            //}
-        //}
+         
     }
 
-    // std::cout << MAGENTA << "LINHAS " << this->lines_body << RESET << std::endl;
 
    
 }
