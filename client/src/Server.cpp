@@ -2,7 +2,6 @@
 
 Server::Server() {
     
-    std::cout << "Aqui argumentos" << std::endl;
     /*memset(&s_socketAddress, 0, sizeof(s_socketAddress));
     s_socketAddress.sin_family = AF_INET;
     s_socketAddress.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -75,7 +74,7 @@ Server &Server::operator= (const Server &rhs)
 
 Server::~Server() {
     //close(this->s_socket);
-    std::cout << "Server port: " << this->s_port << " destructor called.\n";
+    //std::cout << "Server port: " << this->s_port << " destructor called.\n";
 }
 
 // ---- SETTERS ----
@@ -236,7 +235,6 @@ Location Server::verifyLocations(std::string pathRequest) {
                         pathRequest = pathExt;
                        if(_locations[i].getPath().find_last_of('.'))
                        {
-                        std::cout << "Entrei para PPYYYY" << std::endl;
                             location = _locations[i];
                        }
                     }

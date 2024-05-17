@@ -126,7 +126,6 @@ void ConfigFile::parser(std::string conFile)
         }
         else if (fword == "location")
         {
-            std::cout << "entrei para parser location " << line << std::endl;
             if (!insideServerBlock)
             {
                 log("ERROR: Invalid configure file, { outside");
@@ -269,7 +268,7 @@ bool ConfigFile::parserServer(std::stringstream *serverContent)
         {
             std::string temp_serv_name = obtainValue(line, "server_name");
             std::string token;
-            std::cout  << CYAN << "SERVER  :" << temp_serv_name << RESET << std::endl;
+            //std::cout  << CYAN << "SERVER  :" << temp_serv_name << RESET << std::endl;
             for (size_t i = 0; i < temp_serv_name.size(); ++i)
             {
 
@@ -325,7 +324,6 @@ bool ConfigFile::parserLocation(std::string path, std::stringstream *locationCon
         ss >> fword;
         if (fword == "allow_methods")
         {
-            std::cout << "Entrei allow  " << std::endl;
             std::vector<std::string> methods_vec;
             std::string str_methods = obtainValue(line, "allow_methods");
             int flag = 0;

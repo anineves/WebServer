@@ -28,10 +28,6 @@ std::string Response::buildErrorResponse(int code)
 
 std::string Response::buildResponse(Request request) {
     std::string response;
-    //Aqui fiz um codigo meio porco, mas era para ver se funcionava. 
-    //Acho que pode ser interessante criar um novo ficheiro.
-    //Para fazer tipo o parser, Verificar se HTTP/1.1, Verificar se o metodo e GET, POST OU DELETE ... 
-    request.printMessage();
     if (request.getMethod() == "GET" || request.getMethod() == "POST" || request.getMethod() == "DELETE") 
     {
         //std::cout << "valor redirect " << m_server.getredirect << std::endl;
@@ -74,11 +70,9 @@ std::string Response::obtainFilePath(const std::string& request) {
         fullPath = m_server.getRoot_s() + "/html" +  path;
     else
         fullPath = m_server.getRoot_s() + path;
-    std::cout << "Path:" << fullPath << std::endl;
     if (!isValidPath(fullPath)) {
         fullPath = "frontend/error/404.html";
     }
-     std::cout << "Path:" << fullPath << std::endl;
 
     return fullPath;
 }
@@ -94,8 +88,6 @@ bool Response::isValidPath(std::string& fullPath) {
 
 
 std::string Response::getContentType(const std::string& filePath) {
-    //Aqui e para colocar corretamente o ContentType, porque varia segundo o ficheiro
-    //Ainda so pus os mais utilizados mas ha uma lista enorme
     size_t ext = filePath.find_last_of(".");
     std::string extension = "";
     if (ext != std::string::npos) {
