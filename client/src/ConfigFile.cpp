@@ -6,9 +6,17 @@ ConfigFile::ConfigFile(std::string conFile) : _ip_address(""), _port(0), _root("
     parser(conFile);
 }
 
-ConfigFile::~ConfigFile() {}
-ConfigFile::ConfigFile() {}
+ConfigFile::~ConfigFile() 
+{
+    std::cout << CYAN << "FUI CHAMADOOOOOO\n\n\n\n\n"; 
+    _servers.clear();
+    _locations.clear();
+
+}
+ConfigFile::ConfigFile() {
+}
 ConfigFile::ConfigFile(const ConfigFile &src) { (void)src; }
+
 
 int ConfigFile::getPort() const
 {
@@ -40,10 +48,6 @@ std::vector<Server> &ConfigFile::getServers()
     return _servers;
 }
 
-//--- SETTERS ---
-/*void    ConfigFile::setPort(std::string set_port) {
-    this->_port = set_port;
-}*/
 
 void ConfigFile::setIpAddr(std::string set_ip_addr)
 {
@@ -176,9 +180,7 @@ void ConfigFile::parser(std::string conFile)
         {
             Brackets--;
             insideLocationBlock = false;
-            // Enviar conteudo na o _vector Location
-            parserLocation(path, _locations, &locationContent);
-            // Colocar a branco para quando tem mais do que uma Locations
+            parserLocation(path, &locationContent);
             locationContent.str("");
             locationContent.clear();
         }
@@ -193,8 +195,7 @@ void ConfigFile::parser(std::string conFile)
             if (Brackets == 0)
             {
                 insideServerBlock = false;
-                // Aqui Vai o vector das Locations para poder ser adicionado no Server
-                parserServer(_locations, _servers, &serverContent);
+                parserServer(&serverContent);
                 serverContent.str("");
                 serverContent.clear();
             }
@@ -207,9 +208,6 @@ void ConfigFile::parser(std::string conFile)
                     Brackets++;
             }
         }
-
-        // std::cout << "+++Line " << line <<  " " << insideLocationBlock << " " << insideServerBlock << std::endl;
-        // Verificacao para saber para onde vai cada linha
         if (insideLocationBlock == false && insideServerBlock == true)
         {
             serverContent << line << "\n";
@@ -221,15 +219,9 @@ void ConfigFile::parser(std::string conFile)
     }
     readConFile.close();
 
-    std::cout << "First Locations Info:\n";
-    std::cout << "Path:" << _locations[1].getPath() << std::endl;
-    // std::cout << "Allow methods:" << _locations[1].getAllowMethods() << std::endl;
-    std::cout << "Upload:" << _locations[1].getUploadTo() << std::endl;
-    std::cout << "Cgi:" << _locations[1].getCgiPath() << std::endl;
-    std::cout << "Cgi ext:" << _locations[1].getCgiExt() << std::endl;
 }
 
-bool ConfigFile::parserServer(std::vector<Location> &_locations, std::vector<Server> &_servers, std::stringstream *serverContent)
+bool ConfigFile::parserServer(std::stringstream *serverContent)
 {
     std::string line;
     Server server;
@@ -304,7 +296,7 @@ bool ConfigFile::parserServer(std::vector<Location> &_locations, std::vector<Ser
     server.setLocation(_locations);
     server.verificErrorServer();
     _servers.push_back(server);
-    printVector(server.s_server_names);
+    //printVector(server.s_server_names);
     if (_servers.empty())
     {
         std::cout << "No servers found in the vector.\n";
@@ -316,7 +308,7 @@ bool ConfigFile::parserServer(std::vector<Location> &_locations, std::vector<Ser
 }
 
 // Parser da Location, fiz bem parecido com o que temos para o server, para poder reutilizar o codigo
-bool ConfigFile::parserLocation(std::string path, std::vector<Location> &_locations, std::stringstream *locationContent)
+bool ConfigFile::parserLocation(std::string path, std::stringstream *locationContent)
 {
     std::string line;
     Location location;
@@ -428,4 +420,10 @@ std::string ConfigFile::ft_trim(const std::string &line)
     {
         return "";
     }
+}
+
+void ConfigFile::clearConf()
+{
+    _locations.clear();
+    _servers.clear();
 }

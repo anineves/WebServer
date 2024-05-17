@@ -18,6 +18,8 @@ private:
 public:
     Location();
     ~Location();
+    Location(const Location &source);
+    Location &operator = (const Location &rhs);
 
     void setPath(std::string path);
     void setAllowMethods(std::vector<std::string> allow_methods);

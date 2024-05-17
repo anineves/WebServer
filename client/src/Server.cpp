@@ -2,6 +2,7 @@
 
 Server::Server() {
     
+    std::cout << "Aqui argumentos" << std::endl;
     /*memset(&s_socketAddress, 0, sizeof(s_socketAddress));
     s_socketAddress.sin_family = AF_INET;
     s_socketAddress.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -27,6 +28,50 @@ Server::Server(std::string ipAddr, int port, std::string root, std::string index
     _auto_index = false;
     verificErrorServer();
 }
+
+Server::Server(const Server &source)
+{
+    *this= source;
+    return ;
+}
+Server &Server::operator= (const Server &rhs)
+{
+    if(this != &rhs)
+    {
+        s_ip_address = rhs.s_ip_address;
+    s_root = rhs.s_root;
+    s_port = rhs.s_port;
+    s_index = rhs.s_index;
+    s_error_page = rhs.s_error_page;
+    s_client_body = rhs.s_client_body;
+    s_server_name = rhs.s_server_name;
+    
+
+    _upload_to = rhs._upload_to;
+    _methods = rhs._methods;
+    _cgi_path = rhs._cgi_path;
+    _cgi_ext = rhs._cgi_ext;
+    _executable = rhs._executable;
+    _redirect = rhs._redirect;
+    _auto_index = rhs._auto_index;
+   
+    _return = rhs._return;
+    s_socket = rhs.s_socket;
+    _redirect = rhs._redirect;
+    _locations = rhs._locations;
+     s_addr = rhs.s_addr;
+    sin_port = rhs.sin_port;
+    s_host = rhs.s_host;
+    s_server_names = rhs.s_server_names;
+    
+    }
+    return *this;
+
+}
+
+
+
+
 
 Server::~Server() {
     //close(this->s_socket);

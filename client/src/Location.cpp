@@ -10,6 +10,32 @@ Location::Location() {
     _return = "";
 }
 
+Location::Location(const Location &source)
+{
+    *this= source;
+    return ;
+}
+
+
+Location &Location::operator= (const Location &rhs)
+{
+    if(this != &rhs)
+    {
+       _path = rhs._path;
+       _upload_to = rhs._upload_to;
+       _cgi_path = rhs._cgi_path;
+       _cgi_ext = rhs._cgi_ext;
+       _autoindex = rhs._autoindex;
+       _allow_methods = rhs._allow_methods;
+       _return = rhs._return;
+    
+    }
+    return *this;
+
+}
+
+
+
 Location::~Location() {}
 
 void Location::setPath(std::string path) 

@@ -36,11 +36,8 @@ int main(int ac, char **av) {
     }
     ConfigFile configFile(confFile);
     std::string ip = configFile.getIpAddr();
-    std::cout << "ip ======== " << ip << std::endl;
-
     std::vector<Server>& servers = configFile.getServers();
-
-    
+  
     TcpServer2 tcpServer(servers);
 
     return 0;

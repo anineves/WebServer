@@ -26,8 +26,6 @@ class Server {
         bool                    _executable;
         std::string             _return;
         int                     s_socket;
-        std::string             s_ServerMessage;
-        int                     e_poll_fd;
         bool                    _redirect;
         socklen_t               s_socketAddress_len;
 
@@ -42,6 +40,8 @@ class Server {
         //bool        _redirect;
         std::vector<std::string> _methods;
         Server();
+        Server(const Server &source);
+        Server &operator = (const Server &rhs);
         Server(std::string ipAddr, int port, std::string root, std::string index);
         ~Server();
 
