@@ -10,6 +10,32 @@ Location::Location() {
     _return = "";
 }
 
+Location::Location(const Location &source)
+{
+    *this= source;
+    return ;
+}
+
+
+Location &Location::operator= (const Location &rhs)
+{
+    if(this != &rhs)
+    {
+       _path = rhs._path;
+       _upload_to = rhs._upload_to;
+       _cgi_path = rhs._cgi_path;
+       _cgi_ext = rhs._cgi_ext;
+       _autoindex = rhs._autoindex;
+       _allow_methods = rhs._allow_methods;
+       _return = rhs._return;
+    
+    }
+    return *this;
+
+}
+
+
+
 Location::~Location() {}
 
 void Location::setPath(std::string path) 
@@ -83,50 +109,3 @@ std::string Location::getReturn()
     return this->_return;
 }
 
-void    Location::printLoc() {
-    std::cout << "Path: ";
-    if (_path != "") {
-        std::cout << _path << std::endl;
-    } else {
-        std::cout << "Empty\n";
-    }
-    std::cout << "Upload_to: ";
-    if (_upload_to != "") {
-        std::cout << _upload_to << std::endl;
-    } else {
-        std::cout << "Empty\n";
-    }
-    std::cout << "CGI Path: ";
-    if (_cgi_path != "") {
-        std::cout << _cgi_path << std::endl;
-    } else {
-        std::cout << "Empty\n";
-    }
-    std::cout << "CGI Ext: ";
-    if (_cgi_ext != "") {
-        std::cout << _cgi_ext << std::endl;
-    } else {
-        std::cout << "Emptrey\n";
-    }
-    std::cout << "Autoindex: ";
-    if (_autoindex != "") {
-        std::cout << _autoindex << std::endl;
-    } else {
-        std::cout << "Empty\n";
-    }
-    std::cout << "Allow Methods: ";
-    if (_allow_methods.size() > 0) {
-        for (size_t i = 0; i < _allow_methods.size(); i++) {
-            std::cout << _allow_methods[i] << ", ";
-        }
-        std::cout << std::endl;
-    } else {
-        std::cout << "Empty\n";
-    }
-    std::cout << "Return: ";
-    if (_return != "") {
-        std::cout << _return << std::endl;
-    } else {
-        std::cout << "Empty\n";
-    }
-}

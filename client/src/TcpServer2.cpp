@@ -28,7 +28,7 @@ void TcpServer2::startServer()
 {
     std::vector<struct sockaddr_in>::iterator it;
 
-    std::cout << "@#$@#@$##@$$# Tamanho addresses :" << m_addresses.size() << std::endl;
+    //std::cout << "@#$@#@$##@$$# Tamanho addresses :" << m_addresses.size() << std::endl;
     std::cout << "\n\n * * * Listening Server at following ports * * *   \n\n";
     for (it = m_addresses.begin(); it != m_addresses.end(); ++it)
     {
@@ -95,7 +95,6 @@ void TcpServer2::startListen()
 
     while (g_stop == 1)
     {
-        std::cout << "Stop antes " << g_stop << std::endl;
         int num_events = epoll_wait(epoll_fd, m_event_list, MAXEPOLLSIZE, 2000);
         if (num_events == -1)
         {
@@ -106,13 +105,8 @@ void TcpServer2::startListen()
         verificTimeOut();
 
         std::cout << "num_events= " << num_events << std::endl;
+        std::cout << "\n\n";
 
-        std::cout << "\n\n";
-        for (int i = 0; i < num_events; i++)
-        {
-            std::cout << m_event_list[i].data.fd << std::endl;
-        }
-        std::cout << "\n\n";
         for (int i = 0; i < num_events; i++)
         {
             for (size_t j = 0; j < this->m_server.size(); ++j)
@@ -143,8 +137,7 @@ void TcpServer2::acceptNewConnection(epoll_event &m_event, int fd, int j)
     struct sockaddr_in addr;
     socklen_t addr_len = sizeof(addr);
     int client_socket = accept(fd, (struct sockaddr *)&addr, &addr_len);
-    std::cout << CYAN << client_socket << RESET << std::endl;
-    std::cout << "entrei accept " << std::endl;
+   // std::cout << CYAN << client_socket << RESET << std::endl;
     if (client_socket == -1)
     {
         exitWithError("Can't Accept something");
@@ -179,11 +172,11 @@ void TcpServer2::handleInput(epoll_event &m_event, int fd)
         {
             return;
         }
-        // Request request(clientRequest);
+        
+        request1.printMessage();
         request1.verific_errors(*server);
         std::string serverResponse;
         Response response(*server);
-        std::cout << CYAN << "Path from request = " << request1.getPath() << " CODE " << request1.getCode() << RESET << std::endl;
         if (request1.getCode() != 200 && !request1.getPath().empty())
         {
             serverResponse = response.buildErrorResponse(request1.getCode());
@@ -201,16 +194,8 @@ void TcpServer2::handleInput(epoll_event &m_event, int fd)
             }
             if (!locationSettings.getPath().empty())
             {
-                std::cout << locationSettings.getPath() << " " << locationSettings.getAllowMethods()[0] << std::endl;
-                if (locationSettings.getAllowMethods()[0] == "DELETE")
-                {
-                    std::string pathToDelete = "frontend2" + request1.getPath();
-                    if (std::remove(pathToDelete.c_str()) != 0)
-                        serverResponse = response.buildErrorResponse(500);
-                    else
-                        serverResponse = "HTTP/1.1 200 OK\r\n";
-                }
-                else if (!locationSettings.getReturn().empty())
+                
+                 if (!locationSettings.getReturn().empty())
                 {
                     std::istringstream iss(locationSettings.getReturn());
                     std::string response;
@@ -227,7 +212,7 @@ void TcpServer2::handleInput(epoll_event &m_event, int fd)
                 {
                     if (!request1.getPath().empty()) {
                         Cgi cgi(request1.getPath());
-                        serverResponse = cgi.runCgi(request1); // Armazena a resposta do CGI
+                        serverResponse = cgi.runCgi(request1);
                     }
                     std::cout << "Response: " << serverResponse << std::endl;
                 }
@@ -236,7 +221,6 @@ void TcpServer2::handleInput(epoll_event &m_event, int fd)
                     DIR *dir;
                     struct dirent *ent;
                     std::vector<std::string> content;
-                    std::cout << "locationsettings = " << locationSettings.getPath() << std::endl;
                     if ((dir = opendir(("frontend/html" + locationSettings.getPath() + "/").c_str())) != NULL)
                     {
                         while ((ent = readdir(dir)) != NULL)
@@ -258,6 +242,14 @@ void TcpServer2::handleInput(epoll_event &m_event, int fd)
                     }
                     serverResponse = dirListHtml(content);
                 }
+                else if (locationSettings.getAllowMethods()[0] == "DELETE" )
+                {
+                    std::string pathToDelete = "frontend2" + request1.getPath();
+                    if (std::remove(pathToDelete.c_str()) != 0)
+                        serverResponse = response.buildErrorResponse(500);
+                    else
+                        serverResponse = "HTTP/1.1 200 OK\r\n";
+                }
                 else
                 {
                     serverResponse = response.buildResponse(request1);
@@ -268,6 +260,7 @@ void TcpServer2::handleInput(epoll_event &m_event, int fd)
             }
         }
     }
+    
 }
 
 void TcpServer2::handleOutput(epoll_event &event, int fd)
@@ -435,7 +428,7 @@ void TcpServer2::verificTimeOut()
     for (std::map<int, time_t>::iterator it = socketCreation.begin(); it != socketCreation.end();)
     {
         time_t elapsedTime = currentTime - it->second;
-        std::cout << YELLOW << it->first << " elapsedTime = " << elapsedTime << RESET << std::endl;
+        //std::cout << YELLOW << it->first << " elapsedTime = " << elapsedTime << RESET << std::endl;
         if (elapsedTime >= TIMEOUT)
         {
             std::cout << MAGENTA << "Vou fechar conexão :" << it->first << RESET << std::endl;
@@ -455,22 +448,28 @@ void TcpServer2::verificTimeOut()
 void TcpServer2::closeConnection()
 {
     std::cout << "Vou eliminar tudo" << std::endl;
-    for (std::vector<int>::iterator it = m_sockets.begin(); it != m_sockets.end();)
+     for (std::vector<int>::iterator it = m_sockets.begin(); it != m_sockets.end(); ++it) 
     {
-        close(*it);
-        it++;
         epoll_ctl(this->epoll_fd, EPOLL_CTL_DEL, *it, NULL);
+        close(*it);
     }
+    m_sockets.clear();
 
     for (std::map<int, time_t>::iterator it = socketCreation.begin(); it != socketCreation.end();)
     {
-        close(it->first);
         epoll_ctl(this->epoll_fd, EPOLL_CTL_DEL, it->first, NULL);
+        close(it->first);
         clientServerMap.erase(it->first);
         responseMap.erase(it->first);
         socketCreation.erase(it++);
     }
-    m_sockets.clear();
+
+    for (size_t i = 0; i < m_server.size(); ++i)
+    {
+        m_server[i]._locations.clear();
+    }
+
+    m_server.clear();
     m_addresses.clear();
     // m_sockets.erase();
 

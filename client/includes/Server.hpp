@@ -25,14 +25,12 @@ class Server {
         bool                    _auto_index;
         bool                    _executable;
         std::string             _return;
-        std::vector<Location>  _locations;
         int                     s_socket;
-        std::string             s_ServerMessage;
-        int                     e_poll_fd;
         bool                    _redirect;
         socklen_t               s_socketAddress_len;
 
     public:
+        std::vector<Location>  _locations;
         uint32_t                s_addr;
         uint16_t                sin_port;
         std::string             s_host;
@@ -42,6 +40,8 @@ class Server {
         //bool        _redirect;
         std::vector<std::string> _methods;
         Server();
+        Server(const Server &source);
+        Server &operator = (const Server &rhs);
         Server(std::string ipAddr, int port, std::string root, std::string index);
         ~Server();
 

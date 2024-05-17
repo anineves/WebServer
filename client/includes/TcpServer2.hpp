@@ -20,8 +20,8 @@
 # include <dirent.h>
 # include <map>
 # include <signal.h>
+# include <algorithm>
 # define TIMEOUT 20
-
 
 class Connection;
 class Request;
