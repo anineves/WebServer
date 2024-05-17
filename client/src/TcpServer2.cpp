@@ -174,7 +174,7 @@ void TcpServer2::handleInput(epoll_event &m_event, int fd)
         socketCreation[fd] = time(NULL); // Atualiza o tempo de criação do socket
         Request request1;
 
-        showClientHeader(m_event, request1);
+        showClientHeader(m_event, request1, server);
         if (!request1.has_header)
         {
             return;
@@ -229,6 +229,7 @@ void TcpServer2::handleInput(epoll_event &m_event, int fd)
                         Cgi cgi(request1.getPath());
                         serverResponse = cgi.runCgi(request1); // Armazena a resposta do CGI
                     }
+                    std::cout << "Response: " << serverResponse << std::endl;
                 }
                 else if (locationSettings.getAutoIndex() == "on" && n == 0)
                 {
@@ -293,16 +294,14 @@ size_t stringtohex(std::string value)
     return int_value;
 }
 
-void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request)
+void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request, Server *server)
 {
 
     char buffer[5000];
     int bytesReceived;
     bool chunked = false;
     bool first = true;
-
     std::string chunk;
-    std::string content_length;
     std::string chunk_length_str;
 
     do
@@ -314,7 +313,7 @@ void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request
         if(bytesReceived == 0) 
             close(m_events.data.fd);
         this->_client_request.append(buffer, bytesReceived);
-
+        request.temp_loop++;
         size_t found_header = this->_client_request.find("\r\n\r\n");
         if (found_header != std::string::npos && this->_header.empty()) {
             request.has_header = true;
@@ -323,7 +322,7 @@ void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request
                 size_t pos = this->_header.find("Content-Length:");
                 pos += 15;
                 size_t end_pos = this->_header.find("\r\n", pos);
-                content_length = this->_header.substr(pos, end_pos - pos);
+                request.max_length = std::atoi(this->_header.substr(pos, end_pos - pos).c_str());
             }
             else if (this->_header.find("Transfer-Encoding") != std::string::npos)
                 chunked = true;
@@ -341,12 +340,17 @@ void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request
             chunk_length_str = this->_body.substr(0, this->_body.find("\r\n"));
             if (this->_body.size() >= stringtohex(chunk_length_str)) {
                 while (this->_body.size() > stringtohex(chunk_length_str)) {
+                    request.max_length += stringtohex(chunk_length_str);
                     chunk += this->_body.substr(this->_body.find("\r\n") + 2, stringtohex(chunk_length_str));
                     this->_body.erase(0, stringtohex(chunk_length_str) + 2 + chunk_length_str.size() + 2);                
                     chunk_length_str = this->_body.substr(0, this->_body.find("\r\n"));
                 }
             }
             chunk_length_str.clear();
+        }
+        if (request.max_length > server->getClientMaxBody_s()) {
+            request.verific_errors(*server);
+            return ;
         }
     } while (bytesReceived > 0);
 

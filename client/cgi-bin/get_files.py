@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+from cgi_header import *
 import os, cgi
 
 host = os.environ.get("HTTP_HOST", default=None);
@@ -26,4 +27,7 @@ response = f'<html>\
                 </body>\
             </html>'
 
+print(http_found)
+print(html_head)
+get_header(host)
 print(response)

@@ -5,10 +5,16 @@ Request::Request(std::string request) : _fullRequest(request)
 
     has_header = false;
     _code = 200;
+    max_length = 0;
+
+    temp_loop = 0;
 }
 
 Request::Request() {
-        has_header = false;
+    has_header = false;
+    max_length = 0;
+
+    temp_loop = 0;
 }
 
 Request::~Request() {}
@@ -116,9 +122,8 @@ bool Request::verific_errors(Server server)
         exitWithError(" Wrong Protocol");
         return 0;
     }
-    std::cout << GREEN << this->lines_body.size() << static_cast<std::string::size_type>(server.getClientMaxBody_s());
-    if (this->lines_body.size() > static_cast<std::string::size_type>(server.getClientMaxBody_s()))
-    {
+    // std::cout << GREEN << this->lines_body.size() << server.getClientMaxBody_s() << RESET << std::endl;
+    if (max_length > server.getClientMaxBody_s()) {
         _code = 404;
         exitWithError(" Wrong Client Max");
         return 0;

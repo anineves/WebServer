@@ -80,7 +80,7 @@ std::string Cgi::runCgi(Request &request)
 	int fdRequest[2];
 	size_t content_length;
 	std::string body;
-	std::stringstream header_stream;
+	std::stringstream resposta;
 
 	initEnv(request);
 	body = request.getFullRequest();
@@ -101,16 +101,13 @@ std::string Cgi::runCgi(Request &request)
 
 		close(fdResponse[0]);
 		waitpid(pid, NULL, 0);
-		std::string resposta;
-		resposta += "HTTP/1.1 200 OK\r\n";
-		resposta += "Content-Type: text/html\r\n";
-		resposta += "Content-Length: ";
-		resposta += content_length;
-		resposta += "\r\n\r\n";
 
-		resposta += this->_cgi_response;
-
-		return resposta;
+		int index = this->_cgi_response.find("Content-Length:");
+		
+		resposta << this->_cgi_response;
+		resposta.seekp(index + 15);
+		resposta << content_length;
+		return resposta.str();
 	}
 	else if (pid == 0)
 	{

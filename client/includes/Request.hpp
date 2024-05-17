@@ -49,6 +49,8 @@ public:
     std::string lines_body;
     std::string _query;
     std::string _fullRequest;
+    size_t      max_length;
+    int         temp_loop;
     Server      r_server;
 
 private:

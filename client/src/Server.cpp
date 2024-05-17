@@ -90,7 +90,7 @@ void Server::setSocket(int set_socket) {
 }
 
 
-void Server::setClientMaxBody(int client_max_body) {
+void Server::setClientMaxBody(size_t client_max_body) {
     this->s_client_body = client_max_body;
 }
 
@@ -140,7 +140,7 @@ int Server::getSocket() {
     return this->s_socket;
 }
 
-int Server::getClientMaxBody_s() {
+size_t Server::getClientMaxBody_s() {
     return this->s_client_body;
 }
 
