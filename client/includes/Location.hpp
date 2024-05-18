@@ -29,7 +29,7 @@ public:
     void setAutoIndex(std::string autoindex);
     void setReturn(std::string returnn);
 
-    std::string getPath();
+    std::string getPath() const;
     std::vector<std::string> getAllowMethods();
     std::string getUploadTo();
     std::string getCgiPath();

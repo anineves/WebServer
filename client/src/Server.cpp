@@ -1,80 +1,80 @@
 #include "../includes/Server.hpp"
 
-Server::Server() {
-    
-    /*memset(&s_socketAddress, 0, sizeof(s_socketAddress));
-    s_socketAddress.sin_family = AF_INET;
-    s_socketAddress.sin_addr.s_addr = htonl(INADDR_ANY);
-    std::cout << "valor Porta" << htons(this->s_port) << std::endl;
-    s_socketAddress.sin_port = htons(this->s_port);*/
+Server::Server()
+    : s_root(""),
+      s_index(""),
+      s_index_pages(),
+      s_error_page(""),
+      s_ip_address(""),
+      s_port(""),
+      s_client_body(0),
+      _upload_to(""),
+      _cgi_path(""),
+      _cgi_ext(""),
+      _auto_index(false),
+      _executable(false),
+      _return(""),
+      s_socket(0),
+      _redirect(false),
+      s_socketAddress_len(0),
+      _locations(),
+      s_addr(0),
+      sin_port(0),
+      s_host(""),
+      s_server_names() {
 }
 
-Server::Server(std::string ipAddr, int port, std::string root, std::string index) {
-
-    s_ip_address = ipAddr;
-    s_root = root;
-    s_port = port;
-    s_index = index;
-
-    _upload_to = "";
-    _methods.push_back("GET");
-    _methods.push_back("POST");
-    _methods.push_back("DELETE");
-    _cgi_path = "";
-    _cgi_ext = "";
-    _executable = "";
-    _redirect = false;
-    _auto_index = false;
-    verificErrorServer();
-}
 
 Server::Server(const Server &source)
 {
     *this= source;
     return ;
 }
-Server &Server::operator= (const Server &rhs)
-{
-    if(this != &rhs)
-    {
-        s_ip_address = rhs.s_ip_address;
-    s_root = rhs.s_root;
-    s_port = rhs.s_port;
-    s_index = rhs.s_index;
-    s_error_page = rhs.s_error_page;
-    s_client_body = rhs.s_client_body;
-    s_server_name = rhs.s_server_name;
-    
 
-    _upload_to = rhs._upload_to;
-    _methods = rhs._methods;
-    _cgi_path = rhs._cgi_path;
-    _cgi_ext = rhs._cgi_ext;
-    _executable = rhs._executable;
-    _redirect = rhs._redirect;
-    _auto_index = rhs._auto_index;
-   
-    _return = rhs._return;
-    s_socket = rhs.s_socket;
-    _redirect = rhs._redirect;
-    _locations = rhs._locations;
-     s_addr = rhs.s_addr;
-    sin_port = rhs.sin_port;
-    s_host = rhs.s_host;
-    s_server_names = rhs.s_server_names;
-    
-    }
-    return *this;
+ Server &Server::operator=(const Server &rhs) {
+            if (this != &rhs) {
+                s_ip_address = rhs.s_ip_address;
+                s_root = rhs.s_root;
+                s_port = rhs.s_port;
+                s_index = rhs.s_index;
+                s_error_page = rhs.s_error_page;
+                s_client_body = rhs.s_client_body;
+            
 
-}
+                _upload_to = rhs._upload_to;
+                _methods = rhs._methods;
+                _cgi_path = rhs._cgi_path;
+                _cgi_ext = rhs._cgi_ext;
+                _executable = rhs._executable;
+                _redirect = rhs._redirect;
+                _auto_index = rhs._auto_index;
 
-
+                _return = rhs._return;
+                s_socket = rhs.s_socket;
+                s_socketAddress_len = rhs.s_socketAddress_len;
+                if (!rhs._locations.empty()) 
+                {
+                    _locations.clear();
+                    _locations = rhs._locations;
+                } 
+                s_addr = rhs.s_addr;
+                sin_port = rhs.sin_port;
+                s_host = rhs.s_host;
+                s_socketAddress = rhs.s_socketAddress; 
+        }
+            return *this;
+ }
 
 
 
 Server::~Server() {
     //close(this->s_socket);
     //std::cout << "Server port: " << this->s_port << " destructor called.\n";
+    _locations.clear();
+    _methods.clear();
+    s_server_names.clear();
+    s_index_pages.clear();
+
 }
 
 // ---- SETTERS ----
@@ -87,7 +87,6 @@ void    Server::setIndex_s(std::string index) {this->s_index = index;}
 
 void    Server::setErrorPage_s(std::string error_page) {this->s_error_page = error_page;}
 
-void    Server::setServerName_s(std::string server_name) {this->s_server_name = server_name;}
 
 void    Server::setLocation( std::vector<Location> locations) { this->_locations = locations; }
 
@@ -205,6 +204,13 @@ bool Server::getRedirect()
 {
     return this->_redirect;
 }
+
+
+
+
+
+
+
 // ---- END GETTERS -----
 void Server::verificErrorServer()
 {

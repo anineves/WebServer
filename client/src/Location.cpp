@@ -1,8 +1,7 @@
 #include "../includes/Location.hpp"
 
-Location::Location() {
+Location::Location() : _allow_methods() {
     _path = "";
-    //_allow_methods = "";
     _upload_to = "";
     _cgi_path = "";
     _cgi_ext = "";
@@ -26,7 +25,10 @@ Location &Location::operator= (const Location &rhs)
        _cgi_path = rhs._cgi_path;
        _cgi_ext = rhs._cgi_ext;
        _autoindex = rhs._autoindex;
-       _allow_methods = rhs._allow_methods;
+       if (!rhs._allow_methods.empty()) 
+        {
+            _allow_methods = rhs._allow_methods;
+        } 
        _return = rhs._return;
     
     }
@@ -36,7 +38,9 @@ Location &Location::operator= (const Location &rhs)
 
 
 
-Location::~Location() {}
+Location::~Location() {
+    _allow_methods.clear();
+}
 
 void Location::setPath(std::string path) 
 { 
@@ -74,7 +78,7 @@ void Location::setReturn(std::string returnn)
     this->_return = returnn; 
 }
 
-std::string Location::getPath() 
+std::string Location::getPath() const
 { 
     return this->_path; 
 }

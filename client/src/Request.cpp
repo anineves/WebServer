@@ -115,7 +115,7 @@ bool Request::verific_errors(Server server)
     }
     // if (this->lines_body.size() > static_cast<std::string::size_type>(server.getClientMaxBody_s()))
     if (max_length > server.getClientMaxBody_s()) {
-        _code = 404;
+        _code = 413;
         exitWithError(" Wrong Client Max");
         return 0;
     }

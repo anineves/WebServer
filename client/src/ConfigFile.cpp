@@ -82,7 +82,7 @@ std::string ft_trim(const std::string &line)
     }
 }
 
-void ConfigFile::parser(std::string conFile)
+void ConfigFile::parser(std::string &conFile)
 {
     std::ifstream readConFile(conFile.c_str());
     std::string line;
@@ -194,7 +194,7 @@ void ConfigFile::parser(std::string conFile)
             if (Brackets == 0)
             {
                 insideServerBlock = false;
-                parserServer(&serverContent);
+                parserServer(serverContent);
                 serverContent.str("");
                 serverContent.clear();
             }
@@ -220,12 +220,12 @@ void ConfigFile::parser(std::string conFile)
 
 }
 
-bool ConfigFile::parserServer(std::stringstream *serverContent)
+bool ConfigFile::parserServer(std::stringstream &serverContent)
 {
     std::string line;
     Server server;
 
-    while (std::getline(*serverContent, line))
+    while (std::getline(serverContent, line))
     {
         std::string trimLine = ft_trim(line);
         if (trimLine.empty())
@@ -294,6 +294,7 @@ bool ConfigFile::parserServer(std::stringstream *serverContent)
     }
     server.setLocation(_locations);
     server.verificErrorServer();
+    _locations.clear();
     _servers.push_back(server);
     //printVector(server.s_server_names);
     if (_servers.empty())
