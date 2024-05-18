@@ -1,3 +1,4 @@
 *.o
 .vscode
 webserv
+cgi-bin/__pycache__
