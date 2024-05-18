@@ -7,6 +7,8 @@ Server::Server() {
     s_socketAddress.sin_addr.s_addr = htonl(INADDR_ANY);
     std::cout << "valor Porta" << htons(this->s_port) << std::endl;
     s_socketAddress.sin_port = htons(this->s_port);*/
+     
+     
 }
 
 Server::Server(std::string ipAddr, int port, std::string root, std::string index) {
@@ -205,6 +207,13 @@ bool Server::getRedirect()
 {
     return this->_redirect;
 }
+
+
+
+
+
+
+
 // ---- END GETTERS -----
 void Server::verificErrorServer()
 {

@@ -57,7 +57,7 @@ public:
     void acceptNewConnection(epoll_event &event, int fd, int j);
     void handleInput(epoll_event &event, int fd); 
     void handleOutput(epoll_event &event, int fd);
-    void showClientHeader(struct epoll_event &m_events, Request &request1, Server *server);
+    void showClientHeader(struct epoll_event &m_events, Request &request1);
     void sendResponse(int client_socket, const std::string& response);
     void closeServer();
     uint32_t strToNet(const std::string &ip_address);

@@ -1,6 +1,7 @@
 #ifndef SERVER_HPP
 # define SERVER_HPP
 # include <vector>
+# include <map>
 # include "Location.hpp"
 # include "Utils.hpp"
 # include "./webServer.hpp"
@@ -81,6 +82,9 @@ class Server {
         bool                        getRedirect();
         void    verificErrorServer();
         Location                    verifyLocations(std::string pathRequest);
+
+        void printDefaultErrors();
+
        
 };
 

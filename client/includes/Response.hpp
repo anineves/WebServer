@@ -24,15 +24,19 @@ class Request;
 
 class Response {
 public:
+    std::map<std::string, std::string> _default_error;
+
     Response();
     Response(Server server);
     ~Response();
-    std::string obtainFilePath(const std::string& request);
-    std::string getContentType(const std::string& filePath);
-    bool isValidPath(std::string& fullPath);
-    std::string responseStatus (int code);
-    std::string buildResponse(Request request);
-    std::string buildErrorResponse(int code);
+    std::string     obtainFilePath(const std::string& request);
+    std::string     getContentType(const std::string& filePath);
+    bool            isValidPath(std::string& fullPath);
+    std::string     responseStatus (int code);
+    std::string     buildResponse(Request request);
+    std::string     buildErrorResponse(int code);
+    std::string     getDefaultError(std::string code);
+    void            printDefaultErrors();
 
     Server m_server; 
 private:

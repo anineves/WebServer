@@ -1,0 +1,21 @@
+body {
+    background: -webkit-linear-gradient(left, rgb(20, 17, 25) 0%, rgb(69, 61, 52) 80%, rgb(57, 50, 45) 100%);
+    background: -o-linear-gradient(left, rgb(20, 17, 25) 0%, rgb(69, 61, 52) 80%, rgb(57, 50, 45) 100%);
+    background: -ms-linear-gradient(left, rgb(20, 17, 25) 0%, rgb(69, 61, 52) 80%, rgb(57, 50, 45) 100%);
+    background: -moz-linear-gradient(left, rgb(20, 17, 25) 0%, rgb(69, 61, 52) 80%, rgb(57, 50, 45) 100%);
+    background: linear-gradient(to right, rgb(20, 17, 25) 0%, rgb(69, 61, 52) 80%, rgb(57, 50, 45) 100%);
+    align-items: center;
+}
+
+header {
+    justify-content: center;
+    display: flex;
+    color: whitesmoke;
+    font-family:'Courier New', Courier, monospace
+}
+
+p {
+    text-align-last: center;
+    font-family:'Courier New', Courier, monospace;
+    color: whitesmoke;
+}

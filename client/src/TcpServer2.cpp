@@ -167,7 +167,7 @@ void TcpServer2::handleInput(epoll_event &m_event, int fd)
         socketCreation[fd] = time(NULL); // Atualiza o tempo de criação do socket
         Request request1;
 
-        showClientHeader(m_event, request1, server);
+        showClientHeader(m_event, request1);
         if (!request1.has_header)
         {
             return;
@@ -287,7 +287,7 @@ size_t stringtohex(std::string value)
     return int_value;
 }
 
-void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request, Server *server)
+void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request)
 {
 
     char buffer[5000];
@@ -340,10 +340,6 @@ void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request
                 }
             }
             chunk_length_str.clear();
-        }
-        if (request.max_length > server->getClientMaxBody_s()) {
-            request.verific_errors(*server);
-            return ;
         }
     } while (bytesReceived > 0);
 
