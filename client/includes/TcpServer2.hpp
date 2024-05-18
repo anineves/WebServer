@@ -38,7 +38,7 @@ private:
     std::string                     _body;
 
 public:
-    TcpServer2(std::vector<Server> server);
+    TcpServer2(std::vector<Server> &server);
     ~TcpServer2();
 
     std::map<int, std::string> responseMap;

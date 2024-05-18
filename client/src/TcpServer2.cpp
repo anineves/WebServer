@@ -11,7 +11,7 @@ void sighandler(int sig)
     }
 }
 
-TcpServer2::TcpServer2(std::vector<Server> servers) : m_server(servers)
+TcpServer2::TcpServer2(std::vector<Server> &servers) : m_server(servers)
 {
     setAddresses();
     startServer();
@@ -21,6 +21,7 @@ TcpServer2::TcpServer2(std::vector<Server> servers) : m_server(servers)
 TcpServer2::~TcpServer2()
 {
     closeServer();
+    m_server.clear();
     std::cout << "TcpServer Destructor called.\n";
 }
 
@@ -467,7 +468,7 @@ void TcpServer2::closeConnection()
 
     m_server.clear();
     m_addresses.clear();
-    // m_sockets.erase();
+    
 
     exit(EXIT_SUCCESS);
 }

@@ -20,17 +20,17 @@ private:
     std::string _root;
     std::string _index;
     std::string _error_page;
-    std::vector<Server> _servers;
-    std::vector<Location> _locations;
 
     std::string obtainValue(const std::string &line, const std::string &type);
     int obtainPort(std::string line, std::string token);
-    bool parserServer(std::stringstream *serverContent);
+    bool parserServer(std::stringstream &serverContent);
     bool parserLocation(std::string path,  std::stringstream *locationContent);
     std::string ft_trim(const std::string &line);
 
 
 public:
+    std::vector<Location> _locations;
+    std::vector<Server> _servers;
     //--- CONSTRUCTORS && DESTRUCTOR ---
     ConfigFile(std::string conFile);
     ConfigFile();
@@ -52,7 +52,7 @@ public:
     void setIndex(std::string set_index);
     void setErrorPage(std::string set_error_page);
     //--- PARSER ---
-    void parser(std::string conFile);
+    void parser(std::string &conFile);
     void clearConf();
 
     //u_int32_t strToNet(const std::string &ip_address);

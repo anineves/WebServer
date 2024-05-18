@@ -13,8 +13,7 @@ class Server {
         std::string             s_index;
         std::vector<std::string> s_index_pages;
         std::string             s_error_page;
-        std::string             s_server_name;
-        
+
         std::string             s_ip_address;
         std::string             s_port;
         size_t                     s_client_body;
@@ -36,7 +35,6 @@ class Server {
         uint16_t                sin_port;
         std::string             s_host;
         std::vector<std::string> s_server_names;
-        
         struct sockaddr_in      s_socketAddress;
         //bool        _redirect;
         std::vector<std::string> _methods;
@@ -83,7 +81,6 @@ class Server {
         void    verificErrorServer();
         Location                    verifyLocations(std::string pathRequest);
 
-        void printDefaultErrors();
 
        
 };

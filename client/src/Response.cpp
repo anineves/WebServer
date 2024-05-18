@@ -62,7 +62,7 @@ std::string Response::buildErrorResponse(int code)
 
         response += fileContent;
 
-        std::cout << "response " << response << std::endl;
+        //std::cout << "response " << response << std::endl;
     
     }
     else
@@ -80,7 +80,6 @@ std::string Response::buildResponse(Request request)
     {
         // std::cout << "valor redirect " << m_server.getredirect << std::endl;
         std::string filePath = obtainFilePath(request.getPath());
-        std::cout << "filePath :" << filePath << std::endl; 
         std::ifstream file(filePath.c_str());
         if (file)
         {
