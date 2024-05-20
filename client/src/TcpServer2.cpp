@@ -180,8 +180,10 @@ void TcpServer2::handleInput(epoll_event &m_event, int fd)
         request1.verific_errors(*server);
         std::string serverResponse;
         Response response(*server);
+        std::cout << YELLOW << "CODE:\n" << request1.getCode() << RESET << std::endl;
         if (request1.getCode() != 200 && !request1.getPath().empty())
         {
+            std::cout << MAGENTA << "IM IN CODE:\n" << request1.getCode() << RESET << std::endl;
             serverResponse = response.buildErrorResponse(request1.getCode());
             m_event.events = EPOLLOUT;
             epoll_ctl(this->getEpoll(), EPOLL_CTL_MOD, fd, &m_event);
@@ -327,6 +329,12 @@ void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request
             }
             else if (this->_header.find("Transfer-Encoding") != std::string::npos)
                 chunked = true;
+            else if (this->_header.find("POST") != std::string::npos){
+                // std::cout << RED << "POST METHOD ON SHOW HEADER" << RESET << std::endl;
+                request.setCode(411);
+                request.no_length = true;
+                break ;
+            }
         }
         if (chunked == true) {
             if (first == true) {
@@ -349,8 +357,11 @@ void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request
             }
             chunk_length_str.clear();
         }
-    if (request.max_length > server->getClientMaxBody_s())
-        request.verific_errors(*server);
+    if (request.max_length > server->getClientMaxBody_s()){
+        // std::cout << YELLOW << "GOT IN HERE: MAX LENGTH" << RESET << std::endl;
+        request.setCode(413);
+        break ;
+    }
     } while (bytesReceived > 0);
 
     if(request.has_header == true) {
