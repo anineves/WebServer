@@ -20,9 +20,9 @@ TcpServer2::TcpServer2(std::vector<Server> &servers) : m_server(servers)
 
 TcpServer2::~TcpServer2()
 {
+    std::cout << "TcpServer Destructor called" << std::endl;
+    closeConnection();
     closeServer();
-    m_server.clear();
-    std::cout << "TcpServer Destructor called.\n";
 }
 
 void TcpServer2::startServer()
@@ -127,7 +127,8 @@ void TcpServer2::startListen()
             }
         }
     }
-    closeConnection();
+    // closeConnection();
+    return ;
 }
 
 
@@ -168,7 +169,7 @@ void TcpServer2::handleInput(epoll_event &m_event, int fd)
         socketCreation[fd] = time(NULL); // Atualiza o tempo de criação do socket
         Request request1;
 
-        showClientHeader(m_event, request1);
+        showClientHeader(m_event, request1, server);
         if (!request1.has_header)
         {
             return;
@@ -288,7 +289,7 @@ size_t stringtohex(std::string value)
     return int_value;
 }
 
-void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request)
+void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request, Server *server)
 {
 
     char buffer[5000];
@@ -342,6 +343,8 @@ void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request
             }
             chunk_length_str.clear();
         }
+    if (request.max_length > server->getClientMaxBody_s())
+        request.verific_errors(*server);
     } while (bytesReceived > 0);
 
     if(request.has_header == true) {
@@ -468,7 +471,14 @@ void TcpServer2::closeConnection()
 
     m_server.clear();
     m_addresses.clear();
+    m_sockets.clear();
+    _header.clear();
+    _client_request.clear();
+    m_server.clear();
     
-
-    exit(EXIT_SUCCESS);
+    std::string().swap(_header);
+    std::string().swap(_client_request);
+    std::vector<int>().swap(m_sockets);
+    std::vector<Server>().swap(m_server);
+    // exit(EXIT_SUCCESS);
 }
