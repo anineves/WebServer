@@ -373,9 +373,10 @@ void TcpServer2::sendResponse(int client_socket, const std::string &response)
     {
         log("------ Server Response sent to client ------\n\n");
     }
-    else
+    else if(bytesSent <= 0)
     {
         log("Error sending response to client");
+        close(client_socket);
     }
 }
 
