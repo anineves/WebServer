@@ -68,6 +68,7 @@ class Server {
         std::string                 getIpAddr_s();
         std::string                         getPort_s();
         std::string                 getRoot_s();
+         std::string                 gethost_s();
         std::string                 getIndex_s();
         std::string                 getErrorPage_s();
         std::vector<Location>       getLocations();

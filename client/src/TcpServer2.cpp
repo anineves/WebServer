@@ -96,6 +96,7 @@ void TcpServer2::startListen()
 
     while (g_stop == 1)
     {
+        //epoll_wait(epoll_fd, events, MAX_EVENTS, TIMEOUT);
         int num_events = epoll_wait(epoll_fd, m_event_list, MAXEPOLLSIZE, 2000);
         if (num_events == -1)
         {
@@ -241,8 +242,13 @@ void TcpServer2::handleInput(epoll_event &m_event, int fd)
                             }
                         }
                         closedir(dir);
+                        serverResponse = dirListHtml(content);
                     }
-                    serverResponse = dirListHtml(content);
+                    else
+                    {
+                         serverResponse = response.buildErrorResponse(404);
+
+                    }
                 }
                 else if (locationSettings.getAllowMethods()[0] == "DELETE" )
                 {
@@ -370,9 +376,10 @@ void TcpServer2::sendResponse(int client_socket, const std::string &response)
     {
         log("------ Server Response sent to client ------\n\n");
     }
-    else
+    else if(bytesSent <= 0)
     {
         log("Error sending response to client");
+        close(client_socket);
     }
 }
 
