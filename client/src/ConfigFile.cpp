@@ -238,26 +238,33 @@ bool ConfigFile::parserServer(std::stringstream &serverContent)
         if (fword == "listen")
         {
             std::string temp_port = obtainValue(line, "listen");
-            std::size_t find = (server.getPort_s()).find(':');
+            std::cout << "Temp " << temp_port << std::endl;
+            std::size_t find = temp_port.find(':');
             if (find == std::string::npos)
             {
                 server.setPort_s(temp_port);
                 server.sin_port = htons(ft_stoi(server.getPort_s()));
                 server.s_host = "127.0.0.1";
-                server.s_addr = htonl(str_to_uint32("127.0.0.1"));
+                server.s_addr = htonl(str_to_uint32(server.s_host));
             }
             else
             {
                 server.setPort_s((temp_port.substr(find + 1)));
                 server.sin_port = htons(ft_stoi(server.getPort_s()));
-                server.s_host = temp_port.substr(0 + find);
+                server.s_host = temp_port.substr(0 , find);
+                std::cout << "Host " <<  server.s_host << std::endl; 
                 server.s_addr = htonl(str_to_uint32(server.s_host));
+                server.setIpAddr_s(server.s_host);
             }
         }
         if (fword == "client_max_body_size")
             server.setClientMaxBody(obtainPort(line, "client_max_body_size"));
         if (fword == "host")
+        {
             server.setIpAddr_s(obtainValue(line, "host"));
+            server.s_host = server.getIpAddr_s();
+            server.s_addr = htonl(str_to_uint32(server.s_host));
+        }
         if (fword == "root")
             server.setRoot_s(obtainValue(line, "root"));
         if (fword == "index")

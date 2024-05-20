@@ -96,6 +96,7 @@ void TcpServer2::startListen()
 
     while (g_stop == 1)
     {
+        //epoll_wait(epoll_fd, events, MAX_EVENTS, TIMEOUT);
         int num_events = epoll_wait(epoll_fd, m_event_list, MAXEPOLLSIZE, 2000);
         if (num_events == -1)
         {
@@ -240,8 +241,13 @@ void TcpServer2::handleInput(epoll_event &m_event, int fd)
                             }
                         }
                         closedir(dir);
+                        serverResponse = dirListHtml(content);
                     }
-                    serverResponse = dirListHtml(content);
+                    else
+                    {
+                         serverResponse = response.buildErrorResponse(404);
+
+                    }
                 }
                 else if (locationSettings.getAllowMethods()[0] == "DELETE" )
                 {
