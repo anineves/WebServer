@@ -189,15 +189,32 @@ void TcpServer2::handleInput(epoll_event &m_event, int fd)
         else
         {
             Location locationSettings = server->verifyLocations(request1.getPath());
+            
             int n = 0;
             if (is_file("frontend/html" + request1.getPath()) == 1)
             {
                 n = 1;
             }
+            bool not_allow = 0;
             if (!locationSettings.getPath().empty())
             {
                 
-                 if (!locationSettings.getReturn().empty())
+                for( size_t i = 0 ; i < locationSettings.getAllowMethods().size(); i++)
+                {
+
+                    std::cout << "METHODOOO " <<  locationSettings.getAllowMethods()[i] <<  locationSettings.getPath() << std::endl;
+                    if(locationSettings.getAllowMethods()[i] == request1.getMethod())
+                    {
+                        std::cout << "METHODOOO " <<  locationSettings.getAllowMethods()[i] <<  request1.getMethod() << std::endl;
+                        not_allow = 1;
+
+                    }
+                }
+                if(not_allow == 0) 
+                {
+                    serverResponse = response.buildErrorResponse(405);
+                }
+                else if (!locationSettings.getReturn().empty())
                 {
                     std::istringstream iss(locationSettings.getReturn());
                     std::string response;
@@ -326,6 +343,8 @@ void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request
             }
             else if (this->_header.find("Transfer-Encoding") != std::string::npos)
                 chunked = true;
+            else 
+                break;
         }
         if (chunked == true) {
             if (first == true) {
