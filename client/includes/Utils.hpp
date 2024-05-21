@@ -26,5 +26,24 @@ std::string verificDelete(std::vector<std::string> content);
 std::string handleRequest(std::string request);
 u_int32_t str_to_uint32(std::string str);
 void printVector(const std::vector<std::string>& vec);
+std::string consumeSpaces(std::string line);
+int restSpaces(std::string line, int pos);
+std::string consumeMultiSpaces(std::string line);
+int consumeComments(std::string line);
+int consumeEmptyLines(std::string line);
+std::vector<std::string>    putKeys(std::vector<std::string> keyVec);
+std::vector<std::string> getkeys(std::vector<std::string> fileVec);
+std::vector<std::string> removeBrackets(std::vector<std::string> fileVec);
+int checkkey(std::string line, std::vector<std::string> vector);
+void    matchKeys(std::vector<std::string> keyVec, std::vector<std::string> fileVec);
+void    matchingServerLocsBrackets(std::vector<std::string> tmp, std::vector<std::string> fileVec);
+void    verifyBlocks(std::vector<std::string> fileVec);
+void    checkServerLocs(std::vector<std::string> fileVec);
+void    listenRule(std::string line);
+void    serverNameRule(std::string line);
+void    hostRule(std::string line);
+void    verifyVar(std::vector<std::string> fileVec);
+void    verifyValues(std::vector<std::string> fileVec);
+
 
 #endif
