@@ -22,7 +22,6 @@ TcpServer2::~TcpServer2()
 {
     std::cout << "TcpServer Destructor called" << std::endl;
     closeConnection();
-    closeServer();
 }
 
 void TcpServer2::startServer()
@@ -411,12 +410,6 @@ void TcpServer2::sendResponse(int client_socket, const std::string &response)
     }
 }
 
-void TcpServer2::closeServer()
-{
-    std::cout << "closeServer Function called.\n";
-    exit(0);
-}
-
 uint32_t TcpServer2::strToNet(const std::string &ip_address)
 {
     struct in_addr addr;
@@ -510,7 +503,7 @@ void TcpServer2::closeConnection()
     _header.clear();
     _client_request.clear();
     m_server.clear();
-    
+
     std::string().swap(_header);
     std::string().swap(_client_request);
     std::vector<int>().swap(m_sockets);
