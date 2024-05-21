@@ -1,9 +1,8 @@
 #include "../includes/cParser.hpp"
-cParser::cParser() {std::cout << "cParser destructor called\n";}
+cParser::cParser() {}
 
 cParser::~cParser() {
     this->fileVec.clear();
-    std::cout << "cParser destructor called\n";
 }
 
 std::string consumeSpaces(std::string line) {
@@ -251,7 +250,13 @@ void    checkServerLocs(std::vector<std::string> fileVec) {
     }
 }
 
-/* std::string  */
+size_t foundChar(std::string line, char c) {
+    for (size_t i = 0; i < line.length(); i++) {
+        if (line[i] == c)
+            return i;
+    }
+    return 0;
+}
 
 void    listenRule(std::string line) {
     consumeMultiSpaces(line);
@@ -259,14 +264,16 @@ void    listenRule(std::string line) {
     std::cout << RED << line << RESET << std::endl;
     size_t pos = line.find(' ');
     size_t endpos = 0;
-    int twoP = 0;
+    size_t twoP = 0;
     if (line[line.length() - 2 == ' '])
         endpos = line.length() - 2;
     else
         endpos = line.length() - 1;
     std::string value;
-    int countP = 0;
-    if (line.find(':') >= 0) {
+    size_t countP = 0;
+    std::cout << endpos - pos << std::endl;
+    if ((endpos - pos) > 6 && foundChar(line, ':')) {
+        std::cout << GREEN << "Entrei\n" << RESET;
         for (size_t i = (pos + 1); i < endpos - 1; i++) {
             if (line [i] == '.' || line[i] == ':' || isdigit(line[i])) {
                 value += line[i];
@@ -280,8 +287,21 @@ void    listenRule(std::string line) {
             else 
                 throw("Syntax error listen IP + PORT, must be positive numeric values (example: 127.0.0.1:8080)");
         }
+        
         if (twoP != 1 || countP != 3) {
                 throw("Syntax error listen IP + PORT, must be positive numeric values (example: 127.0.0.1:8080)");
+        }
+        twoP = foundChar(line, ':');
+        std::cout << twoP << std::endl;
+        for (size_t i = (pos + 1); i < twoP; i++) {
+            if (line[i] == '.') {
+                //%%%%%%%%%%%%%
+                //%%%%%%%%%%%%%
+                //terminei AQUI
+                //%%%%%%%%%%%%%
+                //%%%%%%%%%%%%%
+            }
+
         }
     } 
     else {
@@ -385,7 +405,7 @@ void    verifyValues(std::vector<std::string> fileVec) {
     // se as locations estao corretamente dentro dos servers e os brackets estao certos tambem
     checkServerLocs(fileVec);
     verifyBlocks(fileVec);
-    //verifyVar(fileVec);
+    verifyVar(fileVec);
 
     keyVec.clear();
     fileVec.clear();
