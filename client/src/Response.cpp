@@ -73,13 +73,13 @@ std::string Response::buildErrorResponse(int code)
     return response;
 }
 
-std::string Response::buildResponse(Request request)
+std::string Response::buildResponse(Request request, Location &location)
 {
     std::string response;
     if (request.getMethod() == "GET" || request.getMethod() == "POST" || request.getMethod() == "DELETE")
     {
         // std::cout << "valor redirect " << m_server.getredirect << std::endl;
-        std::string filePath = obtainFilePath(request.getPath());
+        std::string filePath = obtainFilePath(request.getPath(), location);
         std::ifstream file(filePath.c_str());
         if (file)
         {
@@ -111,7 +111,7 @@ std::string Response::buildResponse(Request request)
     return response;
 }
 
-std::string Response::obtainFilePath(const std::string &request)
+std::string Response::obtainFilePath(const std::string &request, Location &location)
 {
     size_t start = request.find(" ") + 1;
     size_t end = request.find(" ", start);
@@ -122,9 +122,9 @@ std::string Response::obtainFilePath(const std::string &request)
     }
     std::string fullPath;
     if (path.find(".html") != std::string::npos)
-        fullPath = m_server.getRoot_s() + "/html" + path;
+        fullPath = location.getRoot() + "/html" + path;
     else
-        fullPath = m_server.getRoot_s() + path;
+        fullPath = location.getRoot() + path;
     if (!isValidPath(fullPath))
     {
         fullPath = "frontend/error/404.html";

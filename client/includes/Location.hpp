@@ -14,6 +14,7 @@ private:
     std::string _autoindex;
     std::vector<std::string> _allow_methods;
     std::string _return;
+    std::string _root;
 
 public:
     Location();
@@ -28,6 +29,7 @@ public:
     void setCgiExt(std::string cgi_ext);
     void setAutoIndex(std::string autoindex);
     void setReturn(std::string returnn);
+    void setRoot(std::string root);
 
     std::string getPath() const;
     std::vector<std::string> getAllowMethods();
@@ -36,6 +38,7 @@ public:
     std::string getCgiExt();
     std::string getAutoIndex();
     std::string getReturn();
+    std::string getRoot();
 };
 
 #endif 

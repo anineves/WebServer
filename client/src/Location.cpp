@@ -7,6 +7,7 @@ Location::Location() : _allow_methods() {
     _cgi_ext = "";
     _autoindex ="";
     _return = "";
+    _root = "";
 }
 
 Location::Location(const Location &source)
@@ -78,6 +79,11 @@ void Location::setReturn(std::string returnn)
     this->_return = returnn; 
 }
 
+void Location::setRoot(std::string root)
+{ 
+    this->_root = root; 
+}
+
 std::string Location::getPath() const
 { 
     return this->_path; 
@@ -101,6 +107,11 @@ std::string Location::getCgiPath()
 std::string Location::getCgiExt() 
 { 
     return this->_cgi_ext; 
+}
+
+std::string Location::getRoot() 
+{ 
+    return this->_root; 
 }
 
 std::string Location::getAutoIndex() 

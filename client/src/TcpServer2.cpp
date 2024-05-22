@@ -203,15 +203,13 @@ void TcpServer2::handleInput(epoll_event &m_event, int fd)
                 
                 for( size_t i = 0 ; i < locationSettings.getAllowMethods().size(); i++)
                 {
-
-                    std::cout << "METHODOOO " <<  locationSettings.getAllowMethods()[i] <<  locationSettings.getPath() << std::endl;
                     if(locationSettings.getAllowMethods()[i] == request1.getMethod())
-                    {
-                        std::cout << "METHODOOO " <<  locationSettings.getAllowMethods()[i] <<  request1.getMethod() << std::endl;
                         not_allow = 1;
-
-                    }
                 }
+                std::cout << "Antes Loc " << locationSettings.getRoot()  << " Server " << server->getRoot_s() << std::endl;   
+                if(locationSettings.getRoot() == "")
+                    locationSettings.setRoot(server->getRoot_s());
+                std::cout << "Depois Loc " << locationSettings.getRoot()  << " Server " << server->getRoot_s() << std::endl;   
                 if(not_allow == 0) 
                 {
                     serverResponse = response.buildErrorResponse(405);
@@ -274,11 +272,11 @@ void TcpServer2::handleInput(epoll_event &m_event, int fd)
                     if (std::remove(pathToDelete.c_str()) != 0)
                         serverResponse = response.buildErrorResponse(500);
                     else
-                        serverResponse = "HTTP/1.1 200 OK\r\n";
+                        serverResponse = response.buildErrorResponse(200);
                 }
                 else
                 {
-                    serverResponse = response.buildResponse(request1);
+                    serverResponse = response.buildResponse(request1, locationSettings);
                 }
                 m_event.events = EPOLLOUT;
                 epoll_ctl(this->getEpoll(), EPOLL_CTL_MOD, fd, &m_event);

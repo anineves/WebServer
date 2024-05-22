@@ -78,7 +78,6 @@ void Request::parser(std::string header)
          
     }
 
-
    
 }
 

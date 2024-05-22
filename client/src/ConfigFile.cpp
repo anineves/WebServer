@@ -364,6 +364,10 @@ bool ConfigFile::parserLocation(std::string path, std::stringstream *locationCon
         {
             location.setReturn(obtainValue(line, "return"));
         }
+        if (fword == "root")
+        {
+            location.setRoot(obtainValue(line, "root"));
+        }
     }
     location.setPath(path);
 

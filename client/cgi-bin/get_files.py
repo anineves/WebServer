@@ -23,7 +23,7 @@ response = f'<html>\
                 </nav> \
             </header>\
                 <body>\
-                <h1>Fuck You!</h1>\
+                <h1>Hello Budy!!! Im a GET by CGI</h1>\
                 </body>\
             </html>'
 

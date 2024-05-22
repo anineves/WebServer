@@ -1,14 +1,10 @@
 <!DOCTYPE html>
-
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Delete</title>
-    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" type="text/css" href="../css/styles.css">
+    <title>CGI Operations</title>
 </head>
-
 <body>
     <header>
         <div class="logo">
@@ -27,18 +23,22 @@
         </nav>
     </header>
     <main>
-        <div class="register-form">
-            <h2>Delete</h2>
-            <p> You can delete files that are in the upload folder </p>
-            <form action="../../cgi-bin/delete.py" method="post" enctype="multipart/form-data">
-                <input type="text" name="filename" id="filename">
-                <input type="submit" value="Delete" name="delete">
-            </form>
+        <h2>CGI Operations</h2>
+        <div class="cgi-block">
+            <h3><a href="./upload.html">Upload</a></h3>
+            <p>Use this section to upload files to the server using CGI.</p>
+        </div>
+        <div class="cgi-block">
+            <h3><a href="./delete.html">Delete CGI</a></h3>
+            <p>Use this section to delete files on the server using CGI.</p>
+        </div>
+        <div class="cgi-block">
+            <h3><a href="./test.html">GET CGI</a></h3>
+            <p>Use this section to retrieve information from the server using CGI.</p>
         </div>
     </main>
     <footer>
-        <p id="text-footer">Created by: alexfern, asousa-n, jegger-s</p>
+        <p id="text-footer"> created by: alexfern, asousa-n, jegger-s</p>
     </footer>
 </body>
-
 </html>
