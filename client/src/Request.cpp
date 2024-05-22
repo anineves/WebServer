@@ -73,11 +73,10 @@ void Request::parser(std::string header)
 
     while (std::getline(ss, line) && line != "\r")
     {
-
-                this->lines_body += line;
-         
+                this->lines_body += line;    
     }
 
+    //sleep(5);
    
 }
 

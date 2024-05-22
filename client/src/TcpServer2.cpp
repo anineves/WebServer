@@ -57,7 +57,6 @@ void TcpServer2::startServer()
         }
         std::cout << "listening Port :" << BLUE << convert_uint32_to_str(ntohl(it->sin_addr.s_addr)) << ":" << ntohs(it->sin_port) << " | Socket: " << curr_socket << RESET << std::endl;
         this->m_sockets.push_back(curr_socket);
-        // socketCreation[curr_socket] = time(NULL);
     }
 }
 
@@ -103,7 +102,6 @@ void TcpServer2::startListen()
             exitWithError("Epoll wait");
             continue;
         }
-        verificTimeOut();
 
         std::cout << "num_events= " << num_events << std::endl;
         std::cout << "\n\n";
@@ -112,6 +110,7 @@ void TcpServer2::startListen()
         {
             for (size_t j = 0; j < this->m_server.size(); ++j)
             {
+                //verificTimeOut();
                 if (m_event_list[i].data.fd == m_sockets[j])
                 {
                     acceptNewConnection(m_event_list[i], m_event_list[i].data.fd, j);
@@ -155,8 +154,9 @@ void TcpServer2::acceptNewConnection(epoll_event &m_event, int fd, int j)
         exit(EXIT_FAILURE);
     }
     // Associar cada socket a cada client
+    std::cout << "client " << client_socket << std::endl;
     clientServerMap[client_socket] = &m_server[j];
-    socketCreation[client_socket] = time(NULL); // Atualiza o tempo de criação do socket
+    socketCreation[client_socket] = time(NULL);
 }
 
 
@@ -166,10 +166,11 @@ void TcpServer2::handleInput(epoll_event &m_event, int fd)
     Server *server = clientServerMap[fd];
     if (server != NULL)
     {
-        socketCreation[fd] = time(NULL); // Atualiza o tempo de criação do socket
+        std::cout << "fd " << fd << std::endl;
+        socketCreation[fd] = time(NULL);
         Request request1;
 
-        showClientHeader(m_event, request1, server);
+        showClientHeader(m_event, request1, server, fd);
         if (!request1.has_header)
         {
             return;
@@ -311,7 +312,7 @@ size_t stringtohex(std::string value)
     return int_value;
 }
 
-void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request, Server *server)
+void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request, Server *server, int fd)
 {
 
     char buffer[5000];
@@ -372,9 +373,14 @@ void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request
             chunk_length_str.clear();
         }
     if (request.max_length > server->getClientMaxBody_s()){
-        // std::cout << YELLOW << "GOT IN HERE: MAX LENGTH" << RESET << std::endl;
         request.setCode(413);
         break ;
+    }
+    std::cout << "TIME " << time(NULL) << " socket " << socketCreation[fd] << std::endl;
+    if ((time(NULL) - socketCreation[fd]) > TIMEOUT) {
+        std::cout << "Timeout error: Request not fully received" << std::endl;
+        request.setCode(408);
+        request.no_length = true;
     }
     } while (bytesReceived > 0);
 
@@ -448,6 +454,7 @@ void TcpServer2::setAddresses()
     }
 }
 
+
 void TcpServer2::verificTimeOut()
 {
     time_t currentTime = time(NULL);
@@ -458,10 +465,10 @@ void TcpServer2::verificTimeOut()
         if (elapsedTime >= TIMEOUT)
         {
             std::cout << MAGENTA << "Vou fechar conexão :" << it->first << RESET << std::endl;
-            close(it->first);
-            epoll_ctl(this->epoll_fd, EPOLL_CTL_DEL, it->first, NULL);
+            //close(it->first);
+            //epoll_ctl(this->epoll_fd, EPOLL_CTL_DEL, it->first, NULL);
             clientServerMap.erase(it->first);
-            responseMap.erase(it->first);
+            responseMap[it->first] = "HTTP/1.1 408 TIMEOUT \r\r Content-Length: 0\r\n\r\n";
             socketCreation.erase(it++);
         }
         else
