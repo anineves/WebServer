@@ -5,6 +5,9 @@ import os, cgi
 
 host = os.environ.get("HTTP_HOST", default=None);
 
+while True:
+    continue
+
 response = f'<html>\
                 <head> \
                 <meta charset="UTF-8"> \

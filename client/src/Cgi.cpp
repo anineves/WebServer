@@ -96,6 +96,52 @@ std::string Cgi::runCgi(Request &request)
 
 		write(fdRequest[1], body.c_str(), body.length());
 		close(fdRequest[1]);
+		
+		// Aqui começa o Timeout
+		fd_set readfds;
+		struct timeval timeout;
+		FD_ZERO(&readfds);
+		FD_SET(fdResponse[0], &readfds);
+		timeout.tv_sec = 5;
+		timeout.tv_usec = 0;
+
+		// Talvez seja bom tratar -1!
+		int ret = select(fdResponse[0] + 1, &readfds, NULL, NULL, &timeout);
+		if (ret == 0)
+		{
+			std::stringstream error_resp;
+
+			close(fdResponse[0]);
+			kill(pid, SIGKILL);
+			waitpid(pid, NULL, 0);
+
+			std::string my_response = "<html lang='en'>\
+										<head>\
+											<meta charset='UTF-8'>\
+											<meta name='viewport' content='width=device-width, initial-scale=1.0'>\
+											<title>Test Page</title>\
+										</head>\
+										<body>\
+											<h1>Hello Fuckers</h1>\
+											<p>Why did you put a loop in the script?</p>\
+										</body>\
+										</html>";
+
+			int length_response = my_response.length();
+
+			std::cout << "My response:" << my_response << std::endl;
+			std::cout << "Length:" << length_response << std::endl;
+
+			error_resp << "HTTP/1.1 200 OK\r\n "; // Se por 408 não funciona.
+            error_resp << "Content-Type: text/html\r\n ";
+			error_resp << "Content-Length: ";
+			error_resp << "328\r\n\r\n";
+			error_resp << my_response;
+			return error_resp.str();
+				
+		}
+
+		// Aqui termina o timeout
 
 		content_length = readCgiResponse(fdResponse[0]);
 
