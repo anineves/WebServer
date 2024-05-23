@@ -4,9 +4,12 @@ from cgi_header import *
 import os, cgi
 
 host = os.environ.get("HTTP_HOST", default=None);
+arguments = cgi.FieldStorage()
+for i in arguments.keys():
+    name = arguments[i].value
 
-while True:
-    continue
+# while True:
+#     continue
 
 response = f'<html>\
                 <head> \
@@ -22,11 +25,12 @@ response = f'<html>\
                 <nav> \
                 <ul> \
                     <li><a href="http://{host}/index.html">Home</a></li> \
+                    <li><a href="http://{host}/cgi.html">CGI</a></li> \
                 </ul> \
                 </nav> \
             </header>\
                 <body>\
-                <h1>Hello Budy!!! Im a GET by CGI</h1>\
+                <h1>Fuck You {name}!!!</h1>\
                 </body>\
             </html>'
 
