@@ -13,10 +13,10 @@ void sighandler(int sig)
 
 TcpServer2::TcpServer2(std::vector<Server> &servers) : m_server(servers)
 {
+    timeout = false; 
     setAddresses();
     startServer();
     startListen();
-    timeout = false;
 }
 
 TcpServer2::~TcpServer2()
@@ -99,19 +99,15 @@ void TcpServer2::startListen()
         int num_events = epoll_wait(epoll_fd, m_event_list, MAXEPOLLSIZE, 2000);
         if (num_events == -1)
         {
-            std::cout << "Stop" << g_stop << std::endl;
             exitWithError("Epoll wait");
             continue;
         }
 
-        std::cout << "num_events= " << num_events << std::endl;
-        std::cout << "\n\n";
-
+        verificTimeOut();
         for (int i = 0; i < num_events; i++)
         {
             for (size_t j = 0; j < this->m_server.size(); ++j)
             {
-                // verificTimeOut();
                 if (m_event_list[i].data.fd == m_sockets[j])
                 {
                     acceptNewConnection(m_event_list[i], m_event_list[i].data.fd, j);
@@ -127,7 +123,7 @@ void TcpServer2::startListen()
             }
         }
     }
-    // closeConnection();
+
     return;
 }
 
@@ -137,13 +133,13 @@ void TcpServer2::acceptNewConnection(epoll_event &m_event, int fd, int j)
     struct sockaddr_in addr;
     socklen_t addr_len = sizeof(addr);
     int client_socket = accept(fd, (struct sockaddr *)&addr, &addr_len);
-    // std::cout << CYAN << client_socket << RESET << std::endl;
+
     if (client_socket == -1)
     {
         exitWithError("Can't Accept something");
         return;
     }
-    std::cout << "New Connection on port: " << ntohs(m_server[j].sin_port) << "| fd:" << client_socket << std::endl;
+    std::cout << "New Connection on port: " << ntohs(m_server[j].sin_port) << std::endl;
 
     m_event.events = EPOLLIN | EPOLLRDHUP;
     m_event.data.fd = client_socket;
@@ -153,11 +149,8 @@ void TcpServer2::acceptNewConnection(epoll_event &m_event, int fd, int j)
         exit(EXIT_FAILURE);
     }
     // Associar cada socket a cada client
-    std::cout << "client " << client_socket << std::endl;
     clientServerMap[client_socket] = &m_server[j];
-    struct timespec ts;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    socketCreation[client_socket] = ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
+    socketCreation[client_socket] = time(NULL);
 }
 
 void TcpServer2::handleInput(epoll_event &m_event, int fd)
@@ -165,33 +158,29 @@ void TcpServer2::handleInput(epoll_event &m_event, int fd)
     Server *server = clientServerMap[fd];
     if (server != NULL)
     {
-        std::cout << "fd " << fd << std::endl;
         Request request1;
-
         showClientHeader(m_event, request1, server, fd);
         if (!request1.has_header)
         {
-            /*int time;
-            struct timespec ts;
-            clock_gettime(CLOCK_MONOTONIC, &ts);
-            time = ts.tv_sec * 1000 + ts.tv_nsec / 1000000;*/
-            //std::cout << "TIME " << time << " socket " << socketCreation[fd] << std::endl;
-            if ((time(NULL) - socketCreation[fd]) > TIMEOUT)
+            time_t currentTime = time(NULL);
+            time_t elapsedTime = currentTime - socketCreation[fd];
+            std::cout << "Current " << currentTime << " Socketii " << socketCreation[fd] << " Dife " << elapsedTime << std::endl;  
+            if (elapsedTime > TIMEOUT)
             {
                 std::cout << "Timeout error: Request not fully received" << std::endl;
                 timeout = true;
                 request1.setCode(408);
+                //return;
             }
             else
+            {
                 return;
+            }
         }
-        socketCreation[fd] = time(NULL);
         Response response(*server);
         std::string serverResponse;
         if (timeout == true)
         {
-            std::cout << MAGENTA << "CODE:\n"
-                      << request1.getCode() << RESET << std::endl;
             serverResponse = response.buildErrorResponse(request1.getCode());
             m_event.events = EPOLLOUT;
             epoll_ctl(this->getEpoll(), EPOLL_CTL_MOD, fd, &m_event);
@@ -199,15 +188,13 @@ void TcpServer2::handleInput(epoll_event &m_event, int fd)
             timeout = false;
             return;
         }
+        socketCreation[fd] = time(NULL);
 
         request1.printMessage();
         request1.verific_errors(*server);
-        std::cout << YELLOW << "CODE:\n"
-                  << request1.getCode() << RESET << std::endl;
         if (request1.getCode() != 200 && !request1.getPath().empty())
         {
-            std::cout << MAGENTA << "IM IN CODE:\n"
-                      << request1.getCode() << RESET << std::endl;
+            //std::cout << MAGENTA << "IM IN $$ CODE:\n" << request1.getCode() << RESET << std::endl;
             serverResponse = response.buildErrorResponse(request1.getCode());
             m_event.events = EPOLLOUT;
             epoll_ctl(this->getEpoll(), EPOLL_CTL_MOD, fd, &m_event);
@@ -216,7 +203,6 @@ void TcpServer2::handleInput(epoll_event &m_event, int fd)
         else
         {
             Location locationSettings = server->verifyLocations(request1.getPath());
-
             int n = 0;
             if (is_file("frontend/html" + request1.getPath()) == 1)
             {
@@ -231,10 +217,8 @@ void TcpServer2::handleInput(epoll_event &m_event, int fd)
                     if (locationSettings.getAllowMethods()[i] == request1.getMethod())
                         not_allow = 1;
                 }
-                std::cout << "Antes Loc " << locationSettings.getRoot() << " Server " << server->getRoot_s() << std::endl;
                 if (locationSettings.getRoot() == "")
                     locationSettings.setRoot(server->getRoot_s());
-                std::cout << "Depois Loc " << locationSettings.getRoot() << " Server " << server->getRoot_s() << std::endl;
                 if (not_allow == 0)
                 {
                     serverResponse = response.buildErrorResponse(405);
@@ -293,7 +277,7 @@ void TcpServer2::handleInput(epoll_event &m_event, int fd)
                 }
                 else if (locationSettings.getAllowMethods()[0] == "DELETE")
                 {
-                    std::string pathToDelete = "frontend2" + request1.getPath();
+                    std::string pathToDelete = server->getRoot_s() + request1.getPath();
                     if (std::remove(pathToDelete.c_str()) != 0)
                         serverResponse = response.buildErrorResponse(500);
                     else
@@ -337,6 +321,7 @@ size_t stringtohex(std::string value)
 
 void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request, Server *server, int fd)
 {
+    (void) server;
     (void)fd;
 
     char buffer[5000];
@@ -372,7 +357,6 @@ void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request
                 chunked = true;
             else if (this->_header.find("POST") != std::string::npos)
             {
-                // std::cout << RED << "POST METHOD ON SHOW HEADER" << RESET << std::endl;
                 request.setCode(411);
                 request.no_length = true;
                 break;
@@ -404,17 +388,16 @@ void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request
             }
             chunk_length_str.clear();
         }
-        if (request.max_length > server->getClientMaxBody_s())
+        /*if (request.max_length > server->getClientMaxBody_s())
         {
             request.setCode(413);
             break;
-        }
+        }*/
 
     } while (bytesReceived > 0);
 
     if (request.has_header == true)
     {
-        //std::cout << "ENTREI  " << std::endl;
         //request.has_header = false;
         if (chunked)
         {
@@ -493,14 +476,13 @@ void TcpServer2::verificTimeOut()
     for (std::map<int, time_t>::iterator it = socketCreation.begin(); it != socketCreation.end();)
     {
         time_t elapsedTime = currentTime - it->second;
-        // std::cout << YELLOW << it->first << " elapsedTime = " << elapsedTime << RESET << std::endl;
         if (elapsedTime >= TIMEOUT)
         {
-            std::cout << MAGENTA << "Vou fechar conexão :" << it->first << RESET << std::endl;
-            // close(it->first);
-            // epoll_ctl(this->epoll_fd, EPOLL_CTL_DEL, it->first, NULL);
+            std::cout << MAGENTA << "Close conection: " << it->first << RESET << std::endl;
+            epoll_ctl(this->epoll_fd, EPOLL_CTL_DEL, it->first, NULL);
+            close(it->first);
             clientServerMap.erase(it->first);
-            responseMap[it->first] = "HTTP/1.1 408 TIMEOUT \r\r Content-Length: 0\r\n\r\n";
+            responseMap.erase(it->first);
             socketCreation.erase(it++);
         }
         else
@@ -512,7 +494,7 @@ void TcpServer2::verificTimeOut()
 
 void TcpServer2::closeConnection()
 {
-    std::cout << "Vou eliminar tudo" << std::endl;
+    //std::cout << "Vou eliminar tudo" << std::endl;
     for (std::vector<int>::iterator it = m_sockets.begin(); it != m_sockets.end(); ++it)
     {
         epoll_ctl(this->epoll_fd, EPOLL_CTL_DEL, *it, NULL);

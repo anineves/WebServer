@@ -8,7 +8,7 @@ ConfigFile::ConfigFile(std::string conFile) : _ip_address(""), _port(0), _root("
 
 ConfigFile::~ConfigFile() 
 {
-    std::cout << CYAN << "FUI CHAMADOOOOOO\n\n\n\n\n"; 
+
     _servers.clear();
     _locations.clear();
 
@@ -238,7 +238,6 @@ bool ConfigFile::parserServer(std::stringstream &serverContent)
         if (fword == "listen")
         {
             std::string temp_port = obtainValue(line, "listen");
-            std::cout << "Temp " << temp_port << std::endl;
             std::size_t find = temp_port.find(':');
             if (find == std::string::npos)
             {
@@ -252,7 +251,6 @@ bool ConfigFile::parserServer(std::stringstream &serverContent)
                 server.setPort_s((temp_port.substr(find + 1)));
                 server.sin_port = htons(ft_stoi(server.getPort_s()));
                 server.s_host = temp_port.substr(0 , find);
-                std::cout << "Host " <<  server.s_host << std::endl; 
                 server.s_addr = htonl(str_to_uint32(server.s_host));
                 server.setIpAddr_s(server.s_host);
             }

@@ -205,7 +205,7 @@ void    verifyBlocks(std::vector<std::string> fileVec) {
             locationStart = 0;
         }
         else if (sBlockStart && !s_location && tmp[i].find("location") && locationStart) {
-            std::cout << i << std::endl;
+            //std::cout << i << std::endl;
             throw ("Variables of Server must be at the top, or inside of a location");
         }
         else if (!sBlockStart && !s_location && tmp[i].find("Server")) {
@@ -261,7 +261,7 @@ size_t foundChar(std::string line, char c) {
 void    listenRule(std::string line) {
     consumeMultiSpaces(line);
 
-    std::cout << RED << line << RESET << std::endl;
+    //std::cout << RED << line << RESET << std::endl;
     size_t pos = line.find(' ');
     size_t endpos = 0;
     size_t twoP = 0;
@@ -271,9 +271,9 @@ void    listenRule(std::string line) {
         endpos = line.length() - 1;
     std::string value;
     size_t countP = 0;
-    std::cout << endpos - pos << std::endl;
+    //std::cout << endpos - pos << std::endl;
     if ((endpos - pos) > 6 && foundChar(line, ':')) {
-        std::cout << GREEN << "Entrei\n" << RESET;
+        //std::cout << GREEN << "Entrei\n" << RESET;
         for (size_t i = (pos + 1); i < endpos - 1; i++) {
             if (line [i] == '.' || line[i] == ':' || isdigit(line[i])) {
                 value += line[i];
@@ -292,7 +292,7 @@ void    listenRule(std::string line) {
                 throw("Syntax error listen IP + PORT, must be positive numeric values (example: 127.0.0.1:8080)");
         }
         twoP = foundChar(line, ':');
-        std::cout << twoP << std::endl;
+        //std::cout << twoP << std::endl;
         for (size_t i = (pos + 1); i < twoP; i++) {
             if (line[i] == '.') {
                 //%%%%%%%%%%%%%
@@ -313,7 +313,7 @@ void    listenRule(std::string line) {
             else {
                 throw ("Syntax error, listen Port is not a digit, must be a positive number");
             }
-            std::cout << BLUE << value << RESET << std::endl;
+            //std::cout << BLUE << value << RESET << std::endl;
         }
         //std::cout << value << "$" << std::endl;
         if (value.empty()) {
@@ -382,7 +382,7 @@ void    hostRule(std::string line) {
 
 void    verifyVar(std::vector<std::string> fileVec) {
     for (size_t i = 0; i < fileVec.size(); i++) {
-        std::cout << fileVec[i] << std::endl;
+        //std::cout << fileVec[i] << std::endl;
         if (!fileVec[i].find("listen"))
             listenRule(fileVec[i]);
         if (!fileVec[i].find("server_name"))
