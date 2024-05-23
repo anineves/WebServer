@@ -70,7 +70,7 @@ Server::Server(const Server &source)
 Server::~Server() {
     //close(this->s_socket);
     //std::cout << "Server port: " << this->s_port << " destructor called.\n";
-    _locations.clear();
+    //_locations.clear();
     _methods.clear();
     s_server_names.clear();
     s_index_pages.clear();

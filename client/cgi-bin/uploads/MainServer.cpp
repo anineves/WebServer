@@ -1,6 +1,5 @@
 #include "../includes/TcpServer2.hpp"
 #include "../includes/ConfigFile.hpp"
-#include "../includes/cParser.hpp"
 
 int validFile(std::string arg) {
     size_t dotPosition = arg.find_last_of('.');
@@ -30,19 +29,12 @@ int main(int ac, char **av) {
         std::cout << "Error: Invalid args!\n";
         return 0;
     }
-    try {
-        cParser myFile;
-        myFile.getFileVec(confFile);
-        std::cout << GREEN << "This file is validated!\n" << RESET;
-    } catch (const char* errorMessage) {
-        std::cout  << BOLD << RED << "Error: " << RESET << errorMessage << std::endl;
-        return 0;
-    }
+    
     ConfigFile configFile(confFile);
     std::string ip = configFile.getIpAddr();
     std::vector<Server>& servers = configFile.getServers();
 
     TcpServer2 tcpServer(servers);
-
+    	configFile.clearConf();
     return 0;
 }

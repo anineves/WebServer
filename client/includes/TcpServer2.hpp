@@ -21,7 +21,7 @@
 # include <map>
 # include <signal.h>
 # include <algorithm>
-# define TIMEOUT 20
+# define TIMEOUT 4
 
 class Connection;
 class Request;
@@ -36,6 +36,7 @@ private:
     std::string                     _client_request;
     std::string                     _header;
     std::string                     _body;
+    bool                            timeout;
 
 public:
     TcpServer2(std::vector<Server> &server);
@@ -57,7 +58,7 @@ public:
     void acceptNewConnection(epoll_event &event, int fd, int j);
     void handleInput(epoll_event &event, int fd); 
     void handleOutput(epoll_event &event, int fd);
-    void showClientHeader(struct epoll_event &m_events, Request &request1, Server *server);
+    void showClientHeader(struct epoll_event &m_events, Request &request1, Server *server, int fd);
     void sendResponse(int client_socket, const std::string& response);
     void closeServer();
     uint32_t strToNet(const std::string &ip_address);

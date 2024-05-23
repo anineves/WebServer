@@ -139,3 +139,23 @@ footer {
     text-align: center;
     padding: 5px;
 }
+
+
+.cgi-block {
+    background: rgba(255, 255, 255, 0.8);
+    color: #000;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: var(--box-shadow);
+}
+
+.cgi-block h3 a {
+    text-decoration: none;
+    color: var(--primary-color);
+    transition: color 0.3s;
+}
+
+.cgi-block h3 a:hover {
+    color: var(--secondary-color);
+}

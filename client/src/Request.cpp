@@ -69,16 +69,14 @@ void Request::parser(std::string header)
             _host = sword;
         }
     }
-    this->has_header = true; 
+    //this->has_header = true; 
 
     while (std::getline(ss, line) && line != "\r")
     {
-
-                this->lines_body += line;
-         
+                this->lines_body += line;    
     }
 
-
+    //sleep(5);
    
 }
 
