@@ -248,14 +248,20 @@ size_t foundChar(std::string line, char c) {
 
 void    verifyPort(std::string line) {
     std::string value;
+    size_t endpos;
+    if (line[line.length() - 2] == ' ')
+        endpos = line.length() - 2;
+    else
+        endpos = line.length() - 1;
     size_t pos = foundChar(line, ':');
     //std::cout << pos << std::endl;
-    for (size_t i = pos; i < line.length(); i++) {
+    for (size_t i = pos; i < endpos; i++) {
         if (line[i] != ':' && line[i] != ';') {
+            std::cout << value << std::endl;
             if (isdigit(line[i]))
                 value += line[i];
             else
-                throw ("Syntax error listen IP + PORT, must be positive numeric values (listen 127.0.0.1:8080)");
+                throw ("Syntax error listen, must be positive numeric values (listen 127.0.0.1:8080)");
         }
     }
     int port = atoi(value.c_str());
@@ -269,8 +275,8 @@ void    listenRule(std::string line) {
 
     //std::cout << RED << line << RESET << std::endl;
     size_t pos = line.find(' ');
-    size_t endpos = 0;
     size_t twoP = 0;
+    size_t endpos = 0;
     if (line[line.length() - 2] == ' ')
         endpos = line.length() - 2;
     else
@@ -281,7 +287,7 @@ void    listenRule(std::string line) {
     int flag = 0;
     if ((endpos - pos) > 6 && foundChar(line, ':')) {
         //std::cout << GREEN << "Entrei com ip+porta\n" << RESET;
-        for (size_t i = (pos + 1); i < line.length() - 1; i++) {
+        for (size_t i = (pos + 1); i < endpos - 1; i++) {
             if (line [i] == '.' || line[i] == ':' || isdigit(line[i])) {
                 if (flag)
                     pvalue += value[i];
@@ -394,6 +400,39 @@ void    hostRule(std::string line) {
     }
 }
 
+void    allowMethodsRule(std::string line) {
+    size_t endpos = 0;
+    if (line[line.length() - 2] == ' ')
+        endpos = line.length() - 2;
+    else
+        endpos = line.length() - 1;
+    size_t start = line.find(' ');
+    std::string value;
+    for (size_t i = (start + 1); i < endpos; i++) {
+        //std::cout << GREEN << line << "$\n" << RESET;
+        if (line[i] == ' ') {
+            //std::cout << RED << value << "$" << std::endl;
+            if (value == "GET" || value == "POST" || value == "DELETE")
+                value.clear();
+            else
+                throw ("Syntax error, allow_methods myst be 'GET' 'POST' 'DELETE'");
+        }
+        else if (!isalpha(line[i])) {
+            throw ("Syntax error, allow_methods myst be 'GET' 'POST' 'DELETE'");
+        }
+        else {
+            value += line[i];
+            if ((i + 1) == endpos) {
+                if (value == "GET" || value == "POST" || value == "DELETE")
+                value.clear();
+                else
+                    throw ("Syntax error, allow_methods myst be 'GET' 'POST' 'DELETE'");
+            }
+        }
+    }
+
+}
+
 void    verifyVar(std::vector<std::string> fileVec) {
     for (size_t i = 0; i < fileVec.size(); i++) {
         std::cout << fileVec[i] << std::endl;
@@ -401,9 +440,12 @@ void    verifyVar(std::vector<std::string> fileVec) {
             listenRule(fileVec[i]);
        /*  if (!fileVec[i].find("server_name"))
             serverNameRule(fileVec[i]); */
+        if (!fileVec[i].find("allow_methods")) {
+            allowMethodsRule(fileVec[i]);
+            std::cout << RED << "Entrei\n" << RESET;
+        }
         if (!fileVec[i].find("host"))
             hostRule(fileVec[i]);
-            //std::cout << RED << "Entrei\n" << RESET;
     }
 }
 
