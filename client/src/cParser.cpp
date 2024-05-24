@@ -109,7 +109,6 @@ std::vector<std::string> removeBrackets(std::vector<std::string> fileVec) {
 
 int checkkey(std::string line, std::vector<std::string> vector) {
     for (size_t i = 0; i < vector.size(); i++) {
-        //std::cout << line << "  ==  " << vector[i] << std::endl;
         if (!line.compare(vector[i])) {
             return 1;
         }
@@ -155,29 +154,18 @@ void    matchingServerLocsBrackets(std::vector<std::string> tmp, std::vector<std
                 closeBrack++;
         }
     }
-    //std::cout << "openBrack = " << openBrack << std::endl;
-    //std::cout << "closeBrack = " << closeBrack << std::endl;
-    //std::cout << "Server = " << servercount << std::endl;
-    //std::cout << "locations = " << locationscount << std::endl;
     if ((servercount + locationscount != openBrack) || (servercount + locationscount != closeBrack))
         throw ("To many or Missing Open/Close Brackets in the Configuration file");
 }
-/* void    verifyBrackets(std::vector) {
 
-} */
 
 void    verifyBlocks(std::vector<std::string> fileVec) {
     std::vector<std::string> tmp = getkeys(fileVec);
     int sBlockStart = 0;
-    //int l_begin = 0;
     int s_location = 0;
     int locationStart = 0;
     
     size_t i = 0;
-/*     for (size_t i = 0; i < tmp.size(); i++) {
-        std::cout << i << " = " << tmp[i] << "$" << std::endl;
-    } */
-    //veryfiBrackets(fileVec);
     matchingServerLocsBrackets(tmp, fileVec);
     while (i < tmp.size()) {
         //std::cout << i << " = " << tmp[i]  << "$" << std::endl;
@@ -205,7 +193,7 @@ void    verifyBlocks(std::vector<std::string> fileVec) {
             locationStart = 0;
         }
         else if (sBlockStart && !s_location && tmp[i].find("location") && locationStart) {
-            //std::cout << i << std::endl;
+            std::cout << i << std::endl;
             throw ("Variables of Server must be at the top, or inside of a location");
         }
         else if (!sBlockStart && !s_location && tmp[i].find("Server")) {
@@ -258,52 +246,84 @@ size_t foundChar(std::string line, char c) {
     return 0;
 }
 
+void    verifyPort(std::string line) {
+    std::string value;
+    size_t endpos;
+    if (line[line.length() - 2] == ' ')
+        endpos = line.length() - 2;
+    else
+        endpos = line.length() - 1;
+    size_t pos = foundChar(line, ':');
+    //std::cout << pos << std::endl;
+    for (size_t i = pos; i < endpos; i++) {
+        if (line[i] != ':' && line[i] != ';') {
+            //std::cout << value << std::endl;
+            if (isdigit(line[i]))
+                value += line[i];
+            else
+                throw ("Syntax error listen, must be positive numeric values (listen 127.0.0.1:8080)");
+        }
+    }
+    int port = atoi(value.c_str());
+    //std::cout << GREEN << port << " - " << value << std::endl;
+    if (port < 1024 || port > 65535)
+        throw ("listen Port must be a value between 1024 - 65535");
+}
+
 void    listenRule(std::string line) {
     consumeMultiSpaces(line);
 
     //std::cout << RED << line << RESET << std::endl;
     size_t pos = line.find(' ');
-    size_t endpos = 0;
     size_t twoP = 0;
-    if (line[line.length() - 2 == ' '])
+    size_t endpos = 0;
+    if (line[line.length() - 2] == ' ')
         endpos = line.length() - 2;
     else
         endpos = line.length() - 1;
     std::string value;
     size_t countP = 0;
-    //std::cout << endpos - pos << std::endl;
+    std::string pvalue;
+    int flag = 0;
     if ((endpos - pos) > 6 && foundChar(line, ':')) {
-        //std::cout << GREEN << "Entrei\n" << RESET;
+        //std::cout << GREEN << "Entrei com ip+porta\n" << RESET;
         for (size_t i = (pos + 1); i < endpos - 1; i++) {
             if (line [i] == '.' || line[i] == ':' || isdigit(line[i])) {
-                value += line[i];
+                if (flag)
+                    pvalue += value[i];
+                else if (!flag)
+                    value += line[i];
                 if (line[i] == '.') {
                     countP++;
                 }
                 if (line[i] == ':') {
+                    flag = 1;
                     twoP++;
                 }
             }
-            else 
-                throw("Syntax error listen IP + PORT, must be positive numeric values (example: 127.0.0.1:8080)");
+            else
+                throw("Syntax error listen, must be positive numeric values (listen 127.0.0.1:8080)");
         }
-        
-        if (twoP != 1 || countP != 3) {
-                throw("Syntax error listen IP + PORT, must be positive numeric values (example: 127.0.0.1:8080)");
-        }
-        twoP = foundChar(line, ':');
-        //std::cout << twoP << std::endl;
-        for (size_t i = (pos + 1); i < twoP; i++) {
-            if (line[i] == '.') {
-                //%%%%%%%%%%%%%
-                //%%%%%%%%%%%%%
-                //terminei AQUI
-                //%%%%%%%%%%%%%
-                //%%%%%%%%%%%%%
+        if (twoP != 1 || countP != 3) 
+                throw("Syntax error listen, must be positive numeric values (listen 127.0.0.1:8080)");
+        //std::cout << BLUE << value << " - " << value.length() <<RESET << std::endl;
+        twoP = foundChar(value, ':');
+        int digit = 0;
+        std::string v_digit;
+        for (size_t i = 0; i < twoP + 1; i++) {
+            if (value[i] == '.' || value[i] == ':') {
+                //std::cout << GREEN << v_digit << RESET << std::endl;
+                digit = atoi(v_digit.c_str());
+                v_digit.clear();
+                if (digit < 0 || digit > 255)
+                    throw("Syntax error listen, must be positive numeric values between 0.0.0.0:0 127.0.0.0:1024 - 127.255.255:65535");
+            } else {
+                v_digit += value[i];
             }
-
         }
-    } 
+        verifyPort(line);
+        //std::cout << GREEN << pvalue << " preciso verificar a porta" << RESET << std::endl;
+    }
     else {
         for (int i = (pos + 1); line[i] != ';'; i++) {
             if(isdigit(line[i]))
@@ -320,8 +340,8 @@ void    listenRule(std::string line) {
             throw ("Syntax error, listen Porto doesnt contain value");
         }
         int port = atoi(value.c_str());
-        if (port < 0 || port > 65535)
-            throw ("listen Port must be a value between 0 - 65535");
+        if (port < 1024 || port > 65535)
+            throw ("listen Port must be a value between 1024 - 65535");
         //std::cout << BLUE << line << " = " << port << std::endl; 
     }
     value.clear();
@@ -349,7 +369,7 @@ void    hostRule(std::string line) {
                 countP++;
         }
         else
-            throw("Syntax error host IP address, must be positive numeric values (example: 127.0.0.3)");
+            throw("Syntax error host IP address, must be positive numeric values (example: 127.0.0.0)");
     }
     //std::cout << YELLOW << value << RESET << std::endl;
     if (value.empty()) {
@@ -367,17 +387,50 @@ void    hostRule(std::string line) {
             digit = atoi(v_digit.c_str());
             v_digit.clear();
             if (digit < 0 || digit > 255)
-                throw ("Syntax error host IP address, IP address must be between 0.0.0.0 to 255.255.255.255");
+                throw ("Syntax error host IP address, IP address must be between 0.0.0.0 or 127.0.0.0 - 127.255.255");
         } else {
             v_digit += value[i];
             if ((i + 1) == value.length()) {
                 digit = atoi(v_digit.c_str());
                 v_digit.clear();
                 if (digit < 0 || digit > 255)
-                throw ("Syntax error host IP address, IP address must be between 0.0.0.0 to 255.255.255.255");
+                throw ("Syntax error host IP address, IP address must be between 0.0.0.0 or 127.0.0.0 - 127.255.255");
             }
         }
     }
+}
+
+void    allowMethodsRule(std::string line) {
+    size_t endpos = 0;
+    if (line[line.length() - 2] == ' ')
+        endpos = line.length() - 2;
+    else
+        endpos = line.length() - 1;
+    size_t start = line.find(' ');
+    std::string value;
+    for (size_t i = (start + 1); i < endpos; i++) {
+        //std::cout << GREEN << line << "$\n" << RESET;
+        if (line[i] == ' ') {
+            //std::cout << RED << value << "$" << std::endl;
+            if (value == "GET" || value == "POST" || value == "DELETE")
+                value.clear();
+            else
+                throw ("Syntax error, allow_methods myst be 'GET' 'POST' 'DELETE'");
+        }
+        else if (!isalpha(line[i])) {
+            throw ("Syntax error, allow_methods myst be 'GET' 'POST' 'DELETE'");
+        }
+        else {
+            value += line[i];
+            if ((i + 1) == endpos) {
+                if (value == "GET" || value == "POST" || value == "DELETE")
+                value.clear();
+                else
+                    throw ("Syntax error, allow_methods myst be 'GET' 'POST' 'DELETE'");
+            }
+        }
+    }
+
 }
 
 void    verifyVar(std::vector<std::string> fileVec) {
@@ -385,11 +438,14 @@ void    verifyVar(std::vector<std::string> fileVec) {
         //std::cout << fileVec[i] << std::endl;
         if (!fileVec[i].find("listen"))
             listenRule(fileVec[i]);
-        if (!fileVec[i].find("server_name"))
-            serverNameRule(fileVec[i]);
+       /*  if (!fileVec[i].find("server_name"))
+            serverNameRule(fileVec[i]); */
+        if (!fileVec[i].find("allow_methods")) {
+            allowMethodsRule(fileVec[i]);
+            //std::cout << RED << "Entrei\n" << RESET;
+        }
         if (!fileVec[i].find("host"))
             hostRule(fileVec[i]);
-            //std::cout << RED << "Entrei\n" << RESET;
     }
 }
 

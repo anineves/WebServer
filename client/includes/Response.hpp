@@ -26,8 +26,9 @@ class Response {
 public:
     std::map<std::string, std::string> _default_error;
 
+
     Response();
-    Response(Server server);
+    Response(Server &server);
     ~Response();
     std::string     obtainFilePath(const std::string &request, Location &location);
     std::string     getContentType(const std::string& filePath);
@@ -38,7 +39,7 @@ public:
     std::string     getDefaultError(std::string code);
     void            printDefaultErrors();
 
-    Server m_server; 
+    Server          m_server; 
 private:
 };
 

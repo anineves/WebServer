@@ -18,16 +18,15 @@ class Cgi {
 		char**						_exec_env;
 		char**						_cgi_argv;
 		
-		void	buildCharEnv(void);
-		void	initEnv(Request &request);
-		size_t	readCgiResponse(int fd);
+		void						buildCharEnv(void);
+		void						initEnv(Request &request);
+		size_t						readCgiResponse(int fd);
 	
 	public:
 		Cgi();
 		Cgi(std::string _file_path);
 		~Cgi();
-
-		std::string runCgi(Request &request);
+		std::string 				runCgi(Request &request);
 };
 
 

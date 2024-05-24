@@ -6,17 +6,16 @@ ConfigFile::ConfigFile(std::string conFile) : _ip_address(""), _port(0), _root("
     parser(conFile);
 }
 
-ConfigFile::~ConfigFile() 
+ConfigFile::~ConfigFile()
 {
 
     _servers.clear();
     _locations.clear();
-
 }
-ConfigFile::ConfigFile() {
+ConfigFile::ConfigFile()
+{
 }
 ConfigFile::ConfigFile(const ConfigFile &src) { (void)src; }
-
 
 int ConfigFile::getPort() const
 {
@@ -47,7 +46,6 @@ std::vector<Server> &ConfigFile::getServers()
 {
     return _servers;
 }
-
 
 void ConfigFile::setIpAddr(std::string set_ip_addr)
 {
@@ -135,7 +133,7 @@ void ConfigFile::parser(std::string &conFile)
 
             ss >> sword;
 
-            if (sword.empty() || ( (sword.at(0) != '/') && (sword.at(0) != '.')))
+            if (sword.empty() || ((sword.at(0) != '/') && (sword.at(0) != '.')))
             {
                 log("ERROR: Invalid location patssh");
                 exit(1);
@@ -217,7 +215,6 @@ void ConfigFile::parser(std::string &conFile)
         }
     }
     readConFile.close();
-
 }
 
 bool ConfigFile::parserServer(std::stringstream &serverContent)
@@ -250,7 +247,7 @@ bool ConfigFile::parserServer(std::stringstream &serverContent)
             {
                 server.setPort_s((temp_port.substr(find + 1)));
                 server.sin_port = htons(ft_stoi(server.getPort_s()));
-                server.s_host = temp_port.substr(0 , find);
+                server.s_host = temp_port.substr(0, find);
                 server.s_addr = htonl(str_to_uint32(server.s_host));
                 server.setIpAddr_s(server.s_host);
             }
@@ -268,12 +265,19 @@ bool ConfigFile::parserServer(std::stringstream &serverContent)
         if (fword == "index")
             server.setIndex_s(obtainValue(line, "index"));
         if (fword == "error_page")
-            server.setErrorPage_s(obtainValue(line, "error_page"));
+        {
+            std::string value = obtainValue(line, "error_page");
+            size_t pos = value.find('/');
+            if (pos != std::string::npos)
+                value = value.substr(pos + 1);
+            server.setErrorPage_s(value);
+            std::cout << server.getErrorPage_s() << std::endl;
+        }
         if (fword == "server_name")
         {
             std::string temp_serv_name = obtainValue(line, "server_name");
             std::string token;
-            //std::cout  << CYAN << "SERVER  :" << temp_serv_name << RESET << std::endl;
+            // std::cout  << CYAN << "SERVER  :" << temp_serv_name << RESET << std::endl;
             for (size_t i = 0; i < temp_serv_name.size(); ++i)
             {
 
@@ -284,7 +288,7 @@ bool ConfigFile::parserServer(std::stringstream &serverContent)
                     if (!token.empty())
                     {
                         server.s_server_names.push_back(token);
-                        token.clear();                    
+                        token.clear();
                     }
                 }
                 else
@@ -292,22 +296,22 @@ bool ConfigFile::parserServer(std::stringstream &serverContent)
                     token += c;
                 }
             }
-            if (!token.empty()) {
-        server.s_server_names.push_back(token);
-    }
-    }
+            if (!token.empty())
+            {
+                server.s_server_names.push_back(token);
+            }
+        }
     }
     server.setLocation(_locations);
     server.verificErrorServer();
     _locations.clear();
     _servers.push_back(server);
-    //printVector(server.s_server_names);
+    // printVector(server.s_server_names);
     if (_servers.empty())
     {
         std::cout << "No servers found in the vector.\n";
         return false;
     }
-
 
     return true;
 }
