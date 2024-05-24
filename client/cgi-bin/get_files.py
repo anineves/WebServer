@@ -25,7 +25,7 @@ if isinstance(name, list):
 
 if return_error == True:
     print(http_not_found)
-    print(get_head("Hello CGI"))
+    print(get_head("Hello CGI")
     print(get_header(host))
     print(get_name_error)
 else:

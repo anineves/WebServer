@@ -14,6 +14,7 @@ void sighandler(int sig)
 TcpServer2::TcpServer2(std::vector<Server> &servers) : m_server(servers)
 {
     timeout = false;
+    _fullheader = false;
     setAddresses();
     startServer();
     startListen();
@@ -173,7 +174,7 @@ void TcpServer2::handleInput(epoll_event &m_event, int fd)
     {
         Request request1;
         showClientHeader(m_event, request1, server, fd);
-        if (!request1.has_header)
+        if (!_fullheader)
         {
                 return;
         }
@@ -190,7 +191,7 @@ void TcpServer2::handleInput(epoll_event &m_event, int fd)
         }
         socketCreation[fd] = time(NULL);
 
-        request1.printMessage();
+        
         request1.verific_errors(*server);
         if (request1.getCode() != 200 && !request1.getPath().empty())
         {
@@ -225,6 +226,7 @@ void TcpServer2::handleInput(epoll_event &m_event, int fd)
                     locationSettings.setRoot(server->getRoot_s());
                 if (not_allow == 0)
                 {
+                    std::cout << "ENTREI " << locationSettings.getPath()<< std::endl;
                     serverResponse = response.buildErrorResponse(405);
                 }
                 else if (!locationSettings.getReturn().empty())
@@ -299,6 +301,7 @@ void TcpServer2::handleInput(epoll_event &m_event, int fd)
                 responseMap[fd] = serverResponse;
             }
         }
+        _fullheader = false;
     }
 }
 
@@ -337,23 +340,31 @@ void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request
     (void)fd;
 
     char buffer[5000];
-    int bytesReceived;
+    int bytesReceived = 0;
     bool chunked = false;
     bool first = true;
     std::string chunk;
     std::string chunk_length_str;
 
-    do
-    {
-        ft_memset(&buffer, 0, 5000);
-        bytesReceived = recv(m_events.data.fd, buffer, sizeof(buffer) - 1, MSG_DONTWAIT);
+    
+        memset(&buffer, 0, 5000);
+        bytesReceived = recv(m_events.data.fd, buffer, sizeof(buffer)-1, MSG_NOSIGNAL);
         if (bytesReceived < 0)
-            break;
-        if (bytesReceived == 0)
+        {
             close(m_events.data.fd);
-        this->_client_request.append(buffer, bytesReceived);
-        request.temp_loop++;
+            //return;
+        }
+        if (bytesReceived == 0)
+        {
+            close(m_events.data.fd);
+            //return;
+        }
+        // std::cout << RED << "client " << _client_request << "\n Buffer" << buffer << RESET<< std::endl;
+        if(buffer[0] != '\0' )
+           this->_client_request.append(buffer, bytesReceived);
+
         size_t found_header = this->_client_request.find("\r\n\r\n");
+
         if (found_header != std::string::npos && this->_header.empty())
         {
             request.has_header = true;
@@ -369,9 +380,9 @@ void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request
                 chunked = true;
             else if (this->_header.find("POST") != std::string::npos)
             {
-                request.setCode(411);
+                //request.setCode(411);
                 request.no_length = true;
-                break;
+                //return;
             }
         }
         if (chunked == true)
@@ -401,24 +412,39 @@ void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request
             chunk_length_str.clear();
         }
 
-    } while (bytesReceived > 0);
-
+    // std::cout << RED << "Client Request " << _client_request << RESET<< std::endl;
     if (request.has_header == true)
     {
-        if (chunked)
-        {
-            this->_header += chunk;
-            request.parser(this->_header);
-            request._fullRequest += this->_header;
+        // std::cout << GREEN << "FOund header" << found_header << RESET<< std::endl;
+        // std::cout << GREEN << "Header Size" << this->_header.size() << RESET<< std::endl;
+
+        // std::cout << this->clientRequest.size() << std::endl;
+
+        this->_body = this->_client_request.substr(found_header + 4, this->_client_request.size());
+        std::cout << GREEN << " this->_body" <<  this->_body << RESET<< std::endl;
+        size_t found_body = this->_body.find("\r\n\r\n");
+
+        if (found_body != std::string::npos) {
+            std::cout << GREEN << "ENTREI"  << RESET<< std::endl;
+            _fullheader = true;
         }
-        else
-        {
-            request.parser(this->_client_request);
-            request._fullRequest += this->_client_request;
+        if (_fullheader == true) {
+            if (chunked)
+            {
+                this->_header += chunk;
+                request.parser(this->_header);
+                request._fullRequest += this->_header;
+            }
+            else
+            {
+                request.parser(this->_client_request);
+                request._fullRequest += this->_client_request;
+            }
+            // request.printMessage(request._fullRequest); 
+            this->_header.clear();
+            this->_body.clear();
+            this->_client_request.clear();
         }
-        this->_header.clear();
-        this->_body.clear();
-        this->_client_request.clear();
     }
 }
 
@@ -533,3 +559,4 @@ void TcpServer2::closeConnection()
     std::vector<int>().swap(m_sockets);
     std::vector<Server>().swap(m_server);
 }
+

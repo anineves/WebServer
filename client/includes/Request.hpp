@@ -41,7 +41,7 @@ public:
     void                                setContentLength(std::string contentLength);
     void                                setCode(int code);
     void                                setPath( std::string path);
-    void                                printMessage();
+    void                                printMessage(std::string header);
     void                                verifyLocations(Server server);
     bool                                verific_errors(Server server);
     void                                parser(std::string header);
