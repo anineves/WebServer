@@ -8,6 +8,15 @@ upload_not_found = '<html>\
                 </body>\
             </html>'
 
+get_name_error = '<html>\
+                <head>\
+                    <title>Get Name</title>\
+                </head>\
+                <body>\
+                    <h1>Error Get CGI</h1>\
+                </body>\
+            </html>'
+
 http_not_found = f"HTTP/1.1 500 Internal Server Error\r\n\
                 Content-Type: text/html\r\n\
                 Content-Length: \r\n\
