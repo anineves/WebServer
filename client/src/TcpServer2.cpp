@@ -13,7 +13,7 @@ void sighandler(int sig)
 
 TcpServer2::TcpServer2(std::vector<Server> &servers) : m_server(servers)
 {
-    timeout = false; 
+    timeout = false;
     setAddresses();
     startServer();
     startListen();
@@ -163,13 +163,13 @@ void TcpServer2::handleInput(epoll_event &m_event, int fd)
         {
             time_t currentTime = time(NULL);
             time_t elapsedTime = currentTime - socketCreation[fd];
-            //std::cout << "Current " << currentTime << " Socketii " << socketCreation[fd] << " Dife " << elapsedTime << std::endl;  
+            // std::cout << "Current " << currentTime << " Socketii " << socketCreation[fd] << " Dife " << elapsedTime << std::endl;
             if (elapsedTime > TIMEOUT)
             {
                 std::cout << "Timeout error: Request not fully received" << std::endl;
                 timeout = true;
                 request1.setCode(408);
-                //return;
+                // return;
             }
             else
             {
@@ -201,11 +201,13 @@ void TcpServer2::handleInput(epoll_event &m_event, int fd)
         else
         {
             Location locationSettings = server->verifyLocations(request1.getPath());
+            locationSettings.deleteAllowed = false;
             int n = 0;
             if (is_file("frontend/html" + request1.getPath()) == 1)
             {
                 n = 1;
             }
+
             bool not_allow = 0;
             if (!locationSettings.getPath().empty())
             {
@@ -214,6 +216,9 @@ void TcpServer2::handleInput(epoll_event &m_event, int fd)
                 {
                     if (locationSettings.getAllowMethods()[i] == request1.getMethod())
                         not_allow = 1;
+                    if (locationSettings.getAllowMethods()[i] ==  "DELETE")
+                        locationSettings.deleteAllowed = true;
+                
                 }
                 if (locationSettings.getRoot() == "")
                     locationSettings.setRoot(server->getRoot_s());
@@ -272,7 +277,7 @@ void TcpServer2::handleInput(epoll_event &m_event, int fd)
                         serverResponse = response.buildErrorResponse(404);
                     }
                 }
-                else if (locationSettings.getAllowMethods()[0] == "DELETE")
+                else if (locationSettings.deleteAllowed && request1.getMethod() == "DELETE")
                 {
                     std::string pathToDelete = server->getRoot_s() + request1.getPath();
                     if (std::remove(pathToDelete.c_str()) != 0)
@@ -318,7 +323,7 @@ size_t stringtohex(std::string value)
 
 void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request, Server *server, int fd)
 {
-    (void) server;
+    (void)server;
     (void)fd;
 
     char buffer[5000];
@@ -395,7 +400,7 @@ void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request
 
     if (request.has_header == true)
     {
-        //request.has_header = false;
+        // request.has_header = false;
         if (chunked)
         {
             this->_header += chunk;
@@ -475,7 +480,7 @@ void TcpServer2::verificTimeOut()
         time_t elapsedTime = currentTime - it->second;
         if (elapsedTime >= TIMEOUT)
         {
-            std::cout  << "Close conection: " << MAGENTA << it->first << RESET << std::endl;
+            std::cout << "Close conection: " << MAGENTA << it->first << RESET << std::endl;
             epoll_ctl(this->epoll_fd, EPOLL_CTL_DEL, it->first, NULL);
             close(it->first);
             clientServerMap.erase(it->first);

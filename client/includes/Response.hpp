@@ -39,7 +39,7 @@ public:
     std::string     getDefaultError(std::string code);
     void            printDefaultErrors();
 
-    Server m_server; 
+    Server          m_server; 
 private:
 };
 
