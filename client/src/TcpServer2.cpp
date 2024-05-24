@@ -246,6 +246,8 @@ void TcpServer2::handleInput(epoll_event &m_event, int fd)
                     {
                         Cgi cgi(request1.getPath());
                         serverResponse = cgi.runCgi(request1);
+                        if(request1.getCode() != 200)
+                            serverResponse = response.buildErrorResponse(500);
                     }
                 }
                 else if (locationSettings.getAutoIndex() == "on" && n == 0)
