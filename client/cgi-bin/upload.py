@@ -13,7 +13,7 @@ if fileitem.filename:
         f.write(fileitem.file.read())
         print(http_found)
         print('<html>')
-        print(html_head)
+        print(get_head("Upload"))
         print('<body>')
         print(get_header(host))        
         print('<body>')
@@ -29,6 +29,6 @@ if fileitem.filename:
         print('</html>')
 else:
     print(http_not_found)
-    print(html_head)
+    print(get_head("Upload"))
     print(get_header(host))        
     print(upload_not_found)
