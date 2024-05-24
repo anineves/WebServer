@@ -24,7 +24,9 @@ TcpServer2::~TcpServer2()
     std::cout << "TcpServer Destructor called" << std::endl;
     closeConnection();
 }
-
+ /*Cria e configura sockets para os servidores definidos.
+Liga os sockets aos endereços especificados.
+Inicia a escuta nos sockets. */
 void TcpServer2::startServer()
 {
     std::vector<struct sockaddr_in>::iterator it;
@@ -60,6 +62,11 @@ void TcpServer2::startServer()
     }
 }
 
+/*Cria um epoll para monitorar os sockets.
+Adiciona os sockets ao epoll.
+Entra em um loop para esperar por eventos nos sockets.
+Quando um evento ocorre, trata o evento de acordo com o tipo (entrada, saída, etc.).
+*/
 void TcpServer2::startListen()
 {
     this->epoll_fd = epoll_create(MAXEPOLLSIZE);
@@ -126,6 +133,8 @@ void TcpServer2::startListen()
     return;
 }
 
+/*Aceita uma nova conexão de cliente.
+Adiciona o novo socket ao epoll para monitoramento.*/
 void TcpServer2::acceptNewConnection(epoll_event &m_event, int fd, int j)
 {
     m_server[j].setSocketAddr_len(sizeof(m_sockets[j]));
@@ -152,6 +161,11 @@ void TcpServer2::acceptNewConnection(epoll_event &m_event, int fd, int j)
     socketCreation[client_socket] = time(NULL);
 }
 
+
+/*Lida com a entrada de dados dos clientes.
+Processa as requisições HTTP recebidas.
+Decide como responder com base na requisição recebida.
+*/
 void TcpServer2::handleInput(epoll_event &m_event, int fd)
 {
     Server *server = clientServerMap[fd];
@@ -161,20 +175,7 @@ void TcpServer2::handleInput(epoll_event &m_event, int fd)
         showClientHeader(m_event, request1, server, fd);
         if (!request1.has_header)
         {
-            time_t currentTime = time(NULL);
-            time_t elapsedTime = currentTime - socketCreation[fd];
-            // std::cout << "Current " << currentTime << " Socketii " << socketCreation[fd] << " Dife " << elapsedTime << std::endl;
-            if (elapsedTime > TIMEOUT)
-            {
-                std::cout << "Timeout error: Request not fully received" << std::endl;
-                timeout = true;
-                request1.setCode(408);
-                // return;
-            }
-            else
-            {
                 return;
-            }
         }
         Response response(*server);
         std::string serverResponse;
@@ -280,10 +281,12 @@ void TcpServer2::handleInput(epoll_event &m_event, int fd)
                 else if (locationSettings.deleteAllowed && request1.getMethod() == "DELETE")
                 {
                     std::string pathToDelete = server->getRoot_s() + request1.getPath();
-                    if (std::remove(pathToDelete.c_str()) != 0)
+                    if(!fileExists(pathToDelete))
+                        serverResponse = response.buildErrorResponse(404);
+                    else if (std::remove(pathToDelete.c_str()) != 0)
                         serverResponse = response.buildErrorResponse(500);
                     else
-                        serverResponse = response.buildErrorResponse(200);
+                        serverResponse = response.buildResponse(request1, locationSettings);
                 }
                 else
                 {
@@ -297,6 +300,8 @@ void TcpServer2::handleInput(epoll_event &m_event, int fd)
     }
 }
 
+/*Lida com a saída de dados para os clientes.
+Envia as respostas HTTP para os clientes.*/
 void TcpServer2::handleOutput(epoll_event &event, int fd)
 {
     std::string serverResponse = responseMap[fd];
@@ -321,6 +326,9 @@ size_t stringtohex(std::string value)
     return int_value;
 }
 
+
+/*Lê o cabeçalho da requisição HTTP enviada pelos clientes.
+Extrai informações importantes do cabeçalho, como método, URI, tamanho do conteúdo, etc.*/
 void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request, Server *server, int fd)
 {
     (void)server;
@@ -390,17 +398,11 @@ void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request
             }
             chunk_length_str.clear();
         }
-        /*if (request.max_length > server->getClientMaxBody_s())
-        {
-            request.setCode(413);
-            break;
-        }*/
 
     } while (bytesReceived > 0);
 
     if (request.has_header == true)
     {
-        // request.has_header = false;
         if (chunked)
         {
             this->_header += chunk;

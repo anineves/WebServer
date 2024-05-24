@@ -42,6 +42,8 @@ void                            serverNameRule(std::string line);
 void                            hostRule(std::string line);
 void                            verifyVar(std::vector<std::string> fileVec);
 void                            verifyValues(std::vector<std::string> fileVec);
+int                             validFile(std::string arg); 
+bool                            fileExists(std::string filename);
 
 
 #endif
