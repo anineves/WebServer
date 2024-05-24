@@ -29,7 +29,6 @@ void TcpServer2::startServer()
 {
     std::vector<struct sockaddr_in>::iterator it;
 
-    // std::cout << "@#$@#@$##@$$# Tamanho addresses :" << m_addresses.size() << std::endl;
     std::cout << "\n\n * * * Listening Server at following ports * * *   \n\n";
     for (it = m_addresses.begin(); it != m_addresses.end(); ++it)
     {
@@ -164,7 +163,7 @@ void TcpServer2::handleInput(epoll_event &m_event, int fd)
         {
             time_t currentTime = time(NULL);
             time_t elapsedTime = currentTime - socketCreation[fd];
-            std::cout << "Current " << currentTime << " Socketii " << socketCreation[fd] << " Dife " << elapsedTime << std::endl;  
+            //std::cout << "Current " << currentTime << " Socketii " << socketCreation[fd] << " Dife " << elapsedTime << std::endl;  
             if (elapsedTime > TIMEOUT)
             {
                 std::cout << "Timeout error: Request not fully received" << std::endl;
@@ -194,7 +193,6 @@ void TcpServer2::handleInput(epoll_event &m_event, int fd)
         request1.verific_errors(*server);
         if (request1.getCode() != 200 && !request1.getPath().empty())
         {
-            //std::cout << MAGENTA << "IM IN $$ CODE:\n" << request1.getCode() << RESET << std::endl;
             serverResponse = response.buildErrorResponse(request1.getCode());
             m_event.events = EPOLLOUT;
             epoll_ctl(this->getEpoll(), EPOLL_CTL_MOD, fd, &m_event);
@@ -243,7 +241,6 @@ void TcpServer2::handleInput(epoll_event &m_event, int fd)
                         Cgi cgi(request1.getPath());
                         serverResponse = cgi.runCgi(request1);
                     }
-                    std::cout << "Response: " << serverResponse << std::endl;
                 }
                 else if (locationSettings.getAutoIndex() == "on" && n == 0)
                 {
@@ -478,7 +475,7 @@ void TcpServer2::verificTimeOut()
         time_t elapsedTime = currentTime - it->second;
         if (elapsedTime >= TIMEOUT)
         {
-            std::cout << MAGENTA << "Close conection: " << it->first << RESET << std::endl;
+            std::cout  << "Close conection: " << MAGENTA << it->first << RESET << std::endl;
             epoll_ctl(this->epoll_fd, EPOLL_CTL_DEL, it->first, NULL);
             close(it->first);
             clientServerMap.erase(it->first);
@@ -494,7 +491,6 @@ void TcpServer2::verificTimeOut()
 
 void TcpServer2::closeConnection()
 {
-    //std::cout << "Vou eliminar tudo" << std::endl;
     for (std::vector<int>::iterator it = m_sockets.begin(); it != m_sockets.end(); ++it)
     {
         epoll_ctl(this->epoll_fd, EPOLL_CTL_DEL, *it, NULL);
@@ -527,5 +523,4 @@ void TcpServer2::closeConnection()
     std::string().swap(_client_request);
     std::vector<int>().swap(m_sockets);
     std::vector<Server>().swap(m_server);
-    // exit(EXIT_SUCCESS);
 }

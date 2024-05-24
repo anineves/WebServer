@@ -257,7 +257,7 @@ void    verifyPort(std::string line) {
     //std::cout << pos << std::endl;
     for (size_t i = pos; i < endpos; i++) {
         if (line[i] != ':' && line[i] != ';') {
-            std::cout << value << std::endl;
+            //std::cout << value << std::endl;
             if (isdigit(line[i]))
                 value += line[i];
             else
@@ -435,14 +435,14 @@ void    allowMethodsRule(std::string line) {
 
 void    verifyVar(std::vector<std::string> fileVec) {
     for (size_t i = 0; i < fileVec.size(); i++) {
-        std::cout << fileVec[i] << std::endl;
+        //std::cout << fileVec[i] << std::endl;
         if (!fileVec[i].find("listen"))
             listenRule(fileVec[i]);
        /*  if (!fileVec[i].find("server_name"))
             serverNameRule(fileVec[i]); */
         if (!fileVec[i].find("allow_methods")) {
             allowMethodsRule(fileVec[i]);
-            std::cout << RED << "Entrei\n" << RESET;
+            //std::cout << RED << "Entrei\n" << RESET;
         }
         if (!fileVec[i].find("host"))
             hostRule(fileVec[i]);

@@ -4,7 +4,7 @@ Response::Response()
 {
 }
 
-Response::Response(Server server)
+Response::Response(Server &server) : m_server(server)
 {
     m_server = server;
     _default_error["413"] = "./errorpages/erro413.html";
@@ -48,7 +48,6 @@ std::string Response::buildErrorResponse(int code)
     std::ifstream file(getDefaultError(codestr).c_str());
     if (file)
     {
-    //std::cout << "Entree :"  << code << "   "<< server.getDefaultError(codestr)  << ".\n\n\n\n\n\n\n" ;
         std::stringstream content;
         content << file.rdbuf();
         std::string fileContent = content.str();
@@ -61,15 +60,27 @@ std::string Response::buildErrorResponse(int code)
         response += "Content-Type: " + getContentType(getDefaultError(codestr).c_str()) + "\r\n\r\n";
 
         response += fileContent;
-
-        //std::cout << "response " << response << std::endl;
     
     }
-    else
-    {
-        response = "HTTP/1.1 " + codestr + " " + responseStatus(code) + "\r\n";
-        response += "Content-Type: Content-Type: text/html \r\n\r\n";
-    }
+    else {
+    response = "HTTP/1.1 " + codestr + " " + responseStatus(code) + "\r\n";
+    response += "Content-Type: text/html\r\n\r\n";
+    std::string fileContent = "<!DOCTYPE html>\n"
+                              "<html lang=\"en\">\n"
+                              "<head>\n"
+                              "    <meta charset=\"UTF-8\">\n"
+                              "    <link rel=\"stylesheet\" href=\"error.css\">\n"
+                              "    <title>Oops! Page Not Found</title>\n"
+                              "</head>\n"
+                              "<body>\n"
+                              "    <header>\n"
+                              "        <h1>404</h1>\n"
+                              "        <p>Oops! Page not found </p>\n"
+                              "    </header>\n"
+                              "</body>\n"
+                              "</html>";
+    response += fileContent;
+}
     return response;
 }
 
@@ -78,7 +89,6 @@ std::string Response::buildResponse(Request request, Location &location)
     std::string response;
     if (request.getMethod() == "GET" || request.getMethod() == "POST" || request.getMethod() == "DELETE")
     {
-        // std::cout << "valor redirect " << m_server.getredirect << std::endl;
         std::string filePath = obtainFilePath(request.getPath(), location);
         std::ifstream file(filePath.c_str());
         if (file)
@@ -86,7 +96,6 @@ std::string Response::buildResponse(Request request, Location &location)
             std::stringstream content;
             content << file.rdbuf();
             std::string fileContent = content.str();
-            //std::cout << "Content " << fileContent << std::endl;
             std::stringstream length;
             length << fileContent.size();
             std::stringstream stringCode;
@@ -94,7 +103,6 @@ std::string Response::buildResponse(Request request, Location &location)
             response = "HTTP/1.1 " + stringCode.str() + " " + responseStatus(request.getCode()) + "\r\n";
             response += "Content-Length: " + length.str() + "\r\n";
             response += "Content-Type: " + getContentType(filePath) + "\r\n\r\n";
-            // std::cout << "response " << response << std::endl;
 
             response += fileContent;
         }
@@ -127,7 +135,11 @@ std::string Response::obtainFilePath(const std::string &request, Location &locat
         fullPath = location.getRoot() + path;
     if (!isValidPath(fullPath))
     {
-        fullPath = "frontend/error/404.html";
+        fullPath = m_server.getErrorPage_s();
+        if(!isValidPath(fullPath))
+        {
+            fullPath = getDefaultError("404");
+        }
     }
 
     return fullPath;

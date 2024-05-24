@@ -33,7 +33,7 @@ int main(int ac, char **av) {
     try {
         cParser myFile;
         myFile.getFileVec(confFile);
-        std::cout << GREEN << "This file is validated!\n" << RESET;
+        //std::cout << GREEN << "This file is validated!\n" << RESET;
     } catch (const char* errorMessage) {
         std::cout  << BOLD << RED << "Error: " << RESET << errorMessage << std::endl;
         return 0;
