@@ -350,7 +350,7 @@ void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request
     
     memset(&buffer, 0, 5000);
     bytesReceived = recv(m_events.data.fd, buffer, sizeof(buffer)-1, MSG_NOSIGNAL);
-    std::cout << RED << "Buffer" << buffer << RESET<< std::endl;
+    // std::cout << RED << "Buffer" << buffer << RESET<< std::endl;
     _my_bytes += bytesReceived;
     if (bytesReceived < 0)
     {
@@ -404,7 +404,7 @@ void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request
             while (this->_body.size() > stringtohex(chunk_length_str))
             {
                 if (stringtohex(chunk_length_str) == 0) {
-                    std::cout << RED << "HEX\n" << stringtohex(chunk_length_str) << RESET<< std::endl;
+                    std::cout << RED << "HEX:\n" << stringtohex(chunk_length_str) << RESET<< std::endl;
                     _last_chunk = true;
                 }
                 this->_max_length += stringtohex(chunk_length_str);
@@ -440,7 +440,7 @@ void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request
                 _fullheader = true;
                 _chunked = false; 
                 _last_chunk = false;
-                _first = false;
+                _first = true;
                 chunk.clear();
                 this->_header.clear();
                 this->_body.clear();
