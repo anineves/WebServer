@@ -36,12 +36,6 @@ private:
     std::string                         _client_request;
     std::string                         _body;
     std::string                         _bodypart;
-    bool                                timeout;
-
-public:
-    TcpServer2(std::vector<Server> &server);
-    ~TcpServer2();
-    //ShowCLienteHeader()
     size_t                              _max_length;
     size_t                              _my_bytes;
     bool                                _fullheader;
@@ -50,9 +44,15 @@ public:
     bool                                _chunked;
     bool                                _first;
     bool                                _last_chunk;
+
+public:
+    TcpServer2(std::vector<Server> &server);
+    ~TcpServer2();
+    //ShowCLienteHeader()
     std::string                         chunk;
     std::string                         chunk_length_str;
 
+    bool                                timeout;
     std::map<int, std::string>          responseMap;
     std::map<int, Server*>              clientServerMap;
     std::string                         clientRequest;
@@ -64,7 +64,7 @@ public:
     void                                acceptNewConnection(epoll_event &event, int fd, int j);
     void                                handleInput(epoll_event &event, int fd); 
     void                                handleOutput(epoll_event &event, int fd);
-    void                                showClientHeader(struct epoll_event &m_events, Request &request1, Server *server, int fd);
+    void                                showClientHeader(struct epoll_event &m_events, Request &request1);
     void                                sendResponse(int client_socket, const std::string& response);
     void                                closeServer();
     uint32_t                            strToNet(const std::string &ip_address);

@@ -23,6 +23,7 @@ TcpServer2::TcpServer2(std::vector<Server> &servers) : m_server(servers)
     chunk = "";
     chunk_length_str = "";
     _last_chunk = false;
+    _body = "";
     setAddresses();
     startServer();
     startListen();
@@ -181,7 +182,7 @@ void TcpServer2::handleInput(epoll_event &m_event, int fd)
     if (server != NULL)
     {
         Request request1;
-        showClientHeader(m_event, request1, server, fd);
+        showClientHeader(m_event, request1);
         if (!_fullheader)
             return;
         Response response(*server);
@@ -331,7 +332,7 @@ void TcpServer2::handleOutput(epoll_event &event, int fd)
 size_t stringtohex(std::string value)
 {
     std::istringstream iss(value);
-    size_t int_value;
+    size_t int_value = 0;
 
     iss >> std::hex >> int_value;
     return int_value;
@@ -340,34 +341,21 @@ size_t stringtohex(std::string value)
 
 /*Lê o cabeçalho da requisição HTTP enviada pelos clientes.
 Extrai informações importantes do cabeçalho, como método, URI, tamanho do conteúdo, etc.*/
-void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request, Server *server, int fd)
+void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request)
 {
-    (void)server;
-    (void)fd;
-
     char buffer[5000];
     int bytesReceived = 0;
     
-    memset(&buffer, 0, 5000);
+    memset(&buffer, 0, sizeof(buffer));
     bytesReceived = recv(m_events.data.fd, buffer, sizeof(buffer)-1, MSG_NOSIGNAL);
-    // std::cout << RED << "Buffer" << buffer << RESET<< std::endl;
     _my_bytes += bytesReceived;
-    if (bytesReceived < 0)
+    if (bytesReceived <= 0)
     {
         close(m_events.data.fd);
         return;
     }
-    if (bytesReceived == 0)
-    {
-        close(m_events.data.fd);
-        return;
-    }
-    // return;
-    if(buffer[0] != '\0' )
-        this->_client_request.append(buffer, bytesReceived);
-
+    this->_client_request.append(buffer, bytesReceived);
     size_t found_header = this->_client_request.find("\r\n\r\n");
-
     if (found_header != std::string::npos && this->_header.empty())
     {
         this->_has_header = true;
@@ -389,7 +377,6 @@ void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request
         if (_first == true)
         {
             this->_body = this->_client_request.substr(found_header + 4, this->_client_request.size());
-            std::cout << MAGENTA << "Body:\n" << this->_body << RESET<< std::endl;                
             this->_client_request.clear();
             _first = false;
         }
@@ -403,10 +390,8 @@ void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request
         {
             while (this->_body.size() > stringtohex(chunk_length_str))
             {
-                if (stringtohex(chunk_length_str) == 0) {
-                    std::cout << RED << "HEX:\n" << stringtohex(chunk_length_str) << RESET<< std::endl;
+                if (stringtohex(chunk_length_str) == 0)
                     _last_chunk = true;
-                }
                 this->_max_length += stringtohex(chunk_length_str);
                 chunk += this->_body.substr(this->_body.find("\r\n") + 2, stringtohex(chunk_length_str));
                 this->_body.erase(0, stringtohex(chunk_length_str) + 2 + chunk_length_str.size() + 2);
@@ -415,27 +400,12 @@ void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request
             chunk_length_str.clear();
         }
     }
-    std::cout << RED << "Header:\n " << this->_header << RESET<< std::endl;
-    // size_t length = this->_client_request.size() - this->_header.size();
-    // std::cout << MAGENTA << "Chunks:\n" << chunk << RESET<< std::endl;
-    // std::cout << MAGENTA << "Body:\n" << this->_body << RESET<< std::endl;
-    // std::cout << MAGENTA << "Chunked:\n" << _chunked << RESET<< std::endl;
     if (this->_has_header)
     {
-        // std::cout << MAGENTA << "length body:\n " << length << RESET<< std::endl;
-        // std::cout << YELLOW << "length client:\n " << this->_client_request << RESET<< std::endl;
-        // std::cout << GREEN << "length header:\n " << this->_header << RESET<< std::endl;
-        
-        // std::cout << BLUE << "max_length:\n " << this->_max_length << RESET<< std::endl;
-        // std::cout << BLUE << "_my_bytes:\n " << _my_bytes << RESET<< std::endl;
         if (_chunked) {
             if (_last_chunk == true) {
-                // usleep(500);
-                std::cout << GREEN << "GOT IN\n" << RESET<< std::endl;
                 this->_header += chunk;
-                std::cout << MAGENTA << "Full:\n" << this->_header << RESET<< std::endl;
                 request.parser(this->_header);
-                // request.printMessage(chunk); 
                 request._fullRequest += this->_header;
                 _fullheader = true;
                 _chunked = false; 
@@ -449,18 +419,19 @@ void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request
             }
         }
         else if (this->_max_length <= _my_bytes || this->_header.find("POST") == std::string::npos) {
-            // std::cout << GREEN << "ENTREI" << RESET << std::endl;
-            usleep(500);
+            usleep(1000);
             _fullheader = true;
             request.parser(this->_client_request);
             request._fullRequest += this->_client_request;
-            // request.printMessage(this->_client_request); 
             this->_header.clear();
             this->_body.clear();
             this->_client_request.clear();
             _my_bytes = 0;
+            this->_has_header = false;
+            this->_max_length = 0;
         }
     }
+    // request.printMessage(request._fullRequest); 
 }
 
 void TcpServer2::sendResponse(int client_socket, const std::string &response)
