@@ -21,7 +21,7 @@
 # include <map>
 # include <signal.h>
 # include <algorithm>
-# define TIMEOUT 4
+# define TIMEOUT 10
 
 class Connection;
 class Request;
@@ -41,12 +41,18 @@ private:
 public:
     TcpServer2(std::vector<Server> &server);
     ~TcpServer2();
-    
+    //ShowCLienteHeader()
     size_t                              _max_length;
-
+    size_t                              _my_bytes;
     bool                                _fullheader;
     bool                                _has_header;
     std::string                         _header;
+    bool                                _chunked;
+    bool                                _first;
+    bool                                _last_chunk;
+    std::string                         chunk;
+    std::string                         chunk_length_str;
+
     std::map<int, std::string>          responseMap;
     std::map<int, Server*>              clientServerMap;
     std::string                         clientRequest;

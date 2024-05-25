@@ -15,6 +15,14 @@ TcpServer2::TcpServer2(std::vector<Server> &servers) : m_server(servers)
 {
     timeout = false;
     _fullheader = false;
+    _header = "";
+    _max_length = 0;
+    _chunked = false;
+    _first = true;
+    _my_bytes = 0;
+    chunk = "";
+    chunk_length_str = "";
+    _last_chunk = false;
     setAddresses();
     startServer();
     startListen();
@@ -190,7 +198,7 @@ void TcpServer2::handleInput(epoll_event &m_event, int fd)
         socketCreation[fd] = time(NULL);
 
         
-        request1.verific_errors(*server);
+        request1.verific_errors(*server, this->_max_length);
         if (request1.getCode() != 200 && !request1.getPath().empty())
         {
             serverResponse = response.buildErrorResponse(request1.getCode());
@@ -339,96 +347,118 @@ void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request
 
     char buffer[5000];
     int bytesReceived = 0;
-    bool chunked = false;
-    bool first = true;
-    std::string chunk;
-    std::string chunk_length_str;
-
     
-        memset(&buffer, 0, 5000);
-        bytesReceived = recv(m_events.data.fd, buffer, sizeof(buffer)-1, MSG_NOSIGNAL);
-        if (bytesReceived < 0)
-        {
-            close(m_events.data.fd);
-            //return;
-        }
-        if (bytesReceived == 0)
-        {
-            close(m_events.data.fd);
-            //return;
-        }
-        // std::cout << RED << "client " << _client_request << "\n Buffer" << buffer << RESET<< std::endl;
-        if(buffer[0] != '\0' )
-           this->_client_request.append(buffer, bytesReceived);
+    memset(&buffer, 0, 5000);
+    bytesReceived = recv(m_events.data.fd, buffer, sizeof(buffer)-1, MSG_NOSIGNAL);
+    std::cout << RED << "Buffer" << buffer << RESET<< std::endl;
+    _my_bytes += bytesReceived;
+    if (bytesReceived < 0)
+    {
+        close(m_events.data.fd);
+        return;
+    }
+    if (bytesReceived == 0)
+    {
+        close(m_events.data.fd);
+        return;
+    }
+    // return;
+    if(buffer[0] != '\0' )
+        this->_client_request.append(buffer, bytesReceived);
 
-        size_t found_header = this->_client_request.find("\r\n\r\n");
+    size_t found_header = this->_client_request.find("\r\n\r\n");
 
-        if (found_header != std::string::npos && this->_header.empty())
+    if (found_header != std::string::npos && this->_header.empty())
+    {
+        this->_has_header = true;
+        this->_header = this->_client_request.substr(0, found_header + 4);
+        if (this->_header.find("Content-Length") != std::string::npos)
         {
-            this->_has_header = true;
-            this->_header = this->_client_request.substr(0, found_header + 4);
-            if (this->_header.find("Content-Length") != std::string::npos)
-            {
-                size_t pos = this->_header.find("Content-Length:");
-                pos += 15;
-                size_t end_pos = this->_header.find("\r\n", pos);
-                this->_max_length = std::atoi(this->_header.substr(pos, end_pos - pos).c_str());
-            }
-            else if (this->_header.find("Transfer-Encoding") != std::string::npos)
-                chunked = true;
-            else if (this->_header.find("POST") != std::string::npos)
-            {
-                //request.setCode(411);
-                request.no_length = true;
-                //return;
-            }
+            size_t pos = this->_header.find("Content-Length:");
+            pos += 15;
+            size_t end_pos = this->_header.find("\r\n", pos);
+            this->_max_length = std::atoi(this->_header.substr(pos, end_pos - pos).c_str());
         }
-        if (chunked == true)
+        else if (this->_header.find("Transfer-Encoding") != std::string::npos)
+            _chunked = true;
+        else if (this->_header.find("POST") != std::string::npos)
+            request.no_length = true;
+    }
+    if (_chunked == true)
+    {
+        if (_first == true)
         {
-            if (first == true)
+            this->_body = this->_client_request.substr(found_header + 4, this->_client_request.size());
+            std::cout << MAGENTA << "Body:\n" << this->_body << RESET<< std::endl;                
+            this->_client_request.clear();
+            _first = false;
+        }
+        else
+        {
+            this->_body.append(this->_client_request);
+            this->_client_request.clear();
+        }
+        chunk_length_str = this->_body.substr(0, this->_body.find("\r\n"));
+        if (this->_body.size() >= stringtohex(chunk_length_str))
+        {
+            while (this->_body.size() > stringtohex(chunk_length_str))
             {
-                this->_body = this->_client_request.substr(found_header + 4, this->_client_request.size());
-                this->_client_request.clear();
-                first = false;
-            }
-            else
-            {
-                this->_body.append(this->_client_request);
-                this->_client_request.clear();
-            }
-            chunk_length_str = this->_body.substr(0, this->_body.find("\r\n"));
-            if (this->_body.size() >= stringtohex(chunk_length_str))
-            {
-                while (this->_body.size() > stringtohex(chunk_length_str))
-                {
-                    this->_max_length += stringtohex(chunk_length_str);
-                    chunk += this->_body.substr(this->_body.find("\r\n") + 2, stringtohex(chunk_length_str));
-                    this->_body.erase(0, stringtohex(chunk_length_str) + 2 + chunk_length_str.size() + 2);
-                    chunk_length_str = this->_body.substr(0, this->_body.find("\r\n"));
+                if (stringtohex(chunk_length_str) == 0) {
+                    std::cout << RED << "HEX\n" << stringtohex(chunk_length_str) << RESET<< std::endl;
+                    _last_chunk = true;
                 }
+                this->_max_length += stringtohex(chunk_length_str);
+                chunk += this->_body.substr(this->_body.find("\r\n") + 2, stringtohex(chunk_length_str));
+                this->_body.erase(0, stringtohex(chunk_length_str) + 2 + chunk_length_str.size() + 2);
+                chunk_length_str = this->_body.substr(0, this->_body.find("\r\n"));
             }
             chunk_length_str.clear();
         }
-
+    }
+    std::cout << RED << "Header:\n " << this->_header << RESET<< std::endl;
+    // size_t length = this->_client_request.size() - this->_header.size();
+    // std::cout << MAGENTA << "Chunks:\n" << chunk << RESET<< std::endl;
+    // std::cout << MAGENTA << "Body:\n" << this->_body << RESET<< std::endl;
+    // std::cout << MAGENTA << "Chunked:\n" << _chunked << RESET<< std::endl;
     if (this->_has_header)
     {
-        if (this->_max_length == (this->_client_request.length() - this->_header.length()) || this->_header.find("POST") == std::string::npos) {
-            _fullheader = true;
-            if (chunked)
-            {
+        // std::cout << MAGENTA << "length body:\n " << length << RESET<< std::endl;
+        // std::cout << YELLOW << "length client:\n " << this->_client_request << RESET<< std::endl;
+        // std::cout << GREEN << "length header:\n " << this->_header << RESET<< std::endl;
+        
+        // std::cout << BLUE << "max_length:\n " << this->_max_length << RESET<< std::endl;
+        // std::cout << BLUE << "_my_bytes:\n " << _my_bytes << RESET<< std::endl;
+        if (_chunked) {
+            if (_last_chunk == true) {
+                // usleep(500);
+                std::cout << GREEN << "GOT IN\n" << RESET<< std::endl;
                 this->_header += chunk;
+                std::cout << MAGENTA << "Full:\n" << this->_header << RESET<< std::endl;
                 request.parser(this->_header);
+                // request.printMessage(chunk); 
                 request._fullRequest += this->_header;
+                _fullheader = true;
+                _chunked = false; 
+                _last_chunk = false;
+                _first = false;
+                chunk.clear();
+                this->_header.clear();
+                this->_body.clear();
+                this->_client_request.clear();
+
             }
-            else
-            {
-                request.parser(this->_client_request);
-                request._fullRequest += this->_client_request;
-            }
-            // request.printMessage(request._fullRequest); 
+        }
+        else if (this->_max_length <= _my_bytes || this->_header.find("POST") == std::string::npos) {
+            // std::cout << GREEN << "ENTREI" << RESET << std::endl;
+            usleep(500);
+            _fullheader = true;
+            request.parser(this->_client_request);
+            request._fullRequest += this->_client_request;
+            // request.printMessage(this->_client_request); 
             this->_header.clear();
             this->_body.clear();
             this->_client_request.clear();
+            _my_bytes = 0;
         }
     }
 }

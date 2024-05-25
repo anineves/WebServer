@@ -80,16 +80,16 @@ void Request::parser(std::string header)
    
 }
 
-bool Request::verific_errors(Server server)
+bool Request::verific_errors(Server server, size_t max_length)
 {
-    (void)server;
+    // (void)server;
     // Aqui Depois em vez do exitWithError colocar os erros, por exemplo se o metodo for diferente do esperado e o erro 501
-    // if (max_length > server.getClientMaxBody_s()) {
-    //     // std::cout << YELLOW << "Verific Errors: MAX LENGTH" << RESET << std::endl;
-    //     _code = 413;
-    //     exitWithError(" Wrong Client Max");
-    //     return 0;
-    // }
+    if (max_length > server.getClientMaxBody_s()) {
+        // std::cout << YELLOW << "Verific Errors: MAX LENGTH" << RESET << std::endl;
+        _code = 413;
+        exitWithError(" Wrong Client Max");
+        return 0;
+    }
     if (no_length == true)
     {
         _code = 411;
@@ -105,6 +105,7 @@ bool Request::verific_errors(Server server)
     }
     if ((this->_method == "POST" && getBody().empty()))
     {
+        std::cout << RED << "Body:" << getBody() << RESET << std::endl;
         _code = 405;
         exitWithError("Method not allowed");
         return 0;

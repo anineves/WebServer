@@ -43,7 +43,7 @@ public:
     void                                setPath( std::string path);
     void                                printMessage(std::string header);
     void                                verifyLocations(Server server);
-    bool                                verific_errors(Server server);
+    bool                                verific_errors(Server server, size_t max_length);
     void                                parser(std::string header);
     bool                                has_header;
     std::string                         lines_body;
