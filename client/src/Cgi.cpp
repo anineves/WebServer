@@ -81,6 +81,7 @@ std::string Cgi::runCgi(Request &request)
 	size_t content_length;
 	std::string body;
 	std::stringstream resposta;
+	int status = 0;
 
 	initEnv(request);
 	body = request.getFullRequest();
@@ -100,8 +101,16 @@ std::string Cgi::runCgi(Request &request)
 		content_length = readCgiResponse(fdResponse[0]);
 
 		close(fdResponse[0]);
-		waitpid(pid, NULL, 0);
+		waitpid(pid, &status, 0);
 
+		if (WIFEXITED(status)) {
+            int exit_status = WEXITSTATUS(status);
+            if (exit_status != 0) {
+				request.setCode(500);
+				std::cerr << " " << exit_status << std::endl;
+				return "External script encountered an error."; // Or handle the error as needed
+            }
+		}
 		int index = this->_cgi_response.find("Content-Length:");
 		
 		resposta << this->_cgi_response;

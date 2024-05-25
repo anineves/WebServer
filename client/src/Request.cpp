@@ -91,7 +91,6 @@ bool Request::verific_errors(Server server)
     }
     if (no_length == true)
     {
-        // std::cout << MAGENTA << "Verific Errors: Length Required" << RESET << std::endl;
         _code = 411;
         exitWithError("Length Required");
         no_length = false;
@@ -99,7 +98,7 @@ bool Request::verific_errors(Server server)
     }
     if (_method.empty() || _protocol.empty() || _path.empty())
     {
-        _code = 504;
+        _code = 400;
         exitWithError("Missing informations");
         return 0;
     }
@@ -112,20 +111,15 @@ bool Request::verific_errors(Server server)
     if ((this->_method != "GET") && (this->_method != "POST") && (this->_method != "DELETE"))
     {
         _code = 501;
-        exitWithError("Not allowed method");
+        exitWithError("Not implemented");
         return 0;
-    }
-    if(this->_method == "DELETE")
-    {
-        
     }
     if (this->_protocol != "HTTP/1.1")
     {
-        _code = 504;
+        _code = 501;
         exitWithError(" Wrong Protocol");
         return 0;
     }
-    // if (this->lines_body.size() > static_cast<std::string::size_type>(server.getClientMaxBody_s()))
     else
     {
         _code = 200;
@@ -168,11 +162,11 @@ int Request::getCode()
     return _code;
 }
 
-void Request::printMessage()
+void Request::printMessage(std::string header)
 {
 
     std::cout << CYAN << " ======= REQUEST ======= \n"
-              << _fullRequest << std::endl
+              << header << std::endl
               << "====== END ======" << RESET << std::endl;
 }
 

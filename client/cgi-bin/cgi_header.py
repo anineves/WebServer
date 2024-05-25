@@ -8,6 +8,15 @@ upload_not_found = '<html>\
                 </body>\
             </html>'
 
+get_name_error = '<html>\
+                <head>\
+                    <title>Get Name</title>\
+                </head>\
+                <body>\
+                    <h1>Error Get CGI</h1>\
+                </body>\
+            </html>'
+
 http_not_found = f"HTTP/1.1 500 Internal Server Error\r\n\
                 Content-Type: text/html\r\n\
                 Content-Length: \r\n\
@@ -18,12 +27,16 @@ http_found = f"HTTP/1.1 200 Ok\r\n\
                 Content-Length: \r\n\
                 \r\n"
 
-html_head = f'<head> \
-            <meta charset="UTF-8"> \
-            <meta name="viewport" content="width=device-width, initial-scale=1.0"> \
-            <title>Upload</title> \
-            <link rel="stylesheet" href="../css/styles.css"> \
-        </head>'
+
+def get_head(title):
+    html_head = f'<head> \
+                    <meta charset="UTF-8"> \
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0"> \
+                    <title>{title}</title> \
+                    <link rel="stylesheet" href="../css/styles.css"> \
+                </head>'
+    return html_head
+            
 
 def get_header(host):
     header = f'<header> \

@@ -9,7 +9,6 @@
 #include <unistd.h>
 
 #include <fstream>
-#include <experimental/filesystem>
 
 
 
@@ -84,25 +83,11 @@ u_int32_t str_to_uint32(std::string str) {
 
 
 
-std::string handleRequest(std::string request)
-{
-    // Analisar a solicitação
-    std::istringstream iss(request);
-    std::string method, uri, protocol;
-    iss >> method >> uri >> protocol;
-
-    if (method == "GET" && uri.find("/delete") == 0) {
-        std::string fileName;
-        size_t pos = uri.find('=');
-        if (pos != std::string::npos) {
-            fileName = uri.substr(pos + 1);
-            return deleteFile(fileName);
-        }
-    }
-
-    // Se a solicitação não for reconhecida ou não puder ser manipulada, retorne um erro
-    return "HTTP/1.1 400 Bad Request\r\nContent-Type: text/plain\r\n\r\nBad Request.";
+bool fileExists(const std::string filename) {
+    std::ifstream file(filename.c_str());
+    return file.good();
 }
+
 
 std::string dirListHtml(std::vector<std::string> content)
 {

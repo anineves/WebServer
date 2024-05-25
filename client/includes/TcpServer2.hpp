@@ -34,7 +34,6 @@ private:
     int                                 epoll_fd;
     std::map<int, time_t>               socketCreation;
     std::string                         _client_request;
-    std::string                         _header;
     std::string                         _body;
     bool                                timeout;
 
@@ -42,6 +41,8 @@ public:
     TcpServer2(std::vector<Server> &server);
     ~TcpServer2();
 
+    bool                                _fullheader;
+    std::string                         _header;
     std::map<int, std::string>          responseMap;
     std::map<int, Server*>              clientServerMap;
     std::string                         clientRequest;
