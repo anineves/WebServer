@@ -175,9 +175,7 @@ void TcpServer2::handleInput(epoll_event &m_event, int fd)
         Request request1;
         showClientHeader(m_event, request1, server, fd);
         if (!_fullheader)
-        {
-                return;
-        }
+            return;
         Response response(*server);
         std::string serverResponse;
         if (timeout == true)
@@ -367,14 +365,14 @@ void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request
 
         if (found_header != std::string::npos && this->_header.empty())
         {
-            request.has_header = true;
+            this->_has_header = true;
             this->_header = this->_client_request.substr(0, found_header + 4);
             if (this->_header.find("Content-Length") != std::string::npos)
             {
                 size_t pos = this->_header.find("Content-Length:");
                 pos += 15;
                 size_t end_pos = this->_header.find("\r\n", pos);
-                request.max_length = std::atoi(this->_header.substr(pos, end_pos - pos).c_str());
+                this->_max_length = std::atoi(this->_header.substr(pos, end_pos - pos).c_str());
             }
             else if (this->_header.find("Transfer-Encoding") != std::string::npos)
                 chunked = true;
@@ -403,7 +401,7 @@ void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request
             {
                 while (this->_body.size() > stringtohex(chunk_length_str))
                 {
-                    request.max_length += stringtohex(chunk_length_str);
+                    this->_max_length += stringtohex(chunk_length_str);
                     chunk += this->_body.substr(this->_body.find("\r\n") + 2, stringtohex(chunk_length_str));
                     this->_body.erase(0, stringtohex(chunk_length_str) + 2 + chunk_length_str.size() + 2);
                     chunk_length_str = this->_body.substr(0, this->_body.find("\r\n"));
@@ -412,23 +410,10 @@ void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request
             chunk_length_str.clear();
         }
 
-    // std::cout << RED << "Client Request " << _client_request << RESET<< std::endl;
-    if (request.has_header == true)
+    if (this->_has_header)
     {
-        // std::cout << GREEN << "FOund header" << found_header << RESET<< std::endl;
-        // std::cout << GREEN << "Header Size" << this->_header.size() << RESET<< std::endl;
-
-        // std::cout << this->clientRequest.size() << std::endl;
-
-        this->_body = this->_client_request.substr(found_header + 4, this->_client_request.size());
-        std::cout << GREEN << " this->_body" <<  this->_body << RESET<< std::endl;
-        size_t found_body = this->_body.find("\r\n\r\n");
-
-        if (found_body != std::string::npos) {
-            std::cout << GREEN << "ENTREI"  << RESET<< std::endl;
+        if (this->_max_length == (this->_client_request.length() - this->_header.length()) || this->_header.find("POST") == std::string::npos) {
             _fullheader = true;
-        }
-        if (_fullheader == true) {
             if (chunked)
             {
                 this->_header += chunk;

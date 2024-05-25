@@ -35,13 +35,17 @@ private:
     std::map<int, time_t>               socketCreation;
     std::string                         _client_request;
     std::string                         _body;
+    std::string                         _bodypart;
     bool                                timeout;
 
 public:
     TcpServer2(std::vector<Server> &server);
     ~TcpServer2();
+    
+    size_t                              _max_length;
 
     bool                                _fullheader;
+    bool                                _has_header;
     std::string                         _header;
     std::map<int, std::string>          responseMap;
     std::map<int, Server*>              clientServerMap;

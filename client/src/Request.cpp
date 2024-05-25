@@ -5,14 +5,14 @@ Request::Request(std::string request) : _fullRequest(request)
 
     has_header = false;
     _code = 200;
-    max_length = 0;
+    // max_length = 0;
     no_length = false;
     temp_loop = 0;
 }
 
 Request::Request() {
     has_header = false;
-    max_length = 0;
+    // max_length = 0;
     no_length = false;
     temp_loop = 0;
 }
@@ -82,13 +82,14 @@ void Request::parser(std::string header)
 
 bool Request::verific_errors(Server server)
 {
+    (void)server;
     // Aqui Depois em vez do exitWithError colocar os erros, por exemplo se o metodo for diferente do esperado e o erro 501
-    if (max_length > server.getClientMaxBody_s()) {
-        // std::cout << YELLOW << "Verific Errors: MAX LENGTH" << RESET << std::endl;
-        _code = 413;
-        exitWithError(" Wrong Client Max");
-        return 0;
-    }
+    // if (max_length > server.getClientMaxBody_s()) {
+    //     // std::cout << YELLOW << "Verific Errors: MAX LENGTH" << RESET << std::endl;
+    //     _code = 413;
+    //     exitWithError(" Wrong Client Max");
+    //     return 0;
+    // }
     if (no_length == true)
     {
         _code = 411;
