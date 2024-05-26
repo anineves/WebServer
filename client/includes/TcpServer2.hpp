@@ -38,11 +38,12 @@ private:
     std::string                         _bodypart;
     size_t                              _max_length;
     size_t                              _my_bytes;
+    size_t                              _chunk_size;
     bool                                _fullheader;
     bool                                _has_header;
     std::string                         _header;
     bool                                _chunked;
-    bool                                _first;
+    bool                                _first_chunk;
     bool                                _last_chunk;
 
 public:
@@ -70,6 +71,8 @@ public:
     uint32_t                            strToNet(const std::string &ip_address);
     void                                setAddresses();
     void                                closeConnection();
+    int                                 handleChunkedRequest(size_t found_header, Request &request);
+    void                                fetchAndParseRequest(Request &request);
 
 };
 

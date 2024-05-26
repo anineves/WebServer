@@ -5,16 +5,15 @@ Request::Request(std::string request) : _fullRequest(request)
 
     has_header = false;
     _code = 200;
-    // max_length = 0;
     no_length = false;
     temp_loop = 0;
 }
 
 Request::Request() {
     has_header = false;
-    // max_length = 0;
     no_length = false;
     temp_loop = 0;
+    chunked_error = false;
 }
 
 Request::~Request() {}
@@ -84,6 +83,7 @@ bool Request::verific_errors(Server server, size_t max_length)
 {
     // (void)server;
     // Aqui Depois em vez do exitWithError colocar os erros, por exemplo se o metodo for diferente do esperado e o erro 501
+    // std::cout << MAGENTA << "ERROR VERIFY" << RESET << std::endl;
     if (max_length > server.getClientMaxBody_s()) {
         // std::cout << YELLOW << "Verific Errors: MAX LENGTH" << RESET << std::endl;
         _code = 413;
@@ -120,6 +120,13 @@ bool Request::verific_errors(Server server, size_t max_length)
     {
         _code = 501;
         exitWithError(" Wrong Protocol");
+        return 0;
+    }
+    if (chunked_error == true)
+    {
+        _code = 400;
+        exitWithError("Bad Request");
+        chunked_error = false;
         return 0;
     }
     else
@@ -167,7 +174,7 @@ int Request::getCode()
 void Request::printMessage(std::string header)
 {
 
-    std::cout << CYAN << " ======= REQUEST ======= \n"
+    std::cout << CYAN << "======= REQUEST ======= \n"
               << header << std::endl
               << "====== END ======" << RESET << std::endl;
 }

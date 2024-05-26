@@ -18,7 +18,7 @@ TcpServer2::TcpServer2(std::vector<Server> &servers) : m_server(servers)
     _header = "";
     _max_length = 0;
     _chunked = false;
-    _first = true;
+    _first_chunk = true;
     _my_bytes = 0;
     chunk = "";
     chunk_length_str = "";
@@ -308,7 +308,7 @@ void TcpServer2::handleInput(epoll_event &m_event, int fd)
             }
         }
         _fullheader = false;
-        this->_max_length =0;
+        this->_max_length = 0;
     }
 }
 
@@ -338,6 +338,80 @@ size_t stringtohex(std::string value)
     return int_value;
 }
 
+void    TcpServer2::fetchAndParseRequest(Request &request)
+{
+    if (_chunked) {
+        if (_last_chunk == true) {
+            this->_header.append(chunk);
+            request.parser(this->_header);
+            request._fullRequest += this->_header;
+            _fullheader = true;
+            _chunked = false; 
+            _last_chunk = false;
+            _first_chunk = true;
+            chunk.clear();
+            this->_header.clear();
+            this->_body.clear();
+            this->_client_request.clear();
+        }
+    }
+    else if (this->_max_length <= _my_bytes || this->_header.find("POST") == std::string::npos) {
+        usleep(1000);
+        _fullheader = true;
+        request.parser(this->_client_request);
+        request._fullRequest += this->_client_request;
+        this->_header.clear();
+        this->_body.clear();
+        this->_client_request.clear();
+        _my_bytes = 0;
+        this->_has_header = false;
+    }
+}
+
+int    TcpServer2::handleChunkedRequest(size_t found_header, Request &request)
+{
+    if (_header.find("GET") != std::string::npos) {
+        _fullheader = true;
+        request.chunked_error = true;
+        _client_request.clear();
+        this->_header.clear();
+        return 1;
+    }
+    if (_first_chunk == true) {
+        _body = _client_request.substr(found_header + 4, _client_request.size());
+        std::cout << GREEN << "_body:\n" << _body << RESET << std::endl;
+        if (_header.find("POST") != std::string::npos && _body.empty()) {
+            if (_client_request.find("100-continue") == std::string::npos) {
+                _fullheader = true;
+                request.chunked_error = true;
+                _client_request.clear();
+                this->_header.clear();
+                return 1;
+            }
+        }
+        _first_chunk = false;
+    }
+    else
+        _body.append(_client_request);
+    chunk_length_str = _body.substr(0, _body.find("\r\n"));
+    _chunk_size = stringtohex(chunk_length_str);
+    if (_body.size() >= _chunk_size) 
+    {
+        while (_body.size() > stringtohex(chunk_length_str)) 
+        {
+            _chunk_size = stringtohex(chunk_length_str);
+            if (_chunk_size == 0)
+                _last_chunk = true;
+            _max_length += _chunk_size;
+            chunk += _body.substr(_body.find("\r\n") + 2, _chunk_size);
+            _body.erase(0, _chunk_size + 2 + chunk_length_str.size() + 2);
+            chunk_length_str = _body.substr(0, _body.find("\r\n"));
+        }
+        chunk_length_str.clear();
+    }
+    _client_request.clear();
+    return 0;
+}
 
 /*Lê o cabeçalho da requisição HTTP enviada pelos clientes.
 Extrai informações importantes do cabeçalho, como método, URI, tamanho do conteúdo, etc.*/
@@ -347,91 +421,38 @@ void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request
     int bytesReceived = 0;
     
     memset(&buffer, 0, sizeof(buffer));
-    bytesReceived = recv(m_events.data.fd, buffer, sizeof(buffer)-1, MSG_NOSIGNAL);
+    bytesReceived = recv(m_events.data.fd, buffer, sizeof(buffer) - 1, MSG_NOSIGNAL);
     _my_bytes += bytesReceived;
-    if (bytesReceived <= 0)
-    {
+    if (bytesReceived <= 0) {
         close(m_events.data.fd);
         return;
     }
-    this->_client_request.append(buffer, bytesReceived);
-    size_t found_header = this->_client_request.find("\r\n\r\n");
-    if (found_header != std::string::npos && this->_header.empty())
+    _client_request.append(buffer, bytesReceived);
+    size_t found_header = _client_request.find("\r\n\r\n");
+    if (found_header != std::string::npos && _header.empty())
     {
-        this->_has_header = true;
-        this->_header = this->_client_request.substr(0, found_header + 4);
-        if (this->_header.find("Content-Length") != std::string::npos)
-        {
-            size_t pos = this->_header.find("Content-Length:");
-            pos += 15;
-            size_t end_pos = this->_header.find("\r\n", pos);
-            this->_max_length = std::atoi(this->_header.substr(pos, end_pos - pos).c_str());
+        _has_header = true;
+        _header = _client_request.substr(0, found_header + 4);
+        size_t content_pos = _header.find("Content-Length:");
+        if (content_pos != std::string::npos) {
+            content_pos += 15;
+            size_t end_pos = _header.find("\r\n", content_pos);
+            _max_length = std::atoi(_header.substr(content_pos, end_pos - content_pos).c_str());
         }
-        else if (this->_header.find("Transfer-Encoding") != std::string::npos)
+        else if (_header.find("Transfer-Encoding") != std::string::npos)
             _chunked = true;
-        else if (this->_header.find("POST") != std::string::npos)
+        else if (_header.find("POST") != std::string::npos)
             request.no_length = true;
+        if (content_pos != std::string::npos && _header.find("Transfer-Encoding") != std::string::npos) {
+            request.chunked_error = true;
+        }
     }
     if (_chunked == true)
-    {
-        if (_first == true)
-        {
-            this->_body = this->_client_request.substr(found_header + 4, this->_client_request.size());
-            this->_client_request.clear();
-            _first = false;
-        }
-        else
-        {
-            this->_body.append(this->_client_request);
-            this->_client_request.clear();
-        }
-        chunk_length_str = this->_body.substr(0, this->_body.find("\r\n"));
-        if (this->_body.size() >= stringtohex(chunk_length_str))
-        {
-            while (this->_body.size() > stringtohex(chunk_length_str))
-            {
-                if (stringtohex(chunk_length_str) == 0)
-                    _last_chunk = true;
-                this->_max_length += stringtohex(chunk_length_str);
-                chunk += this->_body.substr(this->_body.find("\r\n") + 2, stringtohex(chunk_length_str));
-                this->_body.erase(0, stringtohex(chunk_length_str) + 2 + chunk_length_str.size() + 2);
-                chunk_length_str = this->_body.substr(0, this->_body.find("\r\n"));
-            }
-            chunk_length_str.clear();
-        }
-    }
-    if (this->_has_header)
-    {
-        if (_chunked) {
-            if (_last_chunk == true) {
-                this->_header += chunk;
-                request.parser(this->_header);
-                request._fullRequest += this->_header;
-                _fullheader = true;
-                _chunked = false; 
-                _last_chunk = false;
-                _first = true;
-                chunk.clear();
-                this->_header.clear();
-                this->_body.clear();
-                this->_client_request.clear();
-
-            }
-        }
-        else if (this->_max_length <= _my_bytes || this->_header.find("POST") == std::string::npos) {
-            usleep(1000);
-            _fullheader = true;
-            request.parser(this->_client_request);
-            request._fullRequest += this->_client_request;
-            this->_header.clear();
-            this->_body.clear();
-            this->_client_request.clear();
-            _my_bytes = 0;
-            this->_has_header = false;
-            //this->_max_length = 0;
-        }
-    }
-    // request.printMessage(request._fullRequest); 
+        if (handleChunkedRequest(found_header, request))
+            return ;
+    if (_has_header)
+        fetchAndParseRequest(request);
+    request.printMessage(_header); 
 }
 
 void TcpServer2::sendResponse(int client_socket, const std::string &response)

@@ -53,6 +53,7 @@ public:
     bool                                no_length;
     int                                 temp_loop;
     Server                              r_server;
+    bool                                chunked_error;
 
 private:
     std::string                          _method;
