@@ -7,9 +7,18 @@
 #include <sstream>
 #include <cstdlib>
 #include <unistd.h>
-
 #include <fstream>
 
+
+
+
+void printMap(const std::map<std::string, std::string>& map) 
+{
+    std::map<std::string, std::string>::const_iterator it;
+    for (it = map.begin(); it != map.end(); ++it) {
+        std::cout << it->first << ": " << it->second << std::endl;
+    }
+}
 
 
 void log(const std::string &message) {

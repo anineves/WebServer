@@ -179,6 +179,19 @@ void Request::printMessage(std::string header)
               << "====== END ======" << RESET << std::endl;
 }
 
+void Request::printMap() 
+{
+    std::cout << CYAN << "======= REQUEST ======= \n";
+    std::cout << this->getMethod()  << " " << this->getPath() << " " << this->getProtocol() << std::endl;
+    std::map<std::string, std::string>::const_iterator it;
+    for (it = lines_header.begin(); it != lines_header.end(); ++it) {
+        std::cout << it->first << ": " << it->second << std::endl;
+    }
+    std::cout << "====== END ======" << RESET << std::endl;
+}
+
+
+
 std::string Request::getFullRequest(void)
 {
     std::string temp = _fullRequest;

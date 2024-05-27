@@ -232,7 +232,6 @@ void TcpServer2::handleInput(epoll_event &m_event, int fd)
                     locationSettings.setRoot(server->getRoot_s());
                 if (not_allow == 0)
                 {
-                    std::cout << "ENTREI " << locationSettings.getPath()<< std::endl;
                     serverResponse = response.buildErrorResponse(405);
                 }
                 else if (!locationSettings.getReturn().empty())
@@ -452,7 +451,7 @@ void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request
             return ;
     if (_has_header)
         fetchAndParseRequest(request);
-    request.printMessage(_header); 
+    request.printMap();
 }
 
 void TcpServer2::sendResponse(int client_socket, const std::string &response)

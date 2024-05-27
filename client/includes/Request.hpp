@@ -54,6 +54,8 @@ public:
     int                                 temp_loop;
     Server                              r_server;
     bool                                chunked_error;
+    std::map<std::string, std::string>  lines_header;
+    void                                printMap(); 
 
 private:
     std::string                          _method;
@@ -62,7 +64,6 @@ private:
     std::string                         _contentType;
     std::string                         _contentLength;
     std::string                         _host;
-    std::map<std::string, std::string>  lines_header;
     int                                 _code;
 };
 

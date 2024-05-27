@@ -30,7 +30,7 @@ public:
     Response();
     Response(Server &server);
     ~Response();
-    std::string     obtainFilePath(const std::string &request, Location &location);
+    std::string     obtainFilePath(Request &request, Location &location);
     std::string     getContentType(const std::string& filePath);
     bool            isValidPath(std::string& fullPath);
     std::string     responseStatus (int code);

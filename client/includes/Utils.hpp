@@ -11,6 +11,7 @@
 #include <vector>
 #include <sys/stat.h>
 #include <cstring>
+#include <map>
 
 int                             ft_stoi(std::string str);
 void                            log(const std::string &message);
@@ -44,6 +45,7 @@ void                            verifyVar(std::vector<std::string> fileVec);
 void                            verifyValues(std::vector<std::string> fileVec);
 int                             validFile(std::string arg); 
 bool                            fileExists(std::string filename);
+void                            printMap(const std::map<std::string, std::string>& map); 
 
 
 #endif
