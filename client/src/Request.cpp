@@ -90,6 +90,29 @@ bool Request::verific_errors(Server server, size_t max_length)
         exitWithError(" Wrong Client Max");
         return 0;
     }
+    std::cout << "entrei verific " << server.s_server_names.size() << " host "<< lines_header["Host"]<< std::endl;
+    
+    bool server_name = false;
+    std::string host;
+    host = lines_header["Host"].substr(0, lines_header["Host"].size()-1);
+    size_t pos = lines_header["Host"].find(":");
+    if (pos != std::string::npos)
+    {
+        host = lines_header["Host"].substr(0,pos);
+    }
+    for (size_t i = 0; i < server.s_server_names.size(); i++)
+    {
+        if (server.s_server_names[i] == host)
+        {
+            server_name = true;
+        }
+    }
+
+    if(server_name == false)
+    {
+        _code = 400;
+        return 0 ;
+    }
     if (no_length == true)
     {
         _code = 411;

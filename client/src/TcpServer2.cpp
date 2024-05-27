@@ -199,6 +199,11 @@ void TcpServer2::handleInput(epoll_event &m_event, int fd)
         socketCreation[fd] = time(NULL);
 
         request1.verific_errors(*server, this->_max_length);
+        if(request1.getCode() == 400)
+        {
+            close(fd);
+            return;
+        }
         if (request1.getCode() != 200 && !request1.getPath().empty())
         {
             serverResponse = response.buildErrorResponse(request1.getCode());

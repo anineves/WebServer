@@ -56,7 +56,12 @@ Server::Server(const Server &source)
                 {
                     _locations.clear();
                     _locations = rhs._locations;
-                } 
+                }
+                if (!rhs.s_server_names.empty()) 
+                {
+                    s_server_names.clear();
+                    s_server_names = rhs.s_server_names;
+                }
                 s_addr = rhs.s_addr;
                 sin_port = rhs.sin_port;
                 s_host = rhs.s_host;
