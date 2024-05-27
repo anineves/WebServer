@@ -200,3 +200,12 @@ int is_file(std::string path) {
 
     return S_ISREG(buffer.st_mode);
 }
+
+
+
+int is_directory(const std::string& path) {
+    struct stat buffer;  
+    if (stat(path.c_str(), &buffer) != 0)
+        return 0;  
+    return S_ISDIR(buffer.st_mode);
+}

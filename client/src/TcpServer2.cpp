@@ -210,15 +210,24 @@ void TcpServer2::handleInput(epoll_event &m_event, int fd)
         {
             Location locationSettings = server->verifyLocations(request1.getPath());
             locationSettings.deleteAllowed = false;
-            int n = 0;
-            if (is_file("frontend/html" + request1.getPath()) == 1)
-            {
-                n = 1;
-            }
+           
 
             bool not_allow = 0;
             if (!locationSettings.getPath().empty())
             {
+                 if (locationSettings.getRoot() == "")
+                    locationSettings.setRoot(server->getRoot_s());
+
+                int n = 0;
+                if (is_file(locationSettings.getRoot() + "/html" + request1.getPath()) == 1 || is_file(locationSettings.getRoot() + "/" + request1.getPath()) == 1)
+                {
+                    n = 1;
+                }
+                int is_dir = 0;
+                if(is_directory(locationSettings.getRoot() + "/" + request1.getPath()) == 1)
+                {
+                    is_dir = 1;
+                }
 
                 for (size_t i = 0; i < locationSettings.getAllowMethods().size(); i++)
                 {
@@ -228,13 +237,7 @@ void TcpServer2::handleInput(epoll_event &m_event, int fd)
                         locationSettings.deleteAllowed = true;
                 
                 }
-                if (locationSettings.getRoot() == "")
-                    locationSettings.setRoot(server->getRoot_s());
-                if (not_allow == 0)
-                {
-                    serverResponse = response.buildErrorResponse(405);
-                }
-                else if (!locationSettings.getReturn().empty())
+                if (!locationSettings.getReturn().empty())
                 {
                     std::istringstream iss(locationSettings.getReturn());
                     std::string response;
@@ -246,6 +249,14 @@ void TcpServer2::handleInput(epoll_event &m_event, int fd)
                     response += "Content-Length: 0\r\n";
                     response += "Location: " + loc + "\r\n\r\n";
                     serverResponse = response;
+                }
+                else if(is_dir == 1 && locationSettings.getAutoIndex() != "on" && locationSettings.getPath() != "/")
+                {
+                    serverResponse = response.buildErrorResponse(404);
+                }
+                else if (not_allow == 0)
+                {
+                    serverResponse = response.buildErrorResponse(405);
                 }
                 else if (!locationSettings.getCgiPath().empty())
                 {
@@ -262,7 +273,7 @@ void TcpServer2::handleInput(epoll_event &m_event, int fd)
                     DIR *dir;
                     struct dirent *ent;
                     std::vector<std::string> content;
-                    if ((dir = opendir(("frontend/html" + locationSettings.getPath() + "/").c_str())) != NULL)
+                    if ((dir = opendir((locationSettings.getRoot() + "/" + locationSettings.getPath() + "/").c_str())) != NULL)
                     {
                         while ((ent = readdir(dir)) != NULL)
                         {

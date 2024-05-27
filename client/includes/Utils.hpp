@@ -46,6 +46,7 @@ void                            verifyValues(std::vector<std::string> fileVec);
 int                             validFile(std::string arg); 
 bool                            fileExists(std::string filename);
 void                            printMap(const std::map<std::string, std::string>& map); 
+int                             is_directory(const std::string& path);
 
 
 #endif

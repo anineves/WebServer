@@ -26,6 +26,7 @@ Location &Location::operator= (const Location &rhs)
        _cgi_path = rhs._cgi_path;
        _cgi_ext = rhs._cgi_ext;
        _autoindex = rhs._autoindex;
+       _root = rhs._root;
        if (!rhs._allow_methods.empty()) 
         {
             _allow_methods = rhs._allow_methods;

@@ -271,13 +271,11 @@ bool ConfigFile::parserServer(std::stringstream &serverContent)
             if (pos != std::string::npos)
                 value = value.substr(pos + 1);
             server.setErrorPage_s(value);
-            std::cout << server.getErrorPage_s() << std::endl;
         }
         if (fword == "server_name")
         {
             std::string temp_serv_name = obtainValue(line, "server_name");
             std::string token;
-            // std::cout  << CYAN << "SERVER  :" << temp_serv_name << RESET << std::endl;
             for (size_t i = 0; i < temp_serv_name.size(); ++i)
             {
 
@@ -306,7 +304,6 @@ bool ConfigFile::parserServer(std::stringstream &serverContent)
     server.verificErrorServer();
     _locations.clear();
     _servers.push_back(server);
-    // printVector(server.s_server_names);
     if (_servers.empty())
     {
         std::cout << "No servers found in the vector.\n";
