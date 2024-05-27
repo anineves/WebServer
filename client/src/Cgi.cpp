@@ -108,7 +108,7 @@ std::string Cgi::runCgi(Request &request)
             if (exit_status != 0) {
 				request.setCode(500);
 				std::cerr << " " << exit_status << std::endl;
-				return "External script encountered an error."; // Or handle the error as needed
+				return "External script encountered an error."; 
             }
 		}
 		int index = this->_cgi_response.find("Content-Length:");
