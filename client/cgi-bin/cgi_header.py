@@ -26,6 +26,10 @@ http_found = f"HTTP/1.1 200 Ok\r\n\
                 Content-Type: text/html\r\n\
                 Content-Length: \r\n\
                 \r\n"
+http_found_upload = f"HTTP/1.1 201 Ok\r\n\
+                Content-Type: text/html\r\n\
+                Content-Length: \r\n\
+                \r\n"
 
 
 def get_head(title):

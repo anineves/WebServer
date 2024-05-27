@@ -90,7 +90,6 @@ bool Request::verific_errors(Server server, size_t max_length)
         exitWithError(" Wrong Client Max");
         return 0;
     }
-    std::cout << "entrei verific " << server.s_server_names.size() << " host "<< lines_header["Host"]<< std::endl;
     
     bool server_name = false;
     std::string host;
@@ -107,6 +106,8 @@ bool Request::verific_errors(Server server, size_t max_length)
             server_name = true;
         }
     }
+    if(server.getHost_s() == host)
+        server_name = true;
 
     if(server_name == false)
     {

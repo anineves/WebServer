@@ -36,6 +36,7 @@ public:
     std::string     responseStatus (int code);
     std::string     buildResponse(Request request, Location &location);
     std::string     buildErrorResponse(int code);
+    std::string     buildResponseDelete(Request request, Location &location);
     std::string     getDefaultError(std::string code);
     void            printDefaultErrors();
 

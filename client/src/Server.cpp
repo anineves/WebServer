@@ -164,6 +164,11 @@ std::string     Server::getPort_s() {
     return this->s_port;
 }
 
+
+std::string     Server::getHost_s() {
+    return this->s_host;
+}
+
 std::string Server::getRoot_s() {
     return this->s_root;
 }

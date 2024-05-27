@@ -11,7 +11,7 @@ if fileitem.filename:
     upload_dir = "./cgi-bin/uploads/"
     with open(os.path.join(upload_dir, fileitem.filename), 'wb') as f:
         f.write(fileitem.file.read())
-        print(http_found)
+        print(http_found_upload)
         print('<html>')
         print(get_head("Upload"))
         print('<body>')

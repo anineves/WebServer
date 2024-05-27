@@ -112,6 +112,35 @@ std::string Response::buildResponse(Request request, Location &location)
     return response;
 }
 
+
+std::string Response::buildResponseDelete(Request request, Location &location)
+{
+    std::string response;
+        std::string filePath = location.getRoot();
+        std::ifstream file(filePath.c_str());
+        if (file)
+        {
+            std::stringstream content;
+            content << file.rdbuf();
+            std::string fileContent = content.str();
+            std::stringstream length;
+            length << fileContent.size();
+            std::stringstream stringCode;
+            stringCode << request.getCode();
+            response = "HTTP/1.1 " + stringCode.str() + " " + responseStatus(request.getCode()) + "\r\n";
+            response += "Content-Length: " + length.str() + "\r\n";
+            response += "Content-Type: " + getContentType(filePath) + "\r\n\r\n";
+
+            response += fileContent;
+        }
+        else
+        {
+            response = "HTTP/1.1 404 Not Found\r\n\r\n";
+        }
+
+    return response;
+}
+
 std::string Response::obtainFilePath(Request &request, Location &location)
 {
 
@@ -216,7 +245,7 @@ std::string Response::responseStatus(int code)
     case 103:
         return "Early Hints";
     case 200:
-        return "OKi";
+        return "OK";
     case 201:
         return "Created";
     case 202:

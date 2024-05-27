@@ -311,7 +311,7 @@ void TcpServer2::handleInput(epoll_event &m_event, int fd)
                     else if (std::remove(pathToDelete.c_str()) != 0)
                         serverResponse = response.buildErrorResponse(500);
                     else
-                        serverResponse = response.buildResponse(request1, locationSettings);
+                        serverResponse = response.buildResponseDelete(request1, locationSettings);
                 }
                 else
                 {
@@ -472,6 +472,7 @@ void TcpServer2::showClientHeader(struct epoll_event &m_events, Request &request
 
 void TcpServer2::sendResponse(int client_socket, const std::string &response)
 {
+    //std::cout << MAGENTA << response << RESET << std::endl;
     long bytesSent = send(client_socket, response.c_str(), response.size(), 0);
     if (bytesSent == (long)response.size())
     {
