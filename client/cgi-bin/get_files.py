@@ -22,7 +22,7 @@ if isinstance(name, list):
 
 if return_error == True:
     print(http_not_found)
-    print(get_head("Hello CGI")
+    print(get_head("Hello CGI"))
     print(get_header(host))
     print(get_name_error)
 else:
@@ -31,6 +31,6 @@ else:
     print(get_head("Hello CGI"))
     print("<body>")
     print(get_header(host))
-    print(f"<h1>Fuck You {name}!!!</h1>")
+    print(f"<h1>Hello by CGI {name}!!!</h1>")
     print("</body>")
     print("</html>")          
