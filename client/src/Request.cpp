@@ -134,6 +134,12 @@ bool Request::verific_errors(Server server, size_t max_length)
         exitWithError("Method not allowed");
         return 0;
     }
+    
+    if (this->lines_header.find("Transfer-Encoding:") != this->lines_header.end() && this->_method != "POST")
+    {
+        _code = 400;
+        return 0;
+    }
     if ((this->_method != "GET") && (this->_method != "POST") && (this->_method != "DELETE"))
     {
         _code = 501;

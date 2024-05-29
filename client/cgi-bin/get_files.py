@@ -6,8 +6,8 @@ import os, cgi
 host = os.environ.get("HTTP_HOST", default=None);
 
 
-while True:
- continue; 
+#while True:
+#continue; 
 
 arguments = cgi.FieldStorage()
 return_error = False

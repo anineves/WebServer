@@ -385,13 +385,14 @@ void    TcpServer2::fetchAndParseRequest(Request &request)
 
 int    TcpServer2::handleChunkedRequest(size_t found_header, Request &request)
 {
-    if (_header.find("GET") != std::string::npos) {
+    /*if (_header.find("GET") != std::string::npos) {
+        std::cout << "entrei " << std::endl;
         _fullheader = true;
         request.chunked_error = true;
         _client_request.clear();
         this->_header.clear();
         return 1;
-    }
+    }*/
     if (_first_chunk == true) {
         _body = _client_request.substr(found_header + 4, _client_request.size());
         std::cout << GREEN << "_body:\n" << _body << RESET << std::endl;

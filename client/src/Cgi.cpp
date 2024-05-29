@@ -63,17 +63,7 @@ void Cgi::buildCharEnv(void)
 	this->_cgi_argv[2] = NULL;
 }
 
-size_t Cgi::readCgiResponse(int fd)
-{
-	char buffer[1024];
-	ssize_t bytesRead;
 
-	while ((bytesRead = read(fd, buffer, sizeof(buffer))) > 0)
-	{
-		this->_cgi_response.append(buffer, bytesRead);
-	}
-	return this->_cgi_response.length();
-}
 
 void setNonBlocking(int fd) {
     int flags = fcntl(fd, F_GETFL, 0);
@@ -109,7 +99,7 @@ std::string Cgi::runCgi(Request &request)
 
         setNonBlocking(fdResponse[0]);
 
-        if (write(fdRequest[1], body.c_str(), body.size()) <= -1)
+        if (write(fdRequest[1], body.c_str(), body.size()) <= 0)
         {
             close(fdResponse[0]);
             close(fdRequest[1]);
